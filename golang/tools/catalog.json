@@ -1,0 +1,1011 @@
+{
+  "01-go-core/arrays-slices.md": {
+    "title": "Arrays, slices và ownership",
+    "priority": "P0"
+  },
+  "01-go-core/interfaces.md": {
+    "title": "Interfaces: behavior, representation và typed nil",
+    "priority": "P0"
+  },
+  "01-go-core/nil.md": {
+    "title": "nil: zero value theo từng loại",
+    "priority": "P0"
+  },
+  "01-go-core/maps.md": {
+    "title": "Maps: hashing, growth và concurrent access",
+    "priority": "P0"
+  },
+  "01-go-core/errors.md": {
+    "title": "Error handling và error chains",
+    "priority": "P0"
+  },
+  "01-go-core/go-philosophy.md": {
+    "title": "Go philosophy",
+    "priority": "P1"
+  },
+  "01-go-core/packages-modules.md": {
+    "title": "Packages và modules",
+    "priority": "P1"
+  },
+  "01-go-core/variables-types.md": {
+    "title": "Variables, types và zero values",
+    "priority": "P1"
+  },
+  "01-go-core/value-vs-pointer.md": {
+    "title": "Value versus pointer",
+    "priority": "P1"
+  },
+  "01-go-core/struct.md": {
+    "title": "Struct layout và composition",
+    "priority": "P1"
+  },
+  "01-go-core/methods.md": {
+    "title": "Methods và method sets",
+    "priority": "P1"
+  },
+  "01-go-core/strings-runes-bytes.md": {
+    "title": "Strings, runes và bytes",
+    "priority": "P1"
+  },
+  "01-go-core/defer.md": {
+    "title": "Defer: evaluation, LIFO và cleanup",
+    "priority": "P1"
+  },
+  "01-go-core/panic-recover.md": {
+    "title": "Panic và recover",
+    "priority": "P1"
+  },
+  "01-go-core/generics.md": {
+    "title": "Generics và constraints",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/scheduler-gmp.md": {
+    "title": "Go scheduler: G, M, P và các đường blocking",
+    "priority": "P0"
+  },
+  "03-goroutines-scheduler/goroutine.md": {
+    "title": "Goroutine: lifetime, stack và ownership",
+    "priority": "P0"
+  },
+  "03-goroutines-scheduler/os-thread-vs-goroutine.md": {
+    "title": "OS thread versus goroutine",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/work-stealing.md": {
+    "title": "Work stealing và locality",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/syscalls.md": {
+    "title": "Blocking syscalls",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/netpoller.md": {
+    "title": "Netpoller và network readiness",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/preemption.md": {
+    "title": "Preemption và safe points",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/gomaxprocs.md": {
+    "title": "GOMAXPROCS và container CPU",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/goroutine-lifecycle.md": {
+    "title": "Goroutine lifecycle",
+    "priority": "P1"
+  },
+  "03-goroutines-scheduler/scheduler-scenarios.md": {
+    "title": "Scheduler interview scenarios",
+    "priority": "P1"
+  },
+  "02-memory-runtime/memory-model.md": {
+    "title": "Go memory model và happens-before",
+    "priority": "P0"
+  },
+  "02-memory-runtime/stack-vs-heap.md": {
+    "title": "Stack versus heap: lifetime thay vì cú pháp",
+    "priority": "P0"
+  },
+  "02-memory-runtime/escape-analysis.md": {
+    "title": "Escape analysis: đọc quyết định của compiler",
+    "priority": "P0"
+  },
+  "02-memory-runtime/garbage-collector.md": {
+    "title": "Garbage collection: live heap, pacing và memory budget",
+    "priority": "P0"
+  },
+  "02-memory-runtime/allocation.md": {
+    "title": "Allocation rate và allocator",
+    "priority": "P1"
+  },
+  "02-memory-runtime/write-barrier.md": {
+    "title": "Write barrier và concurrent marking",
+    "priority": "P1"
+  },
+  "02-memory-runtime/object-lifecycle.md": {
+    "title": "Object lifecycle và resource ownership",
+    "priority": "P1"
+  },
+  "02-memory-runtime/memory-leak.md": {
+    "title": "Memory leak trong ngôn ngữ có GC",
+    "priority": "P1"
+  },
+  "02-memory-runtime/memory-profiling.md": {
+    "title": "Memory profiling: retained versus allocated",
+    "priority": "P1"
+  },
+  "02-memory-runtime/runtime-internals.md": {
+    "title": "Runtime internals: ranh giới contract",
+    "priority": "P1"
+  },
+  "04-concurrency/channels.md": {
+    "title": "Channel internals và synchronization",
+    "priority": "P0"
+  },
+  "04-concurrency/select.md": {
+    "title": "Select: readiness, cancellation và fairness",
+    "priority": "P0"
+  },
+  "04-concurrency/mutex.md": {
+    "title": "Mutex: invariants, contention và lock ownership",
+    "priority": "P0"
+  },
+  "04-concurrency/buffered-vs-unbuffered.md": {
+    "title": "Buffered versus unbuffered",
+    "priority": "P1"
+  },
+  "04-concurrency/rwmutex.md": {
+    "title": "RWMutex và writer latency",
+    "priority": "P1"
+  },
+  "04-concurrency/waitgroup.md": {
+    "title": "WaitGroup: join và lifecycle",
+    "priority": "P1"
+  },
+  "04-concurrency/once.md": {
+    "title": "sync.Once và initialization",
+    "priority": "P1"
+  },
+  "04-concurrency/atomic.md": {
+    "title": "Atomics và immutable publication",
+    "priority": "P1"
+  },
+  "04-concurrency/sync-map.md": {
+    "title": "sync.Map versus typed map",
+    "priority": "P1"
+  },
+  "04-concurrency/condition-variable.md": {
+    "title": "Condition variable và predicate",
+    "priority": "P1"
+  },
+  "04-concurrency/semaphore.md": {
+    "title": "Semaphore và admission",
+    "priority": "P1"
+  },
+  "04-concurrency/pipeline.md": {
+    "title": "Pipeline: ownership ở từng stage",
+    "priority": "P1"
+  },
+  "04-concurrency/fan-in-fan-out.md": {
+    "title": "Fan-in và fan-out",
+    "priority": "P1"
+  },
+  "04-concurrency/deadlock.md": {
+    "title": "Deadlock và wait-for graph",
+    "priority": "P1"
+  },
+  "04-concurrency/livelock.md": {
+    "title": "Livelock và retry synchronization",
+    "priority": "P1"
+  },
+  "04-concurrency/concurrency-patterns.md": {
+    "title": "Chọn concurrency pattern",
+    "priority": "P1"
+  },
+  "04-concurrency/worker-pool.md": {
+    "title": "Worker pool và bounded concurrency",
+    "priority": "P0"
+  },
+  "04-concurrency/goroutine-leak.md": {
+    "title": "Goroutine leaks: blocked work còn giữ tài nguyên",
+    "priority": "P0"
+  },
+  "04-concurrency/race-condition.md": {
+    "title": "Race condition versus data race",
+    "priority": "P0"
+  },
+  "05-context/context-basics.md": {
+    "title": "Context: cây lifetime và cooperative cancellation",
+    "priority": "P0"
+  },
+  "05-context/cancellation.md": {
+    "title": "Cancellation propagation",
+    "priority": "P1"
+  },
+  "05-context/timeout-deadline.md": {
+    "title": "Timeout và deadline budget",
+    "priority": "P1"
+  },
+  "05-context/context-values.md": {
+    "title": "Context values có scope",
+    "priority": "P1"
+  },
+  "05-context/propagation.md": {
+    "title": "Propagation qua process boundary",
+    "priority": "P1"
+  },
+  "05-context/common-mistakes.md": {
+    "title": "Context mistakes thường gặp",
+    "priority": "P1"
+  },
+  "05-context/production-patterns.md": {
+    "title": "Context trong production request tree",
+    "priority": "P1"
+  },
+  "06-http-backend/net-http.md": {
+    "title": "net/http: server, handler và request lifetime",
+    "priority": "P0"
+  },
+  "06-http-backend/http-client.md": {
+    "title": "HTTP client reuse và response ownership",
+    "priority": "P0"
+  },
+  "06-http-backend/connection-pooling.md": {
+    "title": "HTTP connection pools và capacity budget",
+    "priority": "P0"
+  },
+  "06-http-backend/graceful-shutdown.md": {
+    "title": "Graceful shutdown và dependency order",
+    "priority": "P0"
+  },
+  "06-http-backend/http-server.md": {
+    "title": "HTTP server configuration",
+    "priority": "P1"
+  },
+  "06-http-backend/request-lifecycle.md": {
+    "title": "HTTP request lifecycle",
+    "priority": "P1"
+  },
+  "06-http-backend/transport.md": {
+    "title": "Transport: pool owner",
+    "priority": "P1"
+  },
+  "06-http-backend/keep-alive.md": {
+    "title": "Keep-alive: HTTP reuse và TCP liveness",
+    "priority": "P1"
+  },
+  "06-http-backend/timeout.md": {
+    "title": "HTTP timeout layers",
+    "priority": "P1"
+  },
+  "06-http-backend/middleware.md": {
+    "title": "Middleware và interface preservation",
+    "priority": "P1"
+  },
+  "06-http-backend/websocket.md": {
+    "title": "WebSocket: long-lived connection lifecycle",
+    "priority": "P1"
+  },
+  "06-http-backend/high-performance-http.md": {
+    "title": "HTTP performance có evidence",
+    "priority": "P1"
+  },
+  "08-database/database-sql.md": {
+    "title": "database/sql: pool handle, rows và transaction ownership",
+    "priority": "P0"
+  },
+  "08-database/database-sql-pool.md": {
+    "title": "Database connection pool: 500 requests và 20 connections",
+    "priority": "P0"
+  },
+  "08-database/transactions.md": {
+    "title": "Transactions và short critical sections",
+    "priority": "P1"
+  },
+  "08-database/isolation-levels.md": {
+    "title": "Isolation levels trong PostgreSQL",
+    "priority": "P1"
+  },
+  "08-database/prepared-statements.md": {
+    "title": "Prepared statements và session scope",
+    "priority": "P1"
+  },
+  "08-database/postgres-with-go.md": {
+    "title": "PostgreSQL với Go",
+    "priority": "P1"
+  },
+  "08-database/pgx.md": {
+    "title": "pgx native và database/sql adapter",
+    "priority": "P1"
+  },
+  "08-database/orm-vs-raw-sql.md": {
+    "title": "ORM, raw SQL và query ownership",
+    "priority": "P1"
+  },
+  "08-database/sqlc.md": {
+    "title": "sqlc: SQL làm contract",
+    "priority": "P1"
+  },
+  "08-database/n-plus-one.md": {
+    "title": "N+1 queries",
+    "priority": "P1"
+  },
+  "08-database/connection-exhaustion.md": {
+    "title": "Connection exhaustion runbook",
+    "priority": "P1"
+  },
+  "08-database/database-performance.md": {
+    "title": "Database performance bằng query evidence",
+    "priority": "P1"
+  },
+  "07-api-design/rest-api.md": {
+    "title": "REST API contracts",
+    "priority": "P1"
+  },
+  "07-api-design/grpc.md": {
+    "title": "gRPC: transport và call shapes",
+    "priority": "P1"
+  },
+  "07-api-design/protobuf.md": {
+    "title": "Protobuf và schema evolution",
+    "priority": "P1"
+  },
+  "07-api-design/rest-vs-grpc.md": {
+    "title": "REST versus gRPC",
+    "priority": "P1"
+  },
+  "07-api-design/pagination.md": {
+    "title": "Pagination: stable order và cursor",
+    "priority": "P1"
+  },
+  "07-api-design/idempotency.md": {
+    "title": "API idempotency key",
+    "priority": "P1"
+  },
+  "07-api-design/versioning.md": {
+    "title": "API versioning và compatibility",
+    "priority": "P1"
+  },
+  "07-api-design/rate-limiting.md": {
+    "title": "API rate limiting",
+    "priority": "P1"
+  },
+  "07-api-design/retry-timeout.md": {
+    "title": "API retry và deadline",
+    "priority": "P1"
+  },
+  "07-api-design/authentication.md": {
+    "title": "Authentication và authorization",
+    "priority": "P1"
+  },
+  "07-api-design/api-security.md": {
+    "title": "API security theo trust boundaries",
+    "priority": "P1"
+  },
+  "09-redis-cache/redis-basics.md": {
+    "title": "Redis: data structures và bounded memory",
+    "priority": "P1"
+  },
+  "09-redis-cache/caching-patterns.md": {
+    "title": "Caching patterns và consistency",
+    "priority": "P1"
+  },
+  "09-redis-cache/cache-aside.md": {
+    "title": "Cache-aside: miss path cũng là production path",
+    "priority": "P1"
+  },
+  "09-redis-cache/distributed-lock.md": {
+    "title": "Redis lock và fencing",
+    "priority": "P1"
+  },
+  "09-redis-cache/rate-limiting.md": {
+    "title": "Redis atomic rate limiting",
+    "priority": "P1"
+  },
+  "09-redis-cache/cache-stampede.md": {
+    "title": "Cache stampede và refresh coalescing",
+    "priority": "P1"
+  },
+  "09-redis-cache/redis-cluster.md": {
+    "title": "Redis Cluster: slots và hot keys",
+    "priority": "P1"
+  },
+  "09-redis-cache/failure-scenarios.md": {
+    "title": "Redis failure game day",
+    "priority": "P1"
+  },
+  "10-messaging/kafka.md": {
+    "title": "Kafka với Go: commit boundary",
+    "priority": "P1"
+  },
+  "10-messaging/rabbitmq.md": {
+    "title": "RabbitMQ acknowledgments và routing",
+    "priority": "P1"
+  },
+  "10-messaging/consumer-groups.md": {
+    "title": "Consumer groups và rebalancing",
+    "priority": "P1"
+  },
+  "10-messaging/partitions.md": {
+    "title": "Partitions: ordering và scale unit",
+    "priority": "P1"
+  },
+  "10-messaging/ordering.md": {
+    "title": "Ordering và contiguous commit",
+    "priority": "P1"
+  },
+  "10-messaging/retry.md": {
+    "title": "Message retries và poison data",
+    "priority": "P1"
+  },
+  "10-messaging/dlq.md": {
+    "title": "Dead-letter queue như workflow vận hành",
+    "priority": "P1"
+  },
+  "10-messaging/idempotent-consumer.md": {
+    "title": "Idempotent consumer transaction",
+    "priority": "P1"
+  },
+  "10-messaging/duplicate-message.md": {
+    "title": "Duplicate delivery không đồng nghĩa producer bug",
+    "priority": "P1"
+  },
+  "10-messaging/backpressure.md": {
+    "title": "Backpressure: 10k vào, 5k ra",
+    "priority": "P1"
+  },
+  "10-messaging/event-driven-go.md": {
+    "title": "Event-driven Go service lifecycle",
+    "priority": "P1"
+  },
+  "11-software-architecture/clean-architecture.md": {
+    "title": "Clean Architecture theo tinh thần Go",
+    "priority": "P1"
+  },
+  "11-software-architecture/hexagonal-architecture.md": {
+    "title": "Ports và adapters",
+    "priority": "P1"
+  },
+  "11-software-architecture/layered-architecture.md": {
+    "title": "Layered architecture và vertical features",
+    "priority": "P1"
+  },
+  "11-software-architecture/repository-pattern.md": {
+    "title": "Repository theo use case",
+    "priority": "P1"
+  },
+  "11-software-architecture/service-pattern.md": {
+    "title": "Service giữ business orchestration",
+    "priority": "P1"
+  },
+  "11-software-architecture/dependency-injection.md": {
+    "title": "Explicit dependency injection",
+    "priority": "P1"
+  },
+  "11-software-architecture/domain-driven-design.md": {
+    "title": "DDD: invariants và bounded contexts",
+    "priority": "P1"
+  },
+  "11-software-architecture/modular-monolith.md": {
+    "title": "Modular monolith",
+    "priority": "P1"
+  },
+  "11-software-architecture/microservices.md": {
+    "title": "Microservices: independent ownership có chi phí",
+    "priority": "P1"
+  },
+  "11-software-architecture/go-project-structure.md": {
+    "title": "Go project structure không có một luật duy nhất",
+    "priority": "P1"
+  },
+  "12-distributed-systems/cap-theorem.md": {
+    "title": "CAP: quyết định trong network partition",
+    "priority": "P1"
+  },
+  "12-distributed-systems/consistency.md": {
+    "title": "Consistency models và client observations",
+    "priority": "P1"
+  },
+  "12-distributed-systems/idempotency.md": {
+    "title": "Distributed idempotency và ambiguous outcomes",
+    "priority": "P1"
+  },
+  "12-distributed-systems/retry.md": {
+    "title": "Retries như một capacity policy",
+    "priority": "P1"
+  },
+  "12-distributed-systems/timeout.md": {
+    "title": "Timeout và failure detection",
+    "priority": "P1"
+  },
+  "12-distributed-systems/circuit-breaker.md": {
+    "title": "Circuit breaker state machine",
+    "priority": "P1"
+  },
+  "12-distributed-systems/bulkhead.md": {
+    "title": "Bulkheads và capacity isolation",
+    "priority": "P1"
+  },
+  "12-distributed-systems/distributed-lock.md": {
+    "title": "Leases, locks và fencing tokens",
+    "priority": "P1"
+  },
+  "12-distributed-systems/saga.md": {
+    "title": "Saga và compensating actions",
+    "priority": "P1"
+  },
+  "12-distributed-systems/outbox-pattern.md": {
+    "title": "Transactional outbox",
+    "priority": "P1"
+  },
+  "12-distributed-systems/eventual-consistency.md": {
+    "title": "Eventual consistency như product contract",
+    "priority": "P1"
+  },
+  "12-distributed-systems/leader-election.md": {
+    "title": "Leader election và epochs",
+    "priority": "P1"
+  },
+  "12-distributed-systems/failure-scenarios.md": {
+    "title": "Distributed failure matrix",
+    "priority": "P1"
+  },
+  "14-microservices/service-communication.md": {
+    "title": "Service communication contract",
+    "priority": "P1"
+  },
+  "14-microservices/service-discovery.md": {
+    "title": "Service discovery và connection lifetime",
+    "priority": "P1"
+  },
+  "14-microservices/grpc-microservices.md": {
+    "title": "gRPC service boundaries",
+    "priority": "P1"
+  },
+  "14-microservices/distributed-transaction.md": {
+    "title": "Distributed transactions và ownership",
+    "priority": "P1"
+  },
+  "14-microservices/configuration.md": {
+    "title": "Configuration lifecycle",
+    "priority": "P1"
+  },
+  "14-microservices/secrets.md": {
+    "title": "Service secrets và rotation",
+    "priority": "P1"
+  },
+  "14-microservices/resilience.md": {
+    "title": "Resilience budget xuyên dependencies",
+    "priority": "P1"
+  },
+  "14-microservices/observability.md": {
+    "title": "Observability across services",
+    "priority": "P1"
+  },
+  "14-microservices/microservice-failure.md": {
+    "title": "Microservice cascading failure",
+    "priority": "P1"
+  },
+  "16-performance/pprof.md": {
+    "title": "pprof: chọn profile từ câu hỏi production",
+    "priority": "P0"
+  },
+  "16-performance/benchmark.md": {
+    "title": "Benchmark đúng workload",
+    "priority": "P1"
+  },
+  "16-performance/cpu-profile.md": {
+    "title": "CPU profile: execution cost",
+    "priority": "P1"
+  },
+  "16-performance/memory-profile.md": {
+    "title": "Heap và allocs profiles",
+    "priority": "P1"
+  },
+  "16-performance/goroutine-profile.md": {
+    "title": "Goroutine profiles và stack grouping",
+    "priority": "P1"
+  },
+  "16-performance/mutex-profile.md": {
+    "title": "Mutex profile",
+    "priority": "P1"
+  },
+  "16-performance/block-profile.md": {
+    "title": "Block profile",
+    "priority": "P1"
+  },
+  "16-performance/trace.md": {
+    "title": "Execution trace: timeline scheduling",
+    "priority": "P1"
+  },
+  "16-performance/optimization.md": {
+    "title": "Optimization theo bottleneck",
+    "priority": "P1"
+  },
+  "16-performance/allocations.md": {
+    "title": "Allocation optimization",
+    "priority": "P1"
+  },
+  "16-performance/performance-debugging.md": {
+    "title": "Performance debugging workflow",
+    "priority": "P1"
+  },
+  "17-observability/logging.md": {
+    "title": "Structured logging có context",
+    "priority": "P1"
+  },
+  "17-observability/metrics.md": {
+    "title": "Metrics: counters, gauges và histograms",
+    "priority": "P1"
+  },
+  "17-observability/tracing.md": {
+    "title": "Tracing và critical path",
+    "priority": "P1"
+  },
+  "17-observability/opentelemetry.md": {
+    "title": "OpenTelemetry instrumentation lifecycle",
+    "priority": "P1"
+  },
+  "17-observability/prometheus.md": {
+    "title": "Prometheus metrics cho Go",
+    "priority": "P1"
+  },
+  "17-observability/health-check.md": {
+    "title": "Health checks: liveness, readiness, startup",
+    "priority": "P1"
+  },
+  "17-observability/sli-slo-sla.md": {
+    "title": "SLI, SLO, SLA và error budget",
+    "priority": "P1"
+  },
+  "17-observability/incident-debugging.md": {
+    "title": "Incident debugging với evidence",
+    "priority": "P1"
+  },
+  "18-testing/unit-testing.md": {
+    "title": "Unit testing business contracts",
+    "priority": "P1"
+  },
+  "18-testing/table-driven-tests.md": {
+    "title": "Table-driven tests và subtests",
+    "priority": "P1"
+  },
+  "18-testing/mocks.md": {
+    "title": "Mocks, fakes và contract tests",
+    "priority": "P1"
+  },
+  "18-testing/integration-testing.md": {
+    "title": "Integration testing boundaries thật",
+    "priority": "P1"
+  },
+  "18-testing/httptest.md": {
+    "title": "httptest: recorder versus server",
+    "priority": "P1"
+  },
+  "18-testing/benchmark-testing.md": {
+    "title": "Benchmark tests có statistical comparison",
+    "priority": "P1"
+  },
+  "18-testing/fuzz-testing.md": {
+    "title": "Fuzzing input space và invariants",
+    "priority": "P1"
+  },
+  "18-testing/race-detector.md": {
+    "title": "Race detector workflow",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/docker-for-go.md": {
+    "title": "Docker cho Go services",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/multistage-build.md": {
+    "title": "Multi-stage builds",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/static-binary.md": {
+    "title": "Static binaries và cgo",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/containers.md": {
+    "title": "Container resources và process model",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/kubernetes.md": {
+    "title": "Kubernetes mental model",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/deployment.md": {
+    "title": "Deployment và rollout capacity",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/service.md": {
+    "title": "Kubernetes Service và endpoint routing",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/ingress.md": {
+    "title": "Ingress và proxy boundary",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/hpa.md": {
+    "title": "HPA và scaling limits",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/resource-limits.md": {
+    "title": "Resource requests, limits và Go budgets",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/probes.md": {
+    "title": "Probes không phải full diagnostics",
+    "priority": "P1"
+  },
+  "15-docker-kubernetes/graceful-deployment.md": {
+    "title": "Graceful deployment và SIGTERM budget",
+    "priority": "P1"
+  },
+  "19-security/api-security.md": {
+    "title": "Security review theo endpoint",
+    "priority": "P1"
+  },
+  "19-security/jwt.md": {
+    "title": "JWT validation và key rotation",
+    "priority": "P1"
+  },
+  "19-security/oauth2.md": {
+    "title": "OAuth2, OIDC và authorization code flow",
+    "priority": "P1"
+  },
+  "19-security/tls.md": {
+    "title": "TLS: trust, identity và lifecycle",
+    "priority": "P1"
+  },
+  "19-security/input-validation.md": {
+    "title": "Input validation tại boundaries",
+    "priority": "P1"
+  },
+  "19-security/secret-management.md": {
+    "title": "Secrets: distribution, storage và rotation",
+    "priority": "P1"
+  },
+  "19-security/common-vulnerabilities.md": {
+    "title": "Vulnerabilities trong Go backend",
+    "priority": "P1"
+  },
+  "13-system-design/design-api-gateway.md": {
+    "title": "Design API Gateway",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-payment-system.md": {
+    "title": "Design Payment System",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-notification-system.md": {
+    "title": "Design Notification System",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-file-processing.md": {
+    "title": "Design File Processing",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-chat-system.md": {
+    "title": "Design Chat System",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-job-processing-system.md": {
+    "title": "Design Job Processing System",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-url-shortener.md": {
+    "title": "Design URL Shortener",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-high-throughput-api.md": {
+    "title": "Design High-Throughput API — 20,000 RPS",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/design-migration-platform.md": {
+    "title": "Design Migration Platform — 4–5 Billion Records",
+    "priority": "P1",
+    "design": true
+  },
+  "13-system-design/system-design-framework.md": {
+    "title": "System design framework cho Senior Go",
+    "priority": "P0"
+  },
+  "12-distributed-systems/fundamentals.md": {
+    "title": "Distributed systems: safety, liveness và replay",
+    "priority": "P0"
+  },
+  "13-system-design/capacity-estimation.md": {
+    "title": "Capacity estimation có units",
+    "priority": "P1"
+  },
+  "13-system-design/load-balancing.md": {
+    "title": "Load balancing: connection versus request",
+    "priority": "P1"
+  },
+  "13-system-design/caching.md": {
+    "title": "Caching trong system design",
+    "priority": "P1"
+  },
+  "13-system-design/database-scaling.md": {
+    "title": "Database scaling theo bottleneck",
+    "priority": "P1"
+  },
+  "13-system-design/sharding.md": {
+    "title": "Sharding và partition ownership",
+    "priority": "P1"
+  },
+  "13-system-design/queue.md": {
+    "title": "Queues và recovery capacity",
+    "priority": "P1"
+  },
+  "13-system-design/observability.md": {
+    "title": "Observability như phần design",
+    "priority": "P1"
+  },
+  "21-coding-interview/go-coding-patterns.md": {
+    "title": "Coding interview workflow",
+    "priority": "P1"
+  },
+  "21-coding-interview/slices-maps.md": {
+    "title": "Slices/maps coding: Two Sum",
+    "priority": "P1"
+  },
+  "21-coding-interview/linked-list.md": {
+    "title": "Linked list reversal",
+    "priority": "P1"
+  },
+  "21-coding-interview/stack-queue.md": {
+    "title": "Stack và queue bằng slices",
+    "priority": "P1"
+  },
+  "21-coding-interview/tree.md": {
+    "title": "Tree traversal và depth",
+    "priority": "P1"
+  },
+  "21-coding-interview/graph.md": {
+    "title": "Graph BFS và visited timing",
+    "priority": "P1"
+  },
+  "21-coding-interview/heap.md": {
+    "title": "Top K với min-heap",
+    "priority": "P1"
+  },
+  "21-coding-interview/binary-search.md": {
+    "title": "Binary search bằng half-open interval",
+    "priority": "P1"
+  },
+  "21-coding-interview/sliding-window.md": {
+    "title": "Sliding window: unique bytes",
+    "priority": "P1"
+  },
+  "21-coding-interview/two-pointers.md": {
+    "title": "Two pointers trên sorted data",
+    "priority": "P1"
+  },
+  "21-coding-interview/concurrency-coding.md": {
+    "title": "Concurrency coding interview",
+    "priority": "P1"
+  },
+  "22-behavioral/senior-engineer.md": {
+    "title": "Senior engineer: scope và judgment",
+    "priority": "P1"
+  },
+  "22-behavioral/ownership.md": {
+    "title": "Ownership qua toàn lifecycle",
+    "priority": "P1"
+  },
+  "22-behavioral/leadership.md": {
+    "title": "Technical leadership không cần chức danh",
+    "priority": "P1"
+  },
+  "22-behavioral/incident.md": {
+    "title": "Behavioral incident story",
+    "priority": "P1"
+  },
+  "22-behavioral/conflict.md": {
+    "title": "Technical disagreement và evidence",
+    "priority": "P1"
+  },
+  "22-behavioral/mentoring.md": {
+    "title": "Mentoring tăng autonomy",
+    "priority": "P1"
+  },
+  "22-behavioral/star-method.md": {
+    "title": "STAR với technical evidence",
+    "priority": "P1"
+  },
+  "20-production-scenarios/api-high-latency.md": {
+    "title": "API high latency",
+    "priority": "P1"
+  },
+  "20-production-scenarios/high-cpu.md": {
+    "title": "CPU95%, memory normal, RPS normal",
+    "priority": "P1"
+  },
+  "20-production-scenarios/memory-growth.md": {
+    "title": "Memory tăng liên tục",
+    "priority": "P1"
+  },
+  "20-production-scenarios/goroutine-leak.md": {
+    "title": "20,000 goroutines trong production",
+    "priority": "P1"
+  },
+  "20-production-scenarios/connection-pool-exhausted.md": {
+    "title": "DB pool exhausted",
+    "priority": "P1"
+  },
+  "20-production-scenarios/database-slow.md": {
+    "title": "Database query slowdown",
+    "priority": "P1"
+  },
+  "20-production-scenarios/redis-down.md": {
+    "title": "Redis unavailable và cache collapse",
+    "priority": "P1"
+  },
+  "20-production-scenarios/kafka-lag.md": {
+    "title": "Kafka consumer lag tăng",
+    "priority": "P1"
+  },
+  "20-production-scenarios/duplicate-message.md": {
+    "title": "Duplicate business effect",
+    "priority": "P1"
+  },
+  "20-production-scenarios/traffic-spike.md": {
+    "title": "Traffic spike và load shedding",
+    "priority": "P1"
+  },
+  "20-production-scenarios/race-condition.md": {
+    "title": "Production race/data corruption",
+    "priority": "P1"
+  },
+  "20-production-scenarios/service-outage.md": {
+    "title": "Service outage: first15 minutes",
+    "priority": "P1"
+  },
+  "23-mock-interview/top-100-golang-questions.md": {
+    "title": "Top100 Golang Questions",
+    "questions": 100
+  },
+  "23-mock-interview/top-50-senior-backend-questions.md": {
+    "title": "Top50 Senior Backend Questions",
+    "questions": 50
+  },
+  "23-mock-interview/go-core.md": {
+    "title": "Go core and runtime Mock",
+    "questions": 15
+  },
+  "23-mock-interview/concurrency.md": {
+    "title": "Concurrency Mock",
+    "questions": 10
+  },
+  "23-mock-interview/backend.md": {
+    "title": "Backend and HTTP Mock",
+    "questions": 5
+  },
+  "23-mock-interview/database.md": {
+    "title": "Database Mock",
+    "questions": 5
+  },
+  "23-mock-interview/distributed-systems.md": {
+    "title": "Distributed systems Mock",
+    "questions": 10
+  },
+  "23-mock-interview/system-design.md": {
+    "title": "System design Mock",
+    "questions": 5
+  },
+  "23-mock-interview/production-debugging.md": {
+    "title": "Production debugging Mock",
+    "questions": 10
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "recorded_at": "2026-09-29T22:41:19.930880+07:00",
+  "revision": "Teaching rewrite: problem, worked example, mechanism, production and failure reasoning",
+  "toolchain": "go1.26.4 darwin/arm64",
+  "markdown_files_reviewed": 296,
+  "standalone_lessons": 242,
+  "foundational_p0_articles": 27,
+  "required_paths": 276,
+  "system_designs": 9,
+  "production_scenarios": 12,
+  "diagram_reading_guides": 95,
+  "mermaid_version": "12.0.0",
+  "mermaid_parse_errors": [],
+  "compiled_go_markdown_blocks": 45,
+  "snippet_compile_failures": [],
+  "executed_complete_programs": 24,
+  "program_failures": [],
+  "program_skips": [
+    {
+      "file": "06-http-backend/net-http.md",
+      "block": 1,
+      "status": "skipped",
+      "reason": "long-running HTTP server: covered by server lab, no unbounded go run"
+    }
+  ],
+  "code_blocks_with_walkthrough": 61,
+  "checks": {
+    "structure_and_local_links": "passed",
+    "go_test_race_all": "passed; cached package result reused because Go lab implementation/tests were unchanged",
+    "go_vet_all": "passed",
+    "complete_program_outputs": "24 executions inspected against lesson explanations; runtime metric values are environment-dependent"
+  },
+  "python_revision_start_hashes_match": true,
+  "python_revision_drift": {
+    "removed": 0,
+    "added": 0,
+    "modified": 0
+  },
+  "python_scope": "All writes in this revision were under golang. Historical python-baseline.json is retained; the revision comparison used a read-only snapshot in .cache/rewrite/python-start.json.",
+  "previous_lab_checks": {
+    "recorded_at": "2026-09-29T15:56:25.421894+07:00",
+    "checks": {
+      "go_test_race_all": "passed",
+      "go_vet_all": "passed",
+      "fuzz_lower_bound_5s": "passed; 62611 executions observed",
+      "fuzz_decimal_round_trip_5s": "passed; 207875 executions observed",
+      "negative_race_demo": "expected exit1 with DATA RACE",
+      "benchmark_and_cpu_heap_profile_smoke": "passed; results not used as production performance claims",
+      "execution_trace_capture": "passed",
+      "shutdown_smoke": {
+        "health_status": 200,
+        "sigterm_exit_code": 0,
+        "shutdown_seconds": 0.002
+      }
+    },
+    "note": "Historical results retained for context; fuzz, negative race, benchmark/profile/trace capture and shutdown smoke were not rerun during this documentation-only revision."
+  },
+  "limitations": [
+    "No live PostgreSQL, Redis, Kafka, Kubernetes or gRPC integration deployment was exercised.",
+    "No 20000 RPS benchmark or 5-billion-record migration was executed.",
+    "Mermaid syntax was parsed; every diagram was not visually rendered on every Markdown engine.",
+    "Compile checks do not run intentional race/leak snippets; the long-running HTTP Markdown server was compile-only.",
+    "Structural checks and word counts assist review; they are not a semantic proof of every technical claim."
+  ]
+}

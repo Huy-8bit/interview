@@ -1,0 +1,4 @@
+.cache/
+*.out
+*.test
+__pycache__/
