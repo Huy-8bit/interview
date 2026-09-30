@@ -18,4 +18,7 @@ flowchart LR
     cdcInit --> register["debezium-init: 4 connectors RUNNING"]
     connect --> register
     register --> traffic["Traffic Generator - continuous REST workload"]
+    api --> metrics["Application and infrastructure exporters"]
+    metrics --> prometheus["Prometheus targets and live samples"]
+    prometheus --> grafana["Grafana auto-provisioned dashboards"]
     readiness --> traffic

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from datetime import timedelta
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
@@ -9,24 +9,28 @@ from sqlalchemy.dialects.postgresql import insert
 from app.models.warranty import Warranty
 from app.repositories import warranties as repository
 from app.schemas.warranty import Coverage, WarrantyRead
+from platform_common.context import correlation_id
 from platform_common.db import utcnow
 from platform_common.errors import DomainError
 from platform_common.events import enqueue
+from platform_common.metrics import committed
 
 log = logging.getLogger(__name__)
 
 
 def emit(session, runtime, row, kind):
+    if kind == "warranty.created":
+        committed(session, runtime.metrics.business["warranties_created_total"])
     result = WarrantyRead.model_validate(row).model_dump(mode="json")
     enqueue(session, runtime.settings, kind, row.vehicle_id, result)
     return result
 
 
-async def create_default(session, event, runtime):
-    vehicle_id = UUID(event.data["id"])
-    # Event time makes the dates deterministic even if processing is delayed.
-    start = event.occurred_at.date()
-    async with runtime.cache.lock(f"default-warranty:{vehicle_id}"):
+async def create_default(session, body, runtime):
+    vehicle_id = body.vehicle_id
+    # The original vehicle timestamp keeps dates deterministic across REST retries.
+    start = body.vehicle_created_at.date()
+    async with runtime.cache.lock(f"default-warranty:{vehicle_id}", contention_is_error=False):
         row = await session.scalar(
             insert(Warranty)
             .values(
@@ -36,17 +40,26 @@ async def create_default(session, event, runtime):
                 start_date=start,
                 end_date=start + timedelta(days=runtime.settings.default_warranty_days),
                 status="ACTIVE",
+                correlation_id=correlation_id.get() or str(uuid4()),
             )
             .on_conflict_do_nothing(constraint="uq_warranty_vehicle_type")
             .returning(Warranty)
         )
         if row:
             emit(session, runtime, row, "warranty.created")
+        else:
+            row = await session.scalar(select(Warranty).where(Warranty.vehicle_id == vehicle_id, Warranty.warranty_type == "DEFAULT"))
+        return WarrantyRead.model_validate(row)
 
 
 class WarrantyService:
     def __init__(self, runtime):
         self.runtime = runtime
+
+    async def provision(self, body):
+        self.runtime.metrics.business["warranty_rest_requests_total"].inc()
+        async with self.runtime.sessions.begin() as session:
+            return await create_default(session, body, self.runtime)
 
     async def list(self, vehicle_id):
         async with self.runtime.sessions() as session:
@@ -56,6 +69,7 @@ class WarrantyService:
             ]
 
     async def coverage(self, vehicle_id):
+        self.runtime.metrics.business["warranty_rest_requests_total"].inc()
         if self.runtime.http_delay:
             await asyncio.sleep(self.runtime.http_delay)
         async with self.runtime.sessions() as session:
@@ -64,7 +78,7 @@ class WarrantyService:
                 raise DomainError(
                     404,
                     "warranty_not_ready",
-                    "No warranty history yet; vehicle event may still be in transit",
+                    "No warranty history yet; vehicle REST provision may still be pending",
                 )
             today = utcnow().date()
             active = next(
@@ -82,9 +96,9 @@ class WarrantyService:
         async with self.runtime.sessions.begin() as session:
             if not await repository.for_vehicle(session, body.vehicle_id):
                 raise DomainError(
-                    409, "vehicle_not_ready", "Wait for default warranty from vehicle.created"
+                    409, "vehicle_not_ready", "Wait for default warranty provision via REST"
                 )
-            row = Warranty(**body.model_dump())
+            row = Warranty(**body.model_dump(), correlation_id=correlation_id.get())
             session.add(row)
             await session.flush()
             return emit(session, self.runtime, row, "warranty.created")
@@ -103,6 +117,7 @@ class WarrantyService:
                     "Only a PENDING warranty within its date range can activate",
                 )
             row.status = status
+            row.correlation_id = correlation_id.get()
             await session.flush()
             return emit(
                 session,

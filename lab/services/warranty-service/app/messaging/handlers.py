@@ -1,3 +1,3 @@
-from app.services.warranties import create_default
+"""Warranty publishes domain outbox events; DEFAULT provisioning is owned by REST."""
 
-HANDLERS = {"vehicle.created": create_default}
+HANDLERS = {}

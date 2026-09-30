@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     consumer_max_poll_interval_ms: int = Field(default=300000, ge=1000)
     consumer_fetch_timeout: float = Field(default=15, ge=2)
     consumer_stall_timeout: float = Field(default=15, ge=2)
+    simulate_consumer_delay_ms: int = Field(default=0, ge=0, le=5000)
     background_workers: bool = True
     lab_mode: bool = False
 

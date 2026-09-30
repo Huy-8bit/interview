@@ -22,3 +22,4 @@ class Warranty(Timestamps, Base):
     start_date: Mapped[date]
     end_date: Mapped[date]
     status: Mapped[str] = mapped_column(String(20), default="PENDING")
+    correlation_id: Mapped[str | None] = mapped_column(String(128), nullable=True)

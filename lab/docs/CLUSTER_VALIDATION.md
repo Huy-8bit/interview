@@ -1,5 +1,7 @@
 # Kiểm chứng Kafka và Redis Cluster
 
+> Bằng chứng lịch sử của phiên bản trước thay đổi REST A→B và Inspection CDC. Luồng/monitoring hiện tại xem [Observability](OBSERVABILITY.md); không dùng số liệu này như kết quả đo phiên bản mới.
+
 [Mục lục](README.md) · [Thiết kế và command](CLUSTER_INFRASTRUCTURE.md) · [Báo cáo phiên bản đầu](VALIDATION.md)
 
 Báo cáo này ghi nhận bước nâng Kafka/Redis, trước khi thêm PostgreSQL replication/CDC. Xem [báo cáo mới](POSTGRESQL_CDC_VALIDATION.md) cho database layer hiện tại.

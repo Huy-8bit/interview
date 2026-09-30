@@ -12,7 +12,7 @@ step=0
 started_at=$SECONDS
 current_services=()
 
-log() { printf '[%s] [%02d/10] %-7s %s\n' "$(date +%H:%M:%S)" "$step" "$1" "$2" | tee -a "$startup_log"; }
+log() { printf '[%s] [%02d/12] %-7s %s\n' "$(date +%H:%M:%S)" "$step" "$1" "$2" | tee -a "$startup_log"; }
 interrupted() {
   log STOP 'Startup interrupted; inspect running containers with docker compose ps --all.'
   exit 130
@@ -127,7 +127,7 @@ current_services=(postgres-init redis-cluster-init kafka-init)
 run_step 'DB roles/slot, Redis Cluster, Kafka topics' init_jobs "${current_services[@]}"
 current_services=(postgres-replica)
 run_step 'PostgreSQL replica healthcheck' healthy_services "${current_services[@]}"
-current_services=(vehicle-service warranty-service inspection-service repair-service)
+current_services=(vehicle-service warranty-service inspection-service repair-service inspection-api)
 run_step 'Migrations and readiness of 4 APIs' healthy_services "${current_services[@]}"
 current_services=(cdc-db-init)
 run_step 'CDC grants, publications and replica identity' init_jobs "${current_services[@]}"
@@ -135,13 +135,25 @@ current_services=(debezium-connect)
 run_step 'Debezium Connect REST readiness' healthy_services "${current_services[@]}"
 current_services=(debezium-init)
 run_step 'Register 4 connectors and wait for RUNNING tasks' init_jobs "${current_services[@]}"
+current_services=(prometheus kafka-exporter redis-exporter postgres-exporter postgres-replica-exporter platform-exporter cadvisor)
+run_step 'Prometheus and real infrastructure exporters' healthy_services "${current_services[@]}"
 current_services=(kafka-ui traffic-generator)
 run_step 'Kafka UI and Traffic Generator' start_clients
+current_services=(grafana prometheus)
+monitoring_ready() {
+  healthy_services grafana || return
+  local allow_stopped=false
+  local traffic_id
+  traffic_id=$(docker compose ps --all -q traffic-generator) || return
+  if docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$traffic_id" | grep -x 'TRAFFIC_MODE=scenario' >/dev/null; then allow_stopped=true; fi
+  docker compose exec -T -e "ALLOW_STOPPED_TRAFFIC=$allow_stopped" platform-exporter python check_targets.py
+}
+run_step 'Grafana provisioning and Prometheus targets UP' monitoring_ready
 log READY "Startup completed in $((SECONDS - started_at))s. Log: $startup_log"
-for service in vehicle-service warranty-service inspection-service repair-service kafka-ui debezium-connect; do
+for service in vehicle-service warranty-service inspection-api repair-service kafka-ui debezium-connect prometheus grafana; do
   port=8000
   path=/docs
-  case "$service" in kafka-ui) port=8080; path=;; debezium-connect) port=8083; path=/connectors;; esac
+  case "$service" in kafka-ui) port=8080; path=;; debezium-connect) port=8083; path=/connectors;; prometheus) port=9090; path=/targets;; grafana) port=3000; path=;; esac
   if address=$(docker compose port --index 1 "$service" "$port" 2>/dev/null); then
     printf '%-20s http://%s%s\n' "$service" "$address" "$path" | tee -a "$startup_log"
   fi

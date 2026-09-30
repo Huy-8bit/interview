@@ -5,6 +5,7 @@ from platform_common.db import utcnow
 from platform_common.errors import DomainError
 from platform_common.events import enqueue
 from platform_common.idempotency import execute_idempotent
+from platform_common.metrics import committed
 
 
 def serialize(row):
@@ -17,10 +18,11 @@ class InspectionService:
 
     async def create(self, body, key):
         async def action(session):
-            await repository.require_vehicle(session, body.vehicle_id)
-            row = Inspection(**body.model_dump())
+            reference = await repository.require_vehicle(session, body.vehicle_id)
+            row = Inspection(**body.model_dump(), warranty_id=reference.warranty_id)
             session.add(row)
             await session.flush()
+            committed(session, self.runtime.metrics.business["inspections_created_total"])
             return serialize(row)
 
         return await execute_idempotent(
@@ -68,6 +70,7 @@ class InspectionService:
                 body.result,
                 body.failure_reason,
             )
+            committed(session, self.runtime.metrics.business["inspections_passed_total" if body.result == "PASS" else "inspections_failed_total"])
             row.completed_at = utcnow()
             if "notes" in body.model_fields_set:
                 row.notes = body.notes
@@ -80,6 +83,7 @@ class InspectionService:
                 {
                     "inspection_id": str(row.id),
                     "vehicle_id": str(row.vehicle_id),
+                    "warranty_id": str(row.warranty_id) if row.warranty_id else None,
                     "failure_reason": row.failure_reason,
                     "occurred_at": row.completed_at.isoformat(),
                 },

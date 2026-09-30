@@ -1,0 +1,5 @@
+Vehicle: 7 passed in 0.97s
+Warranty: 3 passed in 0.47s
+Inspection: 5 passed in 0.74s
+Repair: 2 passed in 0.73s
+Shared unit + integration: 42 passed in 35.33s

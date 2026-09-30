@@ -26,6 +26,9 @@ for kind in kafka-leader redis-master postgres-replica debezium-connect warranty
   if [ "$kind" = warranty-service ]; then
     progress flows_failed > "$evidence/$kind-down.json"
     progress created_vehicles > "$evidence/$kind-continued.json"
+  elif [ "$kind" = debezium-connect ]; then
+    progress created_vehicles > "$evidence/$kind-down.json"
+    # New inspections wait for warranty CDC. Full flow resumes after Connect recovery.
   elif [ "$kind" = postgres-replica ]; then
     progress replica_fallback_reads > "$evidence/$kind-down.json"
   else

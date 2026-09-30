@@ -20,6 +20,7 @@ class RepairUpdate(BaseModel):
 class RepairRead(RepairCreate):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
+    warranty_id: UUID | None = None
     warranty_covered: bool
     status: str
     created_at: datetime

@@ -29,6 +29,8 @@ flowchart TB
 
 Kafka Connect chạy một worker, gồm bốn connector/task, mỗi connector đọc một database. Một PostgreSQL connector không capture cả bốn database qua cùng một logical slot. Kafka Connect worker hiện chưa HA; khi worker dừng, database và outbox vẫn hoạt động, CDC đợi worker quay lại.
 
+Inspection hiện consume trực tiếp `warranty-cdc.public.warranties` để duy trì local projection, kết hợp với `vehicle.created` từ domain topic. CDC là đầu vào bắt buộc của workflow READY; connector dừng thì warranty mới chưa xuất hiện ở C. Các CDC topic còn lại phục vụ quan sát. Xem [luồng hai đầu vào và kiểm chứng](OBSERVABILITY.md#3-hai-đường-dữ-liệu-chuẩn-bị-inspection).
+
 ## 2. Streaming replication, WAL và LSN
 
 **WAL** là log thay đổi dùng cho crash recovery và replication. **LSN** biểu diễn vị trí trong WAL, không phải business event ID. WAL sender trên primary phục vụ WAL receiver trên replica; replica nhận, flush rồi replay WAL. Receive LSN và replay LSN có thể khác nhau.

@@ -17,8 +17,8 @@ sequenceDiagram
     RepairConsumer->>RepairDB: BEGIN, reserve processed marker
     RepairConsumer->>RepairDB: Find repair by inspection ID
     RepairConsumer->>Redis: Acquire token lock with TTL
-    RepairConsumer->>WarrantyAPI: GET active warranty with correlation ID
-    WarrantyAPI-->>RepairConsumer: 200 covered boolean
+    RepairConsumer->>WarrantyAPI: GET internal coverage with correlation ID
+    WarrantyAPI-->>RepairConsumer: 200 covered, warranty_id, checked_at
     RepairConsumer->>RepairDB: Insert repair, notification and repair.created outbox
     RepairConsumer->>Redis: Release lock if token matches
     RepairConsumer->>RepairDB: COMMIT

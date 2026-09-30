@@ -73,7 +73,7 @@ class LabClient:
             )
             if (
                 response.status_code == 409
-                and response.json()["error"]["code"] == "vehicle_projection_not_ready"
+                and response.json()["error"]["code"] in ("vehicle_projection_not_ready", "warranty_projection_not_ready")
             ):
                 return None
             response.raise_for_status()

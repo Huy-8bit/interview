@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, DateTime, Index, String, Text
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, Index, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from platform_common.db import Base, Timestamps
@@ -14,6 +15,11 @@ class VehicleReference(Timestamps, Base):
     vehicle_id: Mapped[UUID] = mapped_column(primary_key=True)
     vehicle_seen: Mapped[bool] = mapped_column(default=False)
     warranty_seen: Mapped[bool] = mapped_column(default=False)
+    vehicle_payload: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    source_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    warranty_id: Mapped[UUID | None] = mapped_column(nullable=True)
+    workflow_status: Mapped[str] = mapped_column(String(30), default="WAITING_VEHICLE", server_default="WAITING_VEHICLE")
+    prepared_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Inspection(Timestamps, Base):
@@ -34,9 +40,26 @@ class Inspection(Timestamps, Base):
     )
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     vehicle_id: Mapped[UUID]
+    warranty_id: Mapped[UUID | None] = mapped_column(nullable=True)
     inspection_type: Mapped[str] = mapped_column(String(50))
     status: Mapped[str] = mapped_column(String(20), default="PENDING")
     result: Mapped[str | None] = mapped_column(String(10))
     failure_reason: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class VehicleWarrantyProjection(Base):
+    __tablename__ = "vehicle_warranty_projection"
+    warranty_id: Mapped[UUID] = mapped_column(primary_key=True)
+    vehicle_id: Mapped[UUID] = mapped_column(index=True)
+    warranty_status: Mapped[str] = mapped_column(String(20))
+    warranty_type: Mapped[str] = mapped_column(String(50))
+    start_date: Mapped[date]
+    end_date: Mapped[date]
+    source_updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    synced_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    source_lsn: Mapped[int] = mapped_column(BigInteger)
+    source_partition: Mapped[int]
+    source_offset: Mapped[int] = mapped_column(BigInteger)
+    is_deleted: Mapped[bool] = mapped_column(default=False)

@@ -36,3 +36,9 @@ class Coverage(BaseModel):
     covered: bool
     warranty_id: UUID | None
     checked_at: datetime
+
+
+class WarrantyProvision(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    vehicle_id: UUID
+    vehicle_created_at: datetime

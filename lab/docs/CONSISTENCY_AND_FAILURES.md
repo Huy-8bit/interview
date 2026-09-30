@@ -7,14 +7,14 @@
 | Invariant | Lớp thực thi cuối cùng | Transaction liên quan |
 |---|---|---|
 | Một VIN chỉ có một vehicle | PostgreSQL unique vin | Vehicle + outbox |
-| Một DEFAULT warranty/vehicle | Unique vehicle_id + warranty_type | Processed marker + warranty + outbox |
+| Một DEFAULT warranty/vehicle | Unique vehicle_id + warranty_type | REST provision: warranty + outbox, conflict trả row đã có |
 | Một repair/inspection | Unique inspection_id | Marker hoặc API idempotency + repair + notification + outbox |
 | Một notification/channel/repair | Unique repair_id + channel | Cùng repair creation |
 | Event đã commit không chạy handler lần nữa cho cùng consumer_name | Processed PK event_id + consumer_name | Marker + business commit cùng nhau |
 | API retry cùng ý định không tạo resource mới | Idempotency PK scope + key_hash | Reservation + action + response cùng nhau |
 | Mutation phát event có durable publish intent | Outbox insert cùng business transaction | Không có direct DB-write-then-Kafka-send trong request |
 
-SQL constraints không thể bảo vệ quy tắc chưa được encode. Ví dụ manual repair chưa xác minh inspection tồn tại/FAIL, repair row chưa giữ bằng chứng warranty lookup, và notification FK không ép vehicle_id bằng vehicle_id của repair. Đây là giới hạn domain hiện tại.
+SQL constraints không thể bảo vệ quy tắc chưa được encode. Ví dụ manual repair chưa xác minh inspection tồn tại/FAIL, repair row giữ warranty_id và coverage boolean nhưng chưa giữ toàn bộ response/thời điểm lookup, và notification FK không ép vehicle_id bằng vehicle_id của repair. Đây là giới hạn domain hiện tại.
 
 ## 2. Transactional outbox và các cửa sổ crash
 
@@ -48,7 +48,7 @@ flowchart TD
 
 Mất connection trong lúc COMMIT có thể khiến caller không biết DB đã commit hay chưa; không suy ra rollback chỉ từ HTTP 503. API idempotency/natural key và kiểm tra source of truth xử lý unknown outcome này. Tương tự, timeout chờ Kafka không chứng minh broker chưa nhận message. Vì vậy không tạo event ID mới khi retry. Outbox không xóa row vì vượt số attempt; exponential backoff cap 60 giây, có thể tiếp tục vô hạn cho đến khi operator sửa lỗi.
 
-Worker giữ DB transaction/row lock khi chờ network ACK. Cách này đơn giản để claim atomically nhưng tiêu tốn connection và tăng thời gian lock. Nhiều worker dùng SKIP LOCKED; không có leasing table hay CDC/Debezium trong lab.
+Worker giữ DB transaction/row lock khi chờ network ACK. Cách này đơn giản để claim atomically nhưng tiêu tốn connection và tăng thời gian lock. Nhiều worker dùng SKIP LOCKED; publisher này chưa có leasing table; Debezium chạy song song để capture bảng nghiệp vụ, không thay outbox publisher.
 
 Source: [outbox.py](../common/platform_common/outbox.py), [kafka.py](../common/platform_common/kafka.py).
 
@@ -102,7 +102,7 @@ Lock dùng SET NX EX với token UUID. Unlock Lua so sánh token trước DEL; w
 
 Lease 30 giây **không phải fencing token** cho PostgreSQL. Không có lock renewal hoặc monotonic fencing counter. Worker có thể chạy quá lease; correctness vẫn dựa vào DB uniqueness và processed/idempotency reservation. Lock release trong warranty/repair handler xảy ra trước outer DB commit; transaction khác có thể vào lock rồi chờ DB constraint.
 
-Redis down khác lock busy: down → fallback constraints; busy → TransientError cho warranty/repair creation. API idempotency helper chọn không fail vì lock contention, tiếp tục serialize ở DB.
+Redis down khác lock busy: down → fallback constraints; lock busy ở repair creation → TransientError. Warranty REST provision và API idempotency helper tiếp tục serialize bằng DB uniqueness khi lock contention, để concurrent retry nhận cùng kết quả.
 
 Redis Cluster dùng replication bất đồng bộ: failover có thể làm mất lock vừa được ACK, khiến hai worker cùng nghĩ mình giữ lease. Các DB invariants vẫn bắt buộc. Cache/generation dùng hash tag theo vehicle UUID để multi-key Lua không bị CROSSSLOT; failover mất một invalidation vẫn có thể trả stale đến TTL. Xem [thiết kế cluster](CLUSTER_INFRASTRUCTURE.md).
 

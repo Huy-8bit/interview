@@ -7,6 +7,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Config(BaseSettings):
     model_config = SettingsConfigDict(extra="ignore", populate_by_name=True)
 
+    metrics_port: int = Field(9101, ge=1024, le=65535)
+    load_test_mode: bool = False
+    load_test_duration_seconds: int = Field(180, ge=10, le=900)
+    load_test_max_vehicles: int = Field(1000, ge=1, le=10000)
     enabled: bool = Field(True, validation_alias="TRAFFIC_ENABLED")
     mode: Literal["continuous", "scenario"] = Field("continuous", validation_alias="TRAFFIC_MODE")
     virtual_users: int = Field(5, ge=1, le=100, validation_alias=AliasChoices("VIRTUAL_USERS", "TRAFFIC_CONCURRENCY"))

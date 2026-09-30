@@ -8,7 +8,9 @@ Bộ tài liệu này giải thích **hệ thống đang chạy trong repository
 
 | Tài liệu | Nội dung | Khi nào cần đọc |
 |---|---|---|
-| [Getting Started](GETTING_STARTED.md) | Thứ tự CLI, startup 10 bước, log tiến độ, xem traffic và dừng/chạy lại | Bắt đầu chạy lab |
+| [Observability Validation](OBSERVABILITY_VALIDATION.md) | 59 tests, CDC end-to-end, 21 targets, 134 panel queries và consumer scale thật | Xem bằng chứng phiên bản REST + CDC + monitoring |
+| [Observability](OBSERVABILITY.md) | Metrics pipeline, 10 dashboards, PromQL, failures và lag/scale demo | Quan sát và thực hành |
+| [Getting Started](GETTING_STARTED.md) | Thứ tự CLI, startup 12 bước, log tiến độ, xem traffic và dừng/chạy lại | Bắt đầu chạy lab |
 | [System Design](SYSTEM_DESIGN.md) | Yêu cầu, ranh giới service, high-level/low-level design, deployment, capacity, security và hướng production | Muốn hiểu thiết kế tổng thể và lý do lựa chọn |
 | [Cluster Infrastructure](CLUSTER_INFRASTRUCTURE.md) | Kafka 3 brokers, Redis 3M+3R, quorum/slots, failover, consumer scale và command thực hành | Học replication/HA và test node failure |
 | [PostgreSQL & CDC](POSTGRESQL_CDC.md) | Primary/replica, WAL, read routing, Debezium, CDC vs domain events và 8 bài thử lỗi | Học database replication và CDC thật |

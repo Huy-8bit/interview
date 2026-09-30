@@ -1,0 +1,48 @@
+groups:
+  - name: vehicle-lab
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"fastapi|debezium|kafka-jmx|cadvisor"} == 0
+        for: 30s
+        labels: {severity: critical}
+        annotations: {summary: 'Metrics target {{ $labels.instance }} is down'}
+      - alert: HighAPIErrorRate
+        expr: sum by(service)(rate(http_requests_total{status_code=~"5.."}[2m])) / sum by(service)(rate(http_requests_total[2m])) > 0.05
+        for: 1m
+        labels: {severity: warning}
+      - alert: HighP95Latency
+        expr: histogram_quantile(0.95,sum by(le,service)(rate(http_request_duration_seconds_bucket[2m]))) > 2
+        for: 2m
+        labels: {severity: warning}
+      - alert: KafkaConsumerLagHigh
+        expr: sum by(consumergroup)(kafka_consumergroup_lag) > 100
+        for: 30s
+        labels: {severity: warning}
+      - alert: PostgreSQLReplicaLagHigh
+        expr: lab_pg_replication_lag_bytes > 10485760
+        for: 30s
+        labels: {severity: warning}
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / (redis_memory_max_bytes > 0) > 0.8
+        for: 2m
+        labels: {severity: warning}
+      - alert: ContainerMemoryHigh
+        expr: container_memory_working_set_bytes / container_spec_memory_limit_bytes > 0.85
+        for: 2m
+        labels: {severity: warning}
+      - alert: KafkaUnderReplicatedPartitions
+        expr: sum(kafka_replica_underreplicatedpartitions) > 0
+        for: 30s
+        labels: {severity: warning}
+      - alert: DebeziumConnectorDown
+        expr: connect_connector_running == 0
+        for: 30s
+        labels: {severity: critical}
+      - alert: DatabaseExporterUnavailable
+        expr: pg_up == 0
+        for: 30s
+        labels: {severity: critical}
+      - alert: RedisNodeDown
+        expr: redis_up == 0
+        for: 30s
+        labels: {severity: warning}

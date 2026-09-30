@@ -2,7 +2,7 @@
 
 Sở hữu **Warranty, coverage và expiry**, database **warranty_db**. Đây là application FastAPI độc lập; không truy cập database của service khác.
 
-Consume vehicle.created. Publish warranty.created, warranty.activated, warranty.expired.
+Nhận REST POST /internal/warranties từ Vehicle; không consume Kafka để tạo DEFAULT. Publish warranty.created, warranty.activated, warranty.expired.
 
 create_default và expiry_loop trong app/services/warranties.py; DEFAULT warranty được bảo vệ bởi unique vehicle_id + warranty_type.
 

@@ -1,0 +1,34 @@
+[15:50:37] [01/12] RUNNING Docker Engine, Compose and configuration
+[15:50:38] [01/12] OK      Docker Engine, Compose and configuration (1s)
+[15:50:38] [02/12] RUNNING Build application and traffic images
+[15:50:44] [02/12] OK      Build application and traffic images (6s)
+[15:50:44] [03/12] RUNNING PostgreSQL primary, 6 Redis nodes, 3 Kafka brokers
+[15:50:45] [03/12] OK      PostgreSQL primary, 6 Redis nodes, 3 Kafka brokers (1s)
+[15:50:45] [04/12] RUNNING DB roles/slot, Redis Cluster, Kafka topics
+[15:51:53] [04/12] OK      DB roles/slot, Redis Cluster, Kafka topics (68s)
+[15:51:53] [05/12] RUNNING PostgreSQL replica healthcheck
+[15:51:54] [05/12] OK      PostgreSQL replica healthcheck (1s)
+[15:51:54] [06/12] RUNNING Migrations and readiness of 4 APIs
+[15:52:04] [06/12] OK      Migrations and readiness of 4 APIs (10s)
+[15:52:04] [07/12] RUNNING CDC grants, publications and replica identity
+[15:52:05] [07/12] OK      CDC grants, publications and replica identity (1s)
+[15:52:05] [08/12] RUNNING Debezium Connect REST readiness
+[15:52:06] [08/12] OK      Debezium Connect REST readiness (1s)
+[15:52:06] [09/12] RUNNING Register 4 connectors and wait for RUNNING tasks
+[15:52:09] [09/12] OK      Register 4 connectors and wait for RUNNING tasks (3s)
+[15:52:09] [10/12] RUNNING Prometheus and real infrastructure exporters
+[15:52:10] [10/12] OK      Prometheus and real infrastructure exporters (1s)
+[15:52:10] [11/12] RUNNING Kafka UI and Traffic Generator
+[15:52:11] [11/12] OK      Kafka UI and Traffic Generator (1s)
+[15:52:11] [12/12] RUNNING Grafana provisioning and Prometheus targets UP
+OK: 21 Prometheus targets UP
+[15:52:16] [12/12] OK      Grafana provisioning and Prometheus targets UP (4s)
+[15:52:16] [12/12] READY   Startup completed in 99s. Log: /Users/huynguyen/Desktop/poc/lab/lab/artifacts/startup/20260930-155037-9741/startup.log
+vehicle-service      http://127.0.0.1:8001/docs
+warranty-service     http://127.0.0.1:8002/docs
+inspection-api       http://127.0.0.1:8003/docs
+repair-service       http://127.0.0.1:8005/docs
+kafka-ui             http://127.0.0.1:8080
+debezium-connect     http://127.0.0.1:8083/connectors
+prometheus           http://127.0.0.1:9090/targets
+grafana              http://127.0.0.1:3000

@@ -33,7 +33,7 @@ flowchart LR
 
 ### Yêu cầu chức năng
 
-Đăng ký/cập nhật xe; tạo default warranty từ event; quản lý vòng đời warranty; inspection PASS/FAIL; tạo repair/notification từ FAIL; tra coverage bằng REST; xử lý API retry và Kafka duplicate; quan sát/replay các tình huống thất bại.
+Đăng ký/cập nhật xe; tạo default warranty qua REST A→B; quản lý vòng đời warranty; inspection PASS/FAIL; tạo repair/notification từ FAIL; tra coverage bằng REST; xử lý API retry và Kafka duplicate; quan sát/replay các tình huống thất bại.
 
 ### Yêu cầu chất lượng và giới hạn
 
@@ -44,7 +44,7 @@ flowchart LR
 | Không tạo duplicate khi client retry create | Redis result cache + PostgreSQL idempotency reservation | Chỉ POST inspection/repair có header contract này |
 | Không biến dependency failure thành kết quả nghiệp vụ sai | Coverage unavailable → rollback/retry/503 hoặc DLQ | Repair có thể chưa tồn tại cho đến khi dependency phục hồi/replay |
 | Cho phép từng domain phát triển độc lập | Database/role, API và event ownership rõ ràng | Shared infrastructure package tạo coupling ở thời điểm build/release |
-| Quan sát được hành vi lỗi | JSON logs, Kafka UI, health, fault endpoints opt-in | Chưa có metrics pipeline/tracing/SLO thực đo |
+| Quan sát được hành vi lỗi | JSON logs, Kafka UI, health, fault endpoints opt-in | Có Prometheus/Grafana/exporters; chưa có distributed tracing hoặc production SLO |
 
 Không nằm trong phạm vi hiện tại: scheduling workshop, inventory/phụ tùng, thanh toán, mileage, warranty claim limits, giao tiếp ECU, customer master, gửi SMS/email thật hoặc orchestration saga có compensation.
 
@@ -53,11 +53,11 @@ Không nằm trong phạm vi hiện tại: scheduling workshop, inventory/phụ 
 | Service | Source of truth | Bản sao/đầu vào bên ngoài | Quyền quyết định |
 |---|---|---|---|
 | Vehicle | `vehicles`, gồm owner_name | Không | VIN duy nhất, trạng thái và thông tin xe |
-| Warranty | `warranties` | `vehicle.created` | Loại/thời hạn/trạng thái bảo hành và coverage hiện tại |
-| Inspection | `inspections` | `vehicle_references` từ hai loại event | Kết quả inspection và tính bất biến sau complete |
+| Warranty | `warranties` | REST provision từ A | Loại/thời hạn/trạng thái bảo hành và coverage hiện tại |
+| Inspection | `inspections` | `vehicle_references` + `vehicle_warranty_projection` từ domain event và CDC | Kết quả inspection và tính bất biến sau complete |
 | Repair | `repair_requests`, `notifications` | Event FAIL; coverage REST | Một repair/inspection, coverage snapshot, trạng thái sửa chữa |
 
-Không có service đọc trực tiếp DB của service khác. Inspection chỉ lưu hai cờ đã quan sát event; projection này không chứa đầy đủ vehicle/warranty và không đủ để tính coverage.
+Không có service đọc trực tiếp DB của service khác. Inspection lưu vehicle payload và warranty status/type/dates/LSN trong local projection. READY yêu cầu cả hai đầu vào; Repair hỏi owner B về coverage hiện tại.
 
 ## 3. High-level design
 
@@ -104,8 +104,9 @@ Mũi tên nối vào khung application gom các kết nối hạ tầng để s�
 | Interaction | Chọn | Lý do | Hệ quả client cần hiểu |
 |---|---|---|---|
 | Client → service sở hữu dữ liệu | REST | Validation và kết quả local transaction ngay | Thành công chỉ xác nhận local state |
-| Vehicle → Warranty/Inspection | Kafka | Một sự kiện fan-out cho hai domain | Xe có thể tồn tại trước warranty/projection |
-| Warranty → Inspection | Kafka | Cập nhật dấu đã quan sát warranty | Hai topic không có thứ tự toàn cục |
+| Vehicle → Warranty | REST + durable local command | Tạo default warranty tại owner | B unavailable giữ command PENDING |
+| Vehicle → Inspection | Kafka domain outbox | Thông báo xe đã tạo/cập nhật | Projection eventual |
+| Warranty DB → Inspection | Debezium CDC qua Kafka | Materialize local warranty row | Không có order với vehicle domain topic |
 | Inspection FAIL → Repair | Kafka | Tách hoàn tất kiểm định khỏi latency/dependency sửa chữa | Complete FAIL có thể trả trước khi repair xuất hiện |
 | Repair → Warranty | REST | Cần câu trả lời coverage hiện tại của owner | Repair creation phụ thuộc availability/latency của Warranty |
 | Repair → downstream | Kafka | Phát `repair.created` cho bên mở rộng | Lab chưa có consumer cho topic này |
@@ -137,7 +138,7 @@ flowchart TD
 
 [Xem sơ đồ SVG](diagrams/service-components.svg)
 
-Sơ đồ thể hiện các vai trò; một số handler như Inspection projection dùng SQLAlchemy trực tiếp vì chỉ cần upsert nhỏ. `WarrantyService.create_default` và `RepairService.create_in_transaction` dùng session do consumer truyền vào, bảo toàn transaction boundary.
+Sơ đồ thể hiện các vai trò; một số handler như Inspection projection dùng SQLAlchemy trực tiếp vì chỉ cần upsert nhỏ. `create_default` dùng transaction của Warranty REST; `create_in_transaction` dùng session do consumer/API truyền vào, bảo toàn transaction boundary.
 
 | Thành phần | Trách nhiệm | Source |
 |---|---|---|
@@ -147,13 +148,13 @@ Sơ đồ thể hiện các vai trò; một số handler như Inspection project
 | Business/repository | State transition, transaction, row lookup/lock | `services/*/app/services`, `services/*/app/repositories` |
 | Messaging | Envelope, outbox, retries và consumer ledger | [events.py](../common/platform_common/events.py), [consumer.py](../common/platform_common/consumer.py) |
 
-Mỗi container chạy một uvicorn process. API và tasks asyncio chia sẻ pool nhưng không chia sẻ một `AsyncSession` giữa task. Vehicle có outbox task; ba service còn lại thêm consumer; Warranty thêm expiry task. Traffic Generator là process độc lập chạy virtual users bằng HTTPX; các domain background tasks vẫn nằm trong bốn FastAPI process. Xem [thiết kế generator](TRAFFIC_GENERATOR.md).
+Mỗi container chạy một uvicorn process. API và tasks asyncio chia sẻ pool nhưng không chia sẻ một `AsyncSession` giữa task. Mọi service có outbox/metrics tasks. Vehicle thêm durable REST provision worker; Warranty thêm expiry worker; Inspection và Repair có Kafka consumer. Traffic Generator là process độc lập chạy virtual users bằng HTTPX; các domain background tasks vẫn nằm trong bốn FastAPI process. Xem [thiết kế generator](TRAFFIC_GENERATOR.md).
 
 ## 5. Consistency contract
 
 | Quan sát | Cam kết hiện tại |
 |---|---|
-| `POST /vehicles` trả 201 | Vehicle và `vehicle.created` outbox đã commit; không cam kết Warranty đã consume |
+| `POST /vehicles` trả 201 | Vehicle và `vehicle.created` outbox đã commit; durable REST command đã commit; không cam kết Warranty CDC đã được C xử lý |
 | `POST /inspections` trả 201 | Inspection và idempotency response đã commit; không phát inspection.created |
 | Complete FAIL trả 200 | Inspection COMPLETED và failed outbox đã commit; repair có thể chưa có |
 | Repair xuất hiện | Repair, notification và repair outbox đã commit cùng nhau |
@@ -186,12 +187,15 @@ flowchart LR
     cdcInit --> register["debezium-init: 4 connectors RUNNING"]
     connect --> register
     register --> traffic["Traffic Generator - continuous REST workload"]
+    api --> metrics["Application and infrastructure exporters"]
+    metrics --> prometheus["Prometheus targets and live samples"]
+    prometheus --> grafana["Grafana auto-provisioned dashboards"]
     readiness --> traffic
 ```
 
 [Xem sơ đồ SVG](diagrams/startup-dependencies.svg)
 
-`make up` dùng [launcher 10 bước](../scripts/up.sh), in RUNNING/WAIT/OK/FAILED cùng elapsed time, giữ log mỗi phiên và dừng tại gate lỗi. [Getting Started](GETTING_STARTED.md) ghi thứ tự CLI và cách đọc status. Compose trực tiếp vẫn dùng dependency graph trên; launcher chủ động chia các nhóm container theo từng bước.
+`make up` dùng [launcher 12 bước](../scripts/up.sh), in RUNNING/WAIT/OK/FAILED cùng elapsed time, giữ log mỗi phiên và dừng tại gate lỗi. [Getting Started](GETTING_STARTED.md) ghi thứ tự CLI và cách đọc status. Compose trực tiếp vẫn dùng dependency graph trên; launcher chủ động chia các nhóm container theo từng bước.
 
 Startup chờ dependencies; resilience khi Kafka down áp dụng sau khi application đã chạy. Migration lỗi thì uvicorn chưa được mở. Lock migration thuộc từng DB nên các domain không cần khóa chung.
 

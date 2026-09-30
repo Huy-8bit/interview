@@ -1,14 +1,16 @@
 flowchart LR
     %% diagram: event-topology
     vehicle["Vehicle outbox"] -.-> vehicleTopic["vehicle-events"]
-    vehicleTopic -.->|"vehicle.created"| warranty["Warranty group"]
-    vehicleTopic -.->|"vehicle.created"| inspection["Inspection group"]
-    warranty -.-> warrantyTopic["warranty-events"]
-    warrantyTopic -.->|"warranty.created"| inspection
+    vehicleTopic -.->|"created / updated"| inspection["Inspection group v2"]
+    vehicle -->|"REST"| warranty["Warranty API"]
+    warranty --> wdb[("warranty_db")]
+    wdb -->|"WAL"| dbz["Debezium"]
+    dbz -.-> cdc["warranty-cdc.public.warranties"]
+    cdc -.->|"c/u/d/r and tombstone"| inspection
+    warranty -.-> warrantyTopic["warranty-events - observed, no business consumer"]
     inspection -.-> inspectionTopic["inspection-events"]
-    inspectionTopic -.->|"inspection.failed"| repair["Repair group"]
+    inspectionTopic -.->|"inspection.failed"| repair["Repair group v1"]
     repair -.-> repairTopic["repair-events"]
-    warranty -.->|"Source failure"| vehicleDlq["vehicle-events-dlq"]
-    inspection -.->|"Vehicle source failure"| vehicleDlq
-    inspection -.->|"Warranty source failure"| warrantyDlq["warranty-events-dlq"]
-    repair -.->|"Source failure"| inspectionDlq["inspection-events-dlq"]
+    inspection -.-> vehicleDlq["vehicle-events-dlq"]
+    inspection -.-> cdcDlq["warranty-cdc.public.warranties-dlq"]
+    repair -.-> inspectionDlq["inspection-events-dlq"]

@@ -48,3 +48,20 @@ async def update(inspection_id: UUID, body: InspectionUpdate, svc=Depends(servic
 @router.post("/{inspection_id}/complete", response_model=InspectionRead)
 async def complete(inspection_id: UUID, body: InspectionComplete, svc=Depends(service)):
     return await svc.complete(inspection_id, body)
+
+
+@router.get("/workflows/{vehicle_id}")
+async def workflow(vehicle_id: UUID, runtime=Depends(get_runtime)):
+    from sqlalchemy import select
+
+    from app.models.inspection import VehicleReference, VehicleWarrantyProjection
+    from platform_common.errors import DomainError
+    async with runtime.sessions() as session:
+        row = await session.get(VehicleReference, vehicle_id)
+        if row is None:
+            raise DomainError(404, "workflow_not_ready", "Neither input has arrived yet")
+        warranties = (await session.scalars(select(VehicleWarrantyProjection).where(VehicleWarrantyProjection.vehicle_id == vehicle_id))).all()
+        return {"vehicle_id": vehicle_id, "status": row.workflow_status, "vehicle_seen": row.vehicle_seen,
+                "warranty_seen": row.warranty_seen, "warranty_id": row.warranty_id, "prepared_at": row.prepared_at,
+                "warranties": [{"warranty_id": w.warranty_id, "status": w.warranty_status, "deleted": w.is_deleted,
+                               "source_lsn": w.source_lsn, "synced_at": w.synced_at} for w in warranties]}

@@ -11,6 +11,10 @@ async def require_vehicle(session, vehicle_id):
             409, "vehicle_projection_not_ready", "vehicle.created has not arrived; retry shortly"
         )
 
+    if not row.warranty_seen or row.workflow_status != "READY":
+        raise DomainError(409, "warranty_projection_not_ready", "Warranty CDC has not arrived; retry shortly")
+    return row
+
 
 async def get(session, inspection_id, *, lock=False):
     query = select(Inspection).where(Inspection.id == inspection_id)

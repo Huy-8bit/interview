@@ -238,7 +238,7 @@ docker compose exec kafka-2 /opt/kafka/bin/kafka-consumer-groups.sh \
 docker compose up -d --no-deps --scale repair-service=1 repair-service
 ```
 
-Repair host ports dùng range 8004–8006 để ba instance không tranh một port. Ngay cả khi chỉ có một instance, Docker có thể cấp 8005 hoặc 8006; dùng `docker compose port --index 1 repair-service 8000` để lấy địa chỉ thật sau recreate/scale. Đây là port mapping cho lab, chưa có HTTP load balancer. Các app khác giữ host port cố định; scale chúng cần override port mapping. Trong Docker network, service discovery có thể trả nhiều địa chỉ Repair.
+Repair host ports dùng range 8004–8006 để ba instance không tranh một port. Ngay cả khi chỉ có một instance, Docker có thể cấp 8005 hoặc 8006; dùng `docker compose port --index 1 repair-service 8000` để lấy địa chỉ thật sau recreate/scale. Đây là port mapping cho lab, chưa có HTTP load balancer. Inspection đã có Nginx gateway ở host 8003; scale `inspection-service=3` không tranh port, Prometheus khám phá từng replica qua Docker DNS. Vehicle/Warranty giữ host port cố định; scale hai service này cần override port mapping. Trong Docker network, service discovery có thể trả nhiều địa chỉ Repair.
 
 ## 6. Giới hạn, nâng cấp từ lab cũ và phục hồi
 

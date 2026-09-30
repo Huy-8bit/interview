@@ -17,5 +17,7 @@ flowchart TB
     primary -->|"Logical WAL"| debezium["Debezium - 4 connectors"]
     debezium -->|"Row c / u / d"| cdc["Kafka CDC topics"]
     apps <-->|"Outbox / idempotent consumers"| domain["Kafka domain topics"]
+    vehicle -->|"REST provision"| warranty
+    cdc -->|"Warranty row stream"| inspection
     cdc --> ui["Kafka UI"]
     domain --> ui

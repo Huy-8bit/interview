@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from datetime import timedelta
 
 from sqlalchemy import exists, select
@@ -7,6 +8,7 @@ from sqlalchemy.orm import aliased
 
 from platform_common import context
 from platform_common.db import utcnow
+from platform_common.metrics import committed
 from platform_common.models import OutboxEvent
 
 log = logging.getLogger(__name__)
@@ -41,12 +43,14 @@ async def publish_one(runtime) -> bool:
             return False
         ct = context.correlation_id.set(row.payload["correlation_id"])
         et = context.event_id.set(str(row.event_id))
+        started = time.perf_counter()
         try:
             if runtime.outbox_failures > 0:
                 runtime.outbox_failures -= 1
                 raise ConnectionError("lab: injected outbox publish failure")
             await runtime.publisher.publish(row.topic, row.aggregate_id, row.payload)
         except Exception as exc:
+            runtime.metrics.outbox_failed.inc()
             row.attempts += 1
             row.last_error = str(exc)[:2000]
             row.next_attempt_at = utcnow() + timedelta(
@@ -62,11 +66,13 @@ async def publish_one(runtime) -> bool:
             )
         else:
             row.status, row.published_at, row.last_error = "PUBLISHED", utcnow(), None
+            committed(session, runtime.metrics.outbox_published)
             log.info(
                 "outbox_published",
                 extra={"fields": {"topic": row.topic, "event_type": row.event_type}},
             )
         finally:
+            runtime.metrics.outbox_duration.observe(time.perf_counter() - started)
             context.correlation_id.reset(ct)
             context.event_id.reset(et)
     return True

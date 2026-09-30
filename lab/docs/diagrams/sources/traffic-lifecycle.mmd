@@ -4,12 +4,14 @@ sequenceDiagram
     participant V as Vehicle API
     participant I as Inspection API
     participant K as Domain Kafka
-    participant W as Warranty API and consumer
+    participant W as Warranty API
     participant R as Repair API and consumer
     T->>V: POST vehicle with simulation_run_id
     V-->>T: 201 vehicle_id
     V-->>K: vehicle.created via outbox
-    K-->>W: Create default warranty
+    V->>W: REST provision DEFAULT
+    W-->>K: Actual PostgreSQL WAL via Debezium
+    K-->>I: Warranty CDC projection
     K-->>I: Update vehicle projection
     loop Targets 0 / 100 / 500 / 1000 ms
         T->>V: GET consistency=eventual

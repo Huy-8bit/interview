@@ -24,7 +24,7 @@ Các quyết định dưới đây mô tả implementation hiện tại. “Xem 
 
 **Bối cảnh:** Tạo xe cần fan-out sang nhiều domain; tạo repair cần quyết định coverage hiện tại.
 
-**Quyết định:** Kafka cho business facts, REST cho `Repair → Warranty active lookup`. Không có orchestrator hoặc saga compensation.
+**Quyết định:** Kafka cho business facts, REST cho `Vehicle → Warranty provision` và `Repair → Warranty coverage lookup`. Không có orchestrator hoặc saga compensation.
 
 **Phương án khác:** REST chain toàn bộ luồng đơn giản với caller nhưng cộng latency/coupling availability; copy toàn bộ warranty sang Repair giảm synchronous dependency nhưng tăng vấn đề stale/out-of-order projection.
 
@@ -161,3 +161,11 @@ Các quyết định dưới đây mô tả implementation hiện tại. “Xem 
 **Hệ quả:** thấy được c/u/d/r và full before image, đổi lại tăng WAL, CDC permissions, checkpoint/retention và schema coupling. Không chạy Debezium Outbox Router cùng publisher. Worker down không dừng business transaction, nhưng CDC lag tăng và phải bảo đảm WAL còn. PostgreSQL 16 logical-slot failover không được tự động hóa.
 
 **Xem xét lại khi:** cần Connect worker HA, failover primary tự động, CDC throughput lớn, schema registry hoặc chuyển domain publishing sang Outbox Event Router có kế hoạch.
+
+## ADR-014 — Warranty CDC là input nghiệp vụ của Inspection
+
+A→B dùng REST cùng durable local provision command. C ghép vehicle domain event và warranty WAL CDC; cả hai gọi try_prepare_inspection, giữ advisory lock theo vehicle ID, ledger và projection cùng transaction. READY yêu cầu đủ hai phía; CDC source LSN bảo vệ replay/update/delete. Đánh đổi: tạo inspection mới phụ thuộc CDC availability; schema bảng warranty trở thành contract CDC cần migration cẩn thận.
+
+## ADR-015 — Metrics tại nguồn, exporters theo runtime
+
+Prometheus scrape ASGI/business/worker metrics và exporters thật. Grafana provision file, DNS discovery theo replica. Broker JMX bổ sung throughput/ISR; kafka-exporter đo offsets/lag; status exporter chỉ bổ sung Connect REST và Kafka assignment. cAdvisor đo Linux cgroups; không dùng process CPU hoặc số giả để thay container CPU. Cấu hình/kiểm chứng tại [Observability](OBSERVABILITY.md).

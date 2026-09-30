@@ -4,8 +4,27 @@ erDiagram
         uuid vehicle_id PK "No cross-database FK"
         boolean vehicle_seen
         boolean warranty_seen
+        jsonb vehicle_payload
+        uuid warranty_id "Selected local projection"
+        varchar workflow_status
+        timestamptz source_updated_at
+        timestamptz prepared_at
         timestamptz created_at
         timestamptz updated_at
+    }
+    vehicle_warranty_projection {
+        uuid warranty_id PK
+        uuid vehicle_id "Local indexed reference"
+        varchar warranty_status
+        varchar warranty_type
+        date start_date
+        date end_date
+        timestamptz source_updated_at
+        timestamptz synced_at
+        bigint source_lsn
+        integer source_partition
+        bigint source_offset
+        boolean is_deleted "Retained replay checkpoint"
     }
     inspections {
         uuid id PK

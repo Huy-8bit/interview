@@ -1,0 +1,12 @@
+{
+  "single_peak_lag": 187.0,
+  "scaled_peak_lag": 243.0,
+  "scaled_final_lag": 68.66666666666667,
+  "single_throughput": 1.8688525031669834,
+  "scaled_throughput": 5.650699835092992,
+  "workload_creates_during_scaled_phase": 268.0,
+  "members_before": 1,
+  "members_after": 3,
+  "partitions": 6,
+  "passed": true
+}

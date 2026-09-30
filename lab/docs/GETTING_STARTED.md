@@ -24,30 +24,32 @@ make up
 
 | Bước | Nội dung | Điều kiện báo OK |
 |---|---|---|
-| 01/10 | Docker Engine, Compose, cấu hình | Engine truy cập được, Compose hỗ trợ wait-timeout, config hợp lệ |
-| 02/10 | Build bốn API và generator | Docker build exit 0 |
-| 03/10 | PostgreSQL primary, sáu Redis nodes, ba Kafka brokers | Healthchecks của các container thành công |
-| 04/10 | DB roles/physical slot, Redis cluster, Kafka topics | postgres-init, redis-cluster-init, kafka-init đều exit 0 |
-| 05/10 | PostgreSQL replica | Healthcheck xác nhận hot standby đang recovery |
-| 06/10 | Migration và bốn API | Alembic thành công và `/ready` của cả bốn API trả 200 |
-| 07/10 | CDC publications/grants/replica identity | cdc-db-init exit 0 |
-| 08/10 | Debezium Connect | Connect REST healthcheck thành công |
-| 09/10 | Bốn connectors | debezium-init xác nhận connector và task RUNNING rồi exit 0 |
-| 10/10 | Kafka UI và Traffic Generator | UI container running; generator heartbeat healthy hoặc scenario đã exit 0 |
+| 01/12 | Docker Engine, Compose, cấu hình | Engine truy cập được, Compose hỗ trợ wait-timeout, config hợp lệ |
+| 02/12 | Build APIs, generator, Kafka/Connect có JMX và platform exporter | Docker build exit 0 |
+| 03/12 | PostgreSQL primary, sáu Redis nodes, ba Kafka brokers | Healthchecks của các container thành công |
+| 04/12 | DB roles/physical slot, Redis cluster, Kafka topics | postgres-init, redis-cluster-init, kafka-init đều exit 0 |
+| 05/12 | PostgreSQL replica | Healthcheck xác nhận hot standby đang recovery |
+| 06/12 | Migration và bốn API | Alembic thành công và `/ready` của cả bốn API trả 200 |
+| 07/12 | CDC publications/grants/replica identity | cdc-db-init exit 0 |
+| 08/12 | Debezium Connect | Connect REST healthcheck thành công |
+| 09/12 | Bốn connectors | debezium-init xác nhận connector và task RUNNING rồi exit 0 |
+| 10/12 | Prometheus và exporters | Scrape endpoints chạy; PostgreSQL monitor role đã được init |
+| 11/12 | Kafka UI và Traffic Generator | UI container running; generator heartbeat healthy hoặc scenario đã exit 0 |
+| 12/12 | Grafana và Prometheus targets | Grafana health, target UP, DB/Redis connectivity, Connect tasks và container CPU/RAM có mẫu |
 
 Ví dụ hình thức log; thời gian thực tế phụ thuộc máy và image cache:
 
 ```text
-[14:00:00] [01/10] RUNNING Docker Engine, Compose and configuration
-[14:00:01] [01/10] OK      Docker Engine, Compose and configuration (1s)
+[14:00:00] [01/12] RUNNING Docker Engine, Compose and configuration
+[14:00:01] [01/12] OK      Docker Engine, Compose and configuration (1s)
 ...
-[14:00:30] [04/10] RUNNING DB roles/slot, Redis Cluster, Kafka topics
+[14:00:30] [04/12] RUNNING DB roles/slot, Redis Cluster, Kafka topics
 WAIT kafka-init: state=running, health=none, elapsed=10s
 WAIT kafka-init: state=running, health=none, elapsed=20s
 ...
-[14:02:10] [04/10] OK      DB roles/slot, Redis Cluster, Kafka topics (100s)
+[14:02:10] [04/12] OK      DB roles/slot, Redis Cluster, Kafka topics (100s)
 ...
-[14:03:00] [10/10] READY   Startup completed in 180s. Log: .../startup.log
+[14:03:00] [12/12] READY   Startup completed in 180s. Log: .../startup.log
 ```
 
 `RUNNING` là đang thực hiện; `WAIT` là còn chờ init/health; `OK` là bước đã đạt điều kiện thật; `FAILED` dừng tại bước lỗi. Script không dùng sleep cố định để kết luận thành công. Các init jobs hoàn tất đúng sẽ ở trạng thái `Exited (0)` trong `docker compose ps --all`; đây là kết quả bình thường.
@@ -72,6 +74,8 @@ make traffic-status
 make traffic-logs
 ```
 
+Mở [Grafana](http://localhost:3000), đăng nhập mặc định `admin` / `lab_grafana_password`. Datasource và 10 dashboards đã có trong folder **Vehicle Platform Lab**. [Observability guide](OBSERVABILITY.md) giải thích từng dashboard, metric và PromQL; [Prometheus Targets](http://localhost:9090/targets) cho biết lỗi scrape cụ thể nếu có.
+
 `traffic-logs` theo dõi liên tục; **Ctrl+C chỉ thoát màn hình logs**, container tiếp tục chạy. Mở [Kafka UI](http://localhost:8080), hoặc URL cuối lệnh startup nếu đã đổi port. Nhìn domain/CDC topics và consumer lag; [live guide](TRAFFIC_GENERATOR.md#7-quan-sát-realtime) có SQL/Redis/Connect commands.
 
 Xem riêng startup/API logs ở terminal khác:
@@ -93,6 +97,9 @@ make db-check        # Streaming replication, slots, connectors, CDC topics
 make cluster-check   # Kafka/Redis topology
 make traffic-test    # Hai scenario PASS/FAIL, duplicate, cache và CDC
 make test            # Unit/integration; tự pause rồi restore generator
+make cdc-projection-check # REST → warranty CDC → local projection → FAIL → repair
+make monitoring-check # Kiểm targets, datasource và PromQL của toàn bộ dashboards
+make lag-demo        # Load có giới hạn, delay 500ms, scale Inspection 1 → 3
 ```
 
 `make traffic-scenario` chỉ chạy thêm một flow bên cạnh continuous traffic rồi exit. Muốn quan sát đúng một flow, chạy `make traffic-stop` trước, chạy scenario, sau đó `make traffic-start`.
@@ -127,12 +134,14 @@ docker compose logs --tail=100 kafka-init
 docker compose logs --tail=100 vehicle-service
 ```
 
-Sửa nguyên nhân rồi `make up` lại. Ctrl+C khi đang startup dừng phiên chờ; kiểm `make ps` vì những container đã được start có thể vẫn đang chạy. Nếu chỉ muốn logs tiến độ mà không thay thứ tự Compose, `docker compose up --build` vẫn hợp lệ, nhưng chỉ `make up`/`bash scripts/up.sh` có nhãn tổng thể 01/10…10/10 và file log của launcher.
+Sửa nguyên nhân rồi `make up` lại. Ctrl+C khi đang startup dừng phiên chờ; kiểm `make ps` vì những container đã được start có thể vẫn đang chạy. Nếu chỉ muốn logs tiến độ mà không thay thứ tự Compose, `docker compose up --build` vẫn hợp lệ, nhưng chỉ `make up`/`bash scripts/up.sh` có nhãn tổng thể 01/12…12/12 và file log của launcher.
 
 Tham chiếu: [`compose up --wait`](https://docs.docker.com/reference/cli/docker/compose/up/) chờ running/healthy; [`compose logs --follow`](https://docs.docker.com/reference/cli/docker/compose/logs/) theo dõi output container. Launcher chờ init exit code riêng để phân biệt job đã hoàn tất với service đang chạy.
 
 ## 7. Kiểm chứng thay đổi
 
-Ngày 2026-09-30, `make up` đã chạy đủ 10 bước từ stack dừng đến `READY`, exit 0 sau 452s trên máy lab tại thời điểm kiểm tra. Snapshot cuối ghi generator enabled=true, continuous, năm virtual users; cả bốn API có đủ log migration RUNNING/OK và Uvicorn startup. Thời gian này bao gồm build/init và phụ thuộc tải máy, không phải thời gian khởi động cam kết.
+Bằng chứng launcher phiên bản trước monitoring: ngày 2026-09-30, `make up` đã chạy đủ 10 bước từ stack dừng đến `READY`, exit 0 sau 452s trên máy lab tại thời điểm kiểm tra. Snapshot cuối ghi generator enabled=true, continuous, năm virtual users; cả bốn API có đủ log migration RUNNING/OK và Uvicorn startup. Thời gian này bao gồm build/init và phụ thuộc tải máy, không phải thời gian khởi động cam kết.
 
 Ba test trong [test_startup_launcher.py](../tests/unit/test_startup_launcher.py) đều pass: init exit khác 0, init timeout, và continuous worker thoát 0 bất thường. Các test kiểm launcher dừng ở gate lỗi, giữ log chẩn đoán và không tự down/xóa container. Shell syntax, Python lint và liên kết tài liệu đã được kiểm tra.
+
+Bản hiện tại đã chạy đủ 12 bước trong 99s với image cache/volumes hiện hữu, 21 targets UP. Xem [Observability Validation](OBSERVABILITY_VALIDATION.md) cho 59 tests, CDC proof và kết quả lag/scale; đây không phải thời gian cold start cam kết.

@@ -1,0 +1,209 @@
+{
+  "correlation_id": "b2f1aa1b-a507-41f3-b266-e52fb1602049",
+  "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+  "warranty_id": "d27261d9-f3c9-4b41-9660-31012971a690",
+  "inspection_id": "4b80a717-86d2-46c6-aa15-76af5e7a43e7",
+  "repair_id": "1b1b3535-bc4b-48f4-9d19-7207753d37bf",
+  "ready": {
+    "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+    "status": "READY",
+    "vehicle_seen": true,
+    "warranty_seen": true,
+    "warranty_id": "d27261d9-f3c9-4b41-9660-31012971a690",
+    "prepared_at": "2026-09-30T08:56:53.236413+00:00",
+    "warranties": [
+      {
+        "warranty_id": "d27261d9-f3c9-4b41-9660-31012971a690",
+        "status": "ACTIVE",
+        "deleted": false,
+        "source_lsn": 215557160,
+        "synced_at": "2026-09-30T08:56:53.228198+00:00"
+      }
+    ]
+  },
+  "expired": {
+    "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+    "status": "READY",
+    "vehicle_seen": true,
+    "warranty_seen": true,
+    "warranty_id": "d27261d9-f3c9-4b41-9660-31012971a690",
+    "prepared_at": "2026-09-30T08:56:53.236413+00:00",
+    "warranties": [
+      {
+        "warranty_id": "d27261d9-f3c9-4b41-9660-31012971a690",
+        "status": "EXPIRED",
+        "deleted": false,
+        "source_lsn": 215576392,
+        "synced_at": "2026-09-30T08:56:54.750875+00:00"
+      }
+    ]
+  },
+  "deleted": {
+    "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+    "status": "WAITING_WARRANTY",
+    "vehicle_seen": true,
+    "warranty_seen": false,
+    "warranty_id": null,
+    "prepared_at": "2026-09-30T08:56:53.236413+00:00",
+    "warranties": [
+      {
+        "warranty_id": "d27261d9-f3c9-4b41-9660-31012971a690",
+        "status": "EXPIRED",
+        "deleted": true,
+        "source_lsn": 215668712,
+        "synced_at": "2026-09-30T08:56:55.761707+00:00"
+      }
+    ]
+  },
+  "records": [
+    {
+      "topic": "warranty-cdc.public.warranties",
+      "partition": 0,
+      "offset": 1090,
+      "key": {
+        "id": "d27261d9-f3c9-4b41-9660-31012971a690"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "d27261d9-f3c9-4b41-9660-31012971a690",
+          "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+          "warranty_type": "DEFAULT",
+          "start_date": 20726,
+          "end_date": 21821,
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T08:56:52.523869Z",
+          "updated_at": "2026-09-30T08:56:52.523872Z",
+          "correlation_id": "b2f1aa1b-a507-41f3-b266-e52fb1602049"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "warranty-cdc",
+          "ts_ms": 1790758612525,
+          "snapshot": "false",
+          "db": "warranty_db",
+          "sequence": "[\"215456088\",\"215557160\"]",
+          "ts_us": 1790758612525471,
+          "ts_ns": 1790758612525471000,
+          "schema": "public",
+          "table": "warranties",
+          "txId": 68862,
+          "lsn": 215557160,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790758612916,
+        "ts_us": 1790758612916171,
+        "ts_ns": 1790758612916171130
+      }
+    },
+    {
+      "topic": "warranty-cdc.public.warranties",
+      "partition": 0,
+      "offset": 1092,
+      "key": {
+        "id": "d27261d9-f3c9-4b41-9660-31012971a690"
+      },
+      "value": {
+        "before": {
+          "id": "d27261d9-f3c9-4b41-9660-31012971a690",
+          "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+          "warranty_type": "DEFAULT",
+          "start_date": 20726,
+          "end_date": 21821,
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T08:56:52.523869Z",
+          "updated_at": "2026-09-30T08:56:52.523872Z",
+          "correlation_id": "b2f1aa1b-a507-41f3-b266-e52fb1602049"
+        },
+        "after": {
+          "id": "d27261d9-f3c9-4b41-9660-31012971a690",
+          "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+          "warranty_type": "DEFAULT",
+          "start_date": 20726,
+          "end_date": 21821,
+          "status": "EXPIRED",
+          "created_at": "2026-09-30T08:56:52.523869Z",
+          "updated_at": "2026-09-30T08:56:54.082980Z",
+          "correlation_id": "b2f1aa1b-a507-41f3-b266-e52fb1602049"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "warranty-cdc",
+          "ts_ms": 1790758614084,
+          "snapshot": "false",
+          "db": "warranty_db",
+          "sequence": "[\"215575496\",\"215576392\"]",
+          "ts_us": 1790758614084270,
+          "ts_ns": 1790758614084270000,
+          "schema": "public",
+          "table": "warranties",
+          "txId": 68875,
+          "lsn": 215576392,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790758614449,
+        "ts_us": 1790758614449111,
+        "ts_ns": 1790758614449111381
+      }
+    },
+    {
+      "topic": "warranty-cdc.public.warranties",
+      "partition": 0,
+      "offset": 1094,
+      "key": {
+        "id": "d27261d9-f3c9-4b41-9660-31012971a690"
+      },
+      "value": {
+        "before": {
+          "id": "d27261d9-f3c9-4b41-9660-31012971a690",
+          "vehicle_id": "5b0f7a5a-1066-4a53-9954-ba897691f61a",
+          "warranty_type": "DEFAULT",
+          "start_date": 20726,
+          "end_date": 21821,
+          "status": "EXPIRED",
+          "created_at": "2026-09-30T08:56:52.523869Z",
+          "updated_at": "2026-09-30T08:56:54.082980Z",
+          "correlation_id": "b2f1aa1b-a507-41f3-b266-e52fb1602049"
+        },
+        "after": null,
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "warranty-cdc",
+          "ts_ms": 1790758615249,
+          "snapshot": "false",
+          "db": "warranty_db",
+          "sequence": "[\"215616512\",\"215668712\"]",
+          "ts_us": 1790758615249603,
+          "ts_ns": 1790758615249603000,
+          "schema": "public",
+          "table": "warranties",
+          "txId": 68931,
+          "lsn": 215668712,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "d",
+        "ts_ms": 1790758615478,
+        "ts_us": 1790758615478016,
+        "ts_ns": 1790758615478016275
+      }
+    },
+    {
+      "topic": "warranty-cdc.public.warranties",
+      "partition": 0,
+      "offset": 1095,
+      "key": {
+        "id": "d27261d9-f3c9-4b41-9660-31012971a690"
+      },
+      "value": null
+    }
+  ],
+  "passed": true
+}

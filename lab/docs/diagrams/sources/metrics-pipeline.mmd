@@ -1,0 +1,13 @@
+flowchart LR
+    %% diagram: metrics-pipeline
+    api["4 FastAPI services and replicas"] -->|"GET /metrics"| prom["Prometheus - scrape 10s"]
+    traffic["Traffic Generator"] -->|"9101 /metrics"| prom
+    kafka["Kafka brokers"] --> jmx["JMX javaagent 9404"] --> prom
+    kafka --> ke["kafka-exporter 9308"] --> prom
+    redis["Redis 6 nodes"] --> re["redis-exporter multi-target"] --> prom
+    pg["PostgreSQL primary + replica"] --> pe["2 postgres-exporter processes"] --> prom
+    connect["Debezium / Kafka Connect"] --> cj["JMX javaagent 9404"] --> prom
+    connect --> status["Read-only status / assignment exporter"] --> prom
+    kafka --> status
+    containers["Docker Linux containers"] --> cadvisor["cAdvisor"] --> prom
+    prom --> grafana["10 provisioned Grafana dashboards"]

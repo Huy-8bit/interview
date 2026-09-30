@@ -1,0 +1,54 @@
+global:
+  scrape_interval: 10s
+  scrape_timeout: 5s
+  evaluation_interval: 10s
+rule_files: [rules/*.yml]
+scrape_configs:
+  - job_name: prometheus
+    static_configs: [{targets: ['localhost:9090']}]
+  - job_name: fastapi
+    dns_sd_configs:
+      - names: [vehicle-service, warranty-service, inspection-service, repair-service]
+        type: A
+        port: 8000
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: [__meta_dns_name]
+        target_label: service
+    honor_labels: true
+  - job_name: traffic
+    static_configs: [{targets: ['traffic-generator:9101']}]
+  - job_name: kafka
+    static_configs: [{targets: ['kafka-exporter:9308']}]
+    scrape_timeout: 9s
+  - job_name: kafka-jmx
+    static_configs: [{targets: ['kafka-1:9404', 'kafka-2:9404', 'kafka-3:9404']}]
+  - job_name: debezium
+    static_configs: [{targets: ['debezium-connect:9404']}]
+  - job_name: platform
+    static_configs: [{targets: ['platform-exporter:9102']}]
+  - job_name: postgres
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels: {role: primary}
+      - targets: ['postgres-replica-exporter:9187']
+        labels: {role: replica}
+  - job_name: redis
+    metrics_path: /scrape
+    static_configs:
+      - targets: ['redis://redis-1:6379', 'redis://redis-2:6379', 'redis://redis-3:6379', 'redis://redis-4:6379', 'redis://redis-5:6379', 'redis://redis-6:6379']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: redis-exporter:9121
+  - job_name: cadvisor
+    static_configs: [{targets: ['cadvisor:8080']}]
+    metric_relabel_configs:
+      - source_labels: [container_label_com_docker_compose_service]
+        regex: '.+'
+        action: keep
+      - source_labels: [container_label_com_docker_compose_service]
+        target_label: service

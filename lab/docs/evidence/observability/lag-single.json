@@ -1,0 +1,259 @@
+{
+  "members": 1,
+  "samples": [
+    {
+      "time": 1790755912.9562984,
+      "elapsed": 0.0,
+      "lag": 0.0,
+      "processed_per_second": 4.393848611943279,
+      "load_created": 0,
+      "members": 1.0,
+      "api_rps": 13.4
+    },
+    {
+      "time": 1790755917.9783463,
+      "elapsed": 5.0,
+      "lag": 0.0,
+      "processed_per_second": 2.1,
+      "load_created": 0,
+      "members": 0.0,
+      "api_rps": 8.450000000000001
+    },
+    {
+      "time": 1790755923.0360968,
+      "elapsed": 10.1,
+      "lag": 22.0,
+      "processed_per_second": 2.1,
+      "load_created": 20.0,
+      "members": 0.0,
+      "api_rps": 8.450000000000001
+    },
+    {
+      "time": 1790755928.1078265,
+      "elapsed": 15.2,
+      "lag": 22.0,
+      "processed_per_second": 0.8512769153730597,
+      "load_created": 20.0,
+      "members": 1.0,
+      "api_rps": 3.1000000000000005
+    },
+    {
+      "time": 1790755933.267581,
+      "elapsed": 20.3,
+      "lag": 47.0,
+      "processed_per_second": 0.8512769153730597,
+      "load_created": 40.0,
+      "members": 1.0,
+      "api_rps": 3.1000000000000005
+    },
+    {
+      "time": 1790755938.3636377,
+      "elapsed": 25.4,
+      "lag": 47.0,
+      "processed_per_second": 1.4235083333333332,
+      "load_created": 40.0,
+      "members": 1.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790755943.5606074,
+      "elapsed": 30.6,
+      "lag": 66.0,
+      "processed_per_second": 1.7258499999999999,
+      "load_created": 60.0,
+      "members": 1.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790755948.5845263,
+      "elapsed": 35.6,
+      "lag": 66.0,
+      "processed_per_second": 1.8,
+      "load_created": 60.0,
+      "members": 1.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790755953.6234574,
+      "elapsed": 40.7,
+      "lag": 95.0,
+      "processed_per_second": 1.8,
+      "load_created": 84.0,
+      "members": 1.0,
+      "api_rps": 2.1997800219978
+    },
+    {
+      "time": 1790755958.6540291,
+      "elapsed": 45.7,
+      "lag": 95.0,
+      "processed_per_second": 1.9,
+      "load_created": 84.0,
+      "members": 1.0,
+      "api_rps": 2.1997800219978
+    },
+    {
+      "time": 1790755963.7047405,
+      "elapsed": 50.7,
+      "lag": 116.0,
+      "processed_per_second": 1.9,
+      "load_created": 104.0,
+      "members": 1.0,
+      "api_rps": 2.2
+    },
+    {
+      "time": 1790755968.7308226,
+      "elapsed": 55.8,
+      "lag": 116.0,
+      "processed_per_second": 1.9500000000000002,
+      "load_created": 104.0,
+      "members": 1.0,
+      "api_rps": 2.2
+    },
+    {
+      "time": 1790755973.789734,
+      "elapsed": 60.8,
+      "lag": 138.0,
+      "processed_per_second": 1.9500000000000002,
+      "load_created": 124.0,
+      "members": 1.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790755978.8266404,
+      "elapsed": 65.9,
+      "lag": 138.0,
+      "processed_per_second": 1.9001900190019,
+      "load_created": 124.0,
+      "members": 1.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790755983.8857722,
+      "elapsed": 70.9,
+      "lag": 165.0,
+      "processed_per_second": 1.9001900190019,
+      "load_created": 148.0,
+      "members": 1.0,
+      "api_rps": 2.1967049425861207
+    },
+    {
+      "time": 1790755988.9862676,
+      "elapsed": 76.0,
+      "lag": 165.0,
+      "processed_per_second": 1.9000000000000001,
+      "load_created": 148.0,
+      "members": 1.0,
+      "api_rps": 2.1967049425861207
+    },
+    {
+      "time": 1790755994.0227103,
+      "elapsed": 81.1,
+      "lag": 187.0,
+      "processed_per_second": 1.8499999999999996,
+      "load_created": 168.0,
+      "members": 1.0,
+      "api_rps": 2.2002200220022
+    },
+    {
+      "time": 1790755999.084035,
+      "elapsed": 86.1,
+      "lag": 187.0,
+      "processed_per_second": 1.85,
+      "load_created": 168.0,
+      "members": 1.0,
+      "api_rps": 2.2002200220022
+    }
+  ],
+  "assignments": [
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "0",
+        "topic": "vehicle-events"
+      },
+      "value": [
+        1790755912.95,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "1",
+        "topic": "vehicle-events"
+      },
+      "value": [
+        1790755912.95,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "2",
+        "topic": "vehicle-events"
+      },
+      "value": [
+        1790755912.95,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "0",
+        "topic": "warranty-cdc.public.warranties"
+      },
+      "value": [
+        1790755912.95,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "1",
+        "topic": "warranty-cdc.public.warranties"
+      },
+      "value": [
+        1790755912.95,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "2",
+        "topic": "warranty-cdc.public.warranties"
+      },
+      "value": [
+        1790755912.95,
+        "1"
+      ]
+    }
+  ]
+}

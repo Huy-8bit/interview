@@ -1,0 +1,358 @@
+{
+  "members": 3,
+  "samples": [
+    {
+      "time": 1790756035.062338,
+      "elapsed": 0.0,
+      "lag": 242.0,
+      "processed_per_second": 1.9227532685336173,
+      "load_created": 233.0,
+      "members": 3.0,
+      "api_rps": 1.6003200640128024
+    },
+    {
+      "time": 1790756040.2187684,
+      "elapsed": 5.2,
+      "lag": 243.0,
+      "processed_per_second": 3.046219008811534,
+      "load_created": 233.0,
+      "members": 3.0,
+      "api_rps": 1.6003200640128026
+    },
+    {
+      "time": 1790756045.8335855,
+      "elapsed": 10.8,
+      "lag": 243.0,
+      "processed_per_second": 3.6756923708392657,
+      "load_created": 256.0,
+      "members": 3.0,
+      "api_rps": 1.7969451931716085
+    },
+    {
+      "time": 1790756050.980872,
+      "elapsed": 15.9,
+      "lag": 243.0,
+      "processed_per_second": 4.183878054781491,
+      "load_created": 256.0,
+      "members": 3.0,
+      "api_rps": 1.7969451931716085
+    },
+    {
+      "time": 1790756056.0806615,
+      "elapsed": 21.0,
+      "lag": 226.0,
+      "processed_per_second": 4.487175341293328,
+      "load_created": 272.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756061.4437125,
+      "elapsed": 26.4,
+      "lag": 218.0,
+      "processed_per_second": 4.521290224060913,
+      "load_created": 272.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756066.5653083,
+      "elapsed": 31.5,
+      "lag": 218.0,
+      "processed_per_second": 4.509494892951828,
+      "load_created": 292.0,
+      "members": 3.0,
+      "api_rps": 2.0016012810248194
+    },
+    {
+      "time": 1790756071.811448,
+      "elapsed": 36.7,
+      "lag": 206.0,
+      "processed_per_second": 4.838261095242859,
+      "load_created": 312.0,
+      "members": 3.0,
+      "api_rps": 2.0016012810248194
+    },
+    {
+      "time": 1790756076.967315,
+      "elapsed": 41.9,
+      "lag": 206.0,
+      "processed_per_second": 4.4014113586984225,
+      "load_created": 312.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756082.044757,
+      "elapsed": 47.0,
+      "lag": 191.0,
+      "processed_per_second": 4.9739713715810225,
+      "load_created": 328.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756087.0795705,
+      "elapsed": 52.0,
+      "lag": 191.0,
+      "processed_per_second": 5.097874254169143,
+      "load_created": 328.0,
+      "members": 3.0,
+      "api_rps": 1.801621459313382
+    },
+    {
+      "time": 1790756092.1452641,
+      "elapsed": 57.1,
+      "lag": 177.0,
+      "processed_per_second": 5.097874254169143,
+      "load_created": 352.0,
+      "members": 3.0,
+      "api_rps": 1.8016214593133821
+    },
+    {
+      "time": 1790756097.1875813,
+      "elapsed": 62.1,
+      "lag": 177.0,
+      "processed_per_second": 5.450270040506076,
+      "load_created": 352.0,
+      "members": 3.0,
+      "api_rps": 1.94980501949805
+    },
+    {
+      "time": 1790756102.2259026,
+      "elapsed": 67.2,
+      "lag": 164.0,
+      "processed_per_second": 5.450270040506076,
+      "load_created": 372.0,
+      "members": 3.0,
+      "api_rps": 1.94980501949805
+    },
+    {
+      "time": 1790756107.2536826,
+      "elapsed": 72.2,
+      "lag": 164.0,
+      "processed_per_second": 5.702376963660216,
+      "load_created": 372.0,
+      "members": 3.0,
+      "api_rps": 2.1999999999999997
+    },
+    {
+      "time": 1790756112.3273017,
+      "elapsed": 77.3,
+      "lag": 147.0,
+      "processed_per_second": 5.702376963660216,
+      "load_created": 392.0,
+      "members": 3.0,
+      "api_rps": 2.2
+    },
+    {
+      "time": 1790756117.3567436,
+      "elapsed": 82.3,
+      "lag": 147.0,
+      "processed_per_second": 5.599722541618758,
+      "load_created": 392.0,
+      "members": 3.0,
+      "api_rps": 2.05020502050205
+    },
+    {
+      "time": 1790756122.4000375,
+      "elapsed": 87.3,
+      "lag": 132.0,
+      "processed_per_second": 5.599722541618758,
+      "load_created": 412.0,
+      "members": 3.0,
+      "api_rps": 2.05020502050205
+    },
+    {
+      "time": 1790756127.4324617,
+      "elapsed": 92.4,
+      "lag": 132.0,
+      "processed_per_second": 5.65,
+      "load_created": 412.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756132.5296087,
+      "elapsed": 97.5,
+      "lag": 120.0,
+      "processed_per_second": 5.65,
+      "load_created": 436.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756137.5715504,
+      "elapsed": 102.5,
+      "lag": 120.0,
+      "processed_per_second": 5.7,
+      "load_created": 436.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756142.613443,
+      "elapsed": 107.6,
+      "lag": 100.0,
+      "processed_per_second": 5.7,
+      "load_created": 456.0,
+      "members": 3.0,
+      "api_rps": 2.0
+    },
+    {
+      "time": 1790756147.702792,
+      "elapsed": 112.6,
+      "lag": 100.0,
+      "processed_per_second": 5.59962503749625,
+      "load_created": 456.0,
+      "members": 3.0,
+      "api_rps": 2.2
+    },
+    {
+      "time": 1790756152.7444158,
+      "elapsed": 117.7,
+      "lag": 90.0,
+      "processed_per_second": 5.59962503749625,
+      "load_created": 476.0,
+      "members": 3.0,
+      "api_rps": 2.2
+    },
+    {
+      "time": 1790756157.8525238,
+      "elapsed": 122.8,
+      "lag": 90.0,
+      "processed_per_second": 5.649810161476735,
+      "load_created": 476.0,
+      "members": 3.0,
+      "api_rps": 2.2
+    },
+    {
+      "time": 1790756162.885602,
+      "elapsed": 127.8,
+      "lag": 74.0,
+      "processed_per_second": 5.649810161476734,
+      "load_created": 488.0,
+      "members": 3.0,
+      "api_rps": 2.2
+    },
+    {
+      "time": 1790756168.244094,
+      "elapsed": 133.2,
+      "lag": 74.0,
+      "processed_per_second": 4.400290029002901,
+      "load_created": 488.0,
+      "members": 3.0,
+      "api_rps": 1.4500000000000002
+    },
+    {
+      "time": 1790756173.5099094,
+      "elapsed": 138.4,
+      "lag": 66.0,
+      "processed_per_second": 4.400290029002901,
+      "load_created": 501.0,
+      "members": 3.0,
+      "api_rps": 1.05
+    },
+    {
+      "time": 1790756178.8619552,
+      "elapsed": 143.8,
+      "lag": 66.0,
+      "processed_per_second": 2.949550202408916,
+      "load_created": 501.0,
+      "members": 3.0,
+      "api_rps": 1.05
+    }
+  ],
+  "assignments": [
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "1",
+        "topic": "vehicle-events"
+      },
+      "value": [
+        1790756035.021,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.8",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "1",
+        "topic": "warranty-cdc.public.warranties"
+      },
+      "value": [
+        1790756035.021,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.23",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "2",
+        "topic": "vehicle-events"
+      },
+      "value": [
+        1790756035.021,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.23",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "2",
+        "topic": "warranty-cdc.public.warranties"
+      },
+      "value": [
+        1790756035.021,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.24",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "0",
+        "topic": "vehicle-events"
+      },
+      "value": [
+        1790756035.021,
+        "1"
+      ]
+    },
+    {
+      "metric": {
+        "__name__": "kafka_consumer_partition_assigned",
+        "client_host": "/192.168.147.24",
+        "consumergroup": "inspection-service-v2",
+        "instance": "platform-exporter:9102",
+        "job": "platform",
+        "partition": "0",
+        "topic": "warranty-cdc.public.warranties"
+      },
+      "value": [
+        1790756035.021,
+        "1"
+      ]
+    }
+  ]
+}

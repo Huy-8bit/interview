@@ -1,0 +1,23 @@
+flowchart LR
+    %% diagram: observable-business-flow
+    traffic["Traffic Generator - REST only"] --> a["Vehicle A"]
+    a -->|"TX: vehicle + outbox + REST command"| adb[("vehicle_db")]
+    a -->|"POST internal warranties"| b["Warranty B"]
+    b --> bdb[("warranty_db")]
+    bdb -->|"WAL"| dbz["Debezium"]
+    dbz -->|"warranty CDC c/u/d/r"| kafka["Kafka 3 brokers"]
+    adb -->|"Outbox vehicle.created"| kafka
+    kafka -->|"Domain event + CDC"| c["Inspection C - local projection"]
+    c -->|"Prepare READY after both inputs"| cdb[("inspection_db")]
+    cdb -->|"Outbox inspection.failed"| kafka
+    kafka -->|"inspection.failed"| d["Repair D"]
+    d -->|"GET internal coverage"| b
+    d --> ddb[("repair_db")]
+    a --> metrics["Metrics Exporters"]
+    b --> metrics
+    c --> metrics
+    d --> metrics
+    traffic --> metrics
+    kafka --> metrics
+    dbz --> metrics
+    metrics --> prometheus["Prometheus"] --> grafana["Grafana"]

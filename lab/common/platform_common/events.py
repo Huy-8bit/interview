@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from platform_common.context import correlation_id
+from platform_common.context import correlation_id, request_id
 from platform_common.db import utcnow
 from platform_common.models import OutboxEvent
 
@@ -16,6 +16,7 @@ class Event(BaseModel):
     event_version: Literal["1.0"] = "1.0"
     occurred_at: datetime
     producer: str
+    request_id: str | None = None
     correlation_id: str
     data: dict
 
@@ -26,6 +27,7 @@ def enqueue(session, settings, event_type: str, aggregate_id, data: dict):
         event_type=event_type,
         occurred_at=utcnow(),
         producer=settings.service_name,
+        request_id=request_id.get(),
         correlation_id=correlation_id.get() or str(uuid4()),
         data=data,
     )

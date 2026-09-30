@@ -1,10 +1,12 @@
 import logging
 
-from app.models.vehicle import Vehicle
+from app.models.vehicle import Vehicle, WarrantyProvisionRequest
 from app.repositories import vehicles as repository
 from app.schemas.vehicle import VehicleRead
+from app.services.warranty_provision import deliver_pending
 from platform_common.errors import DomainError
 from platform_common.events import enqueue
+from platform_common.metrics import committed
 from platform_common.redis import vehicle_cache_key
 
 log = logging.getLogger(__name__)
@@ -20,15 +22,24 @@ class VehicleService:
             session.add(vehicle)
             await session.flush()
             result = VehicleRead.model_validate(vehicle).model_dump(mode="json")
-            enqueue(session, self.runtime.settings, "vehicle.created", vehicle.id, result)
+            event = enqueue(session, self.runtime.settings, "vehicle.created", vehicle.id, result)
+            session.add(WarrantyProvisionRequest(vehicle_id=vehicle.id, correlation_id=event.correlation_id, created_at=vehicle.created_at))
+            committed(session, self.runtime.metrics.business["vehicles_created_total"])
+        try:
+            await deliver_pending(self.runtime, vehicle.id)
+        except Exception:
+            # Local commit already succeeded; the durable worker will retry.
+            log.exception("warranty_provision_deferred")
         return result
 
     async def get(self, vehicle_id):
         key = vehicle_cache_key(vehicle_id)
         cached, generation = await self.runtime.cache.cache_read(key)
         if cached:
+            self.runtime.metrics.business["vehicle_cache_hit_total"].inc()
             log.info("vehicle_cache_hit")
             return cached, "HIT"
+        self.runtime.metrics.business["vehicle_cache_miss_total"].inc()
         async with self.runtime.sessions() as session:
             vehicle = await repository.get(session, vehicle_id)
             result = VehicleRead.model_validate(vehicle).model_dump(mode="json")

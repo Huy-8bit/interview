@@ -1,0 +1,42 @@
+startDelaySeconds: 5
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+includeObjectNames:
+  - 'kafka.server:type=BrokerTopicMetrics,*'
+  - 'kafka.server:type=ReplicaManager,*'
+  - 'kafka.controller:type=KafkaController,*'
+  - 'kafka.network:type=RequestMetrics,*'
+  - 'kafka.connect:type=source-task-metrics,*'
+  - 'kafka.connect:type=task-error-metrics,*'
+  - 'debezium.postgres:type=connector-metrics,*'
+rules:
+  - pattern: 'kafka.server<type=BrokerTopicMetrics, name=(MessagesInPerSec|BytesInPerSec|BytesOutPerSec)><>Count'
+    name: kafka_broker_$1_total
+    type: COUNTER
+  - pattern: 'kafka.server<type=ReplicaManager, name=(UnderReplicatedPartitions|PartitionCount|LeaderCount|OfflineReplicaCount)><>Value'
+    name: kafka_replica_$1
+    type: GAUGE
+  - pattern: 'kafka.controller<type=KafkaController, name=(ActiveControllerCount|OfflinePartitionsCount)><>Value'
+    name: kafka_controller_$1
+    type: GAUGE
+  - pattern: 'kafka.network<type=RequestMetrics, name=TotalTimeMs, request=(.+)><>Mean'
+    name: kafka_request_latency_seconds
+    labels: {request: '$1'}
+    valueFactor: 0.001
+    type: GAUGE
+  - pattern: 'kafka.connect<type=source-task-metrics, connector=(.+), task=(.+)><>source-record-(poll|write)-total'
+    name: kafka_connect_source_record_$3_total
+    labels: {connector: '$1', task: '$2'}
+    type: COUNTER
+  - pattern: 'kafka.connect<type=task-error-metrics, connector=(.+), task=(.+)><>total-record-errors'
+    name: kafka_connect_record_errors_total
+    labels: {connector: '$1', task: '$2'}
+    type: COUNTER
+  - pattern: 'debezium.postgres<type=connector-metrics, context=(.+), server=(.+)><>TotalNumberOfEventsSeen'
+    name: debezium_events_seen_total
+    labels: {context: '$1', server: '$2'}
+    type: COUNTER
+  - pattern: 'debezium.postgres<type=connector-metrics, context=(.+), server=(.+)><>(Connected|MilliSecondsBehindSource|QueueRemainingCapacity|QueueTotalCapacity|SnapshotRunning|SnapshotCompleted|NumberOfErroneousEvents)'
+    name: debezium_$3
+    labels: {context: '$1', server: '$2'}
+    type: GAUGE

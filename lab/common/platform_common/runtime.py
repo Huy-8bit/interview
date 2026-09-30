@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from uuid import uuid4
 
 import httpx
@@ -10,6 +11,7 @@ from sqlalchemy.exc import TimeoutError as PoolTimeout
 from platform_common.consumer import consumer_loop
 from platform_common.db import database
 from platform_common.kafka import KafkaPublisher
+from platform_common.metrics import Metrics, metrics_loop
 from platform_common.outbox import outbox_loop
 from platform_common.redis import RedisSupport, cluster_client
 
@@ -20,6 +22,7 @@ class Runtime:
     def __init__(self, settings):
         self.instance_id = str(uuid4())
         self.settings = settings
+        self.metrics = Metrics(settings.service_name)
         self.engine, self.sessions = database(settings)
         self.read_engine, self.read_sessions = database(settings, read=True)
         self.redis = cluster_client(
@@ -36,8 +39,9 @@ class Runtime:
             ),
         )
         self.tasks = []
+        self.closing = False
         self.outbox_failures = 0
-        self.consumer_delay = 0.0
+        self.consumer_delay = settings.simulate_consumer_delay_ms / 1000
         self.http_delay = 0.0
 
     async def read(self, operation):
@@ -58,17 +62,39 @@ class Runtime:
             log.warning("replica_unavailable_read_primary_fallback")
             return await execute(self.sessions), "primary-fallback"
 
-    async def start(self, handlers=None, extra_workers=()):
+    async def start(self, handlers=None, extra_workers=(), consumer_topics=None, decoder=None):
         if self.settings.background_workers:
             self.tasks.append(asyncio.create_task(outbox_loop(self), name="outbox"))
+            self.tasks.append(asyncio.create_task(metrics_loop(self), name="metrics"))
             if handlers:
+                for kind in handlers:
+                    topic = "warranty-cdc.public.warranties" if kind == "warranty.cdc" else kind.split(".")[0]+"-events"
+                    labels = (self.settings.service_name, kind, topic)
+                    for counter in self.metrics.events.values():
+                        counter.labels(*labels)
+                    self.metrics.event_duration.labels(*labels)
                 self.tasks.append(
-                    asyncio.create_task(consumer_loop(self, handlers), name="consumer")
+                    asyncio.create_task(consumer_loop(self, handlers, topics=consumer_topics, decoder=decoder), name="consumer")
                 )
             for worker in extra_workers:
                 self.tasks.append(asyncio.create_task(worker(self), name=worker.__name__))
+            for task in self.tasks:
+                task.add_done_callback(self.worker_finished)
+
+    def worker_finished(self, task):
+        if self.closing:
+            return
+        # A fatal consumer cleanup error must not leave an API alive with a dead
+        # worker. Compose restarts the process; durable ledgers/offsets recover it.
+        error = None if task.cancelled() else task.exception()
+        log.critical("background_worker_stopped_restart_required", extra={"fields": {
+            "worker": task.get_name(), "cancelled": task.cancelled(),
+            "error_type": type(error).__name__ if error else None,
+        }}, exc_info=(type(error), error, error.__traceback__) if error else None)
+        os._exit(70)
 
     async def close(self):
+        self.closing = True
         for task in self.tasks:
             task.cancel()
         await asyncio.gather(*self.tasks, return_exceptions=True)

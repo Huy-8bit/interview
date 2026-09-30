@@ -40,6 +40,7 @@ class InspectionComplete(BaseModel):
 
 
 class InspectionRead(BaseModel):
+    warranty_id: UUID | None = None
     model_config = ConfigDict(from_attributes=True)
     id: UUID
     vehicle_id: UUID

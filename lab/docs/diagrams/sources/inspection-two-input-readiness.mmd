@@ -1,0 +1,9 @@
+stateDiagram-v2
+    %% diagram: inspection-two-input-readiness
+    [*] --> WAITING_VEHICLE: CDC warranty arrives first
+    [*] --> WAITING_WARRANTY: vehicle.created arrives first
+    WAITING_VEHICLE --> READY: vehicle.created
+    WAITING_WARRANTY --> READY: warranty CDC create or snapshot
+    READY --> READY: replay or update
+    READY --> WAITING_WARRANTY: last warranty deleted
+    WAITING_WARRANTY --> READY: new warranty CDC

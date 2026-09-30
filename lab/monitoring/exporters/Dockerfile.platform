@@ -1,0 +1,7 @@
+FROM python:3.12-slim
+WORKDIR /opt/exporter
+COPY requirements.lock /tmp/requirements.lock
+RUN pip install --no-cache-dir aiokafka==0.12.0 httpx==0.28.1 prometheus-client==0.22.1 -c /tmp/requirements.lock && useradd exporter
+COPY monitoring/exporters/platform_exporter.py monitoring/exporters/check_targets.py ./
+USER exporter
+CMD ["python", "platform_exporter.py"]

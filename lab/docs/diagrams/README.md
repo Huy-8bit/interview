@@ -23,6 +23,9 @@ Chạy `make docs-render` để cập nhật; file này được tạo tự đ�
 | 5. Repair database | [DATA_MODEL.md](../DATA_MODEL.md) | [Xem SVG](repair-states.svg) | [Source](sources/repair-states.mmd) |
 | 6. Infrastructure tables trong từng database | [DATA_MODEL.md](../DATA_MODEL.md) | [Xem SVG](messaging-tables-erd.svg) | [Source](sources/messaging-tables-erd.mmd) |
 | 1. Topology và subscriptions | [EVENT_CONTRACTS.md](../EVENT_CONTRACTS.md) | [Xem SVG](event-topology.svg) | [Source](sources/event-topology.mmd) |
+| 2. Architecture và metrics pipeline | [OBSERVABILITY.md](../OBSERVABILITY.md) | [Xem SVG](observable-business-flow.svg) | [Source](sources/observable-business-flow.mmd) |
+| 2. Architecture và metrics pipeline | [OBSERVABILITY.md](../OBSERVABILITY.md) | [Xem SVG](metrics-pipeline.svg) | [Source](sources/metrics-pipeline.mmd) |
+| 3. Hai đường dữ liệu chuẩn bị Inspection | [OBSERVABILITY.md](../OBSERVABILITY.md) | [Xem SVG](inspection-two-input-readiness.svg) | [Source](sources/inspection-two-input-readiness.mmd) |
 | 4. Quy trình điều tra một inspection FAIL chưa có repair | [OPERATIONS.md](../OPERATIONS.md) | [Xem SVG](incident-triage.svg) | [Source](sources/incident-triage.mmd) |
 | 1. Thiết kế đang chạy | [POSTGRESQL_CDC.md](../POSTGRESQL_CDC.md) | [Xem SVG](postgres-cdc-infrastructure.svg) | [Source](sources/postgres-cdc-infrastructure.mmd) |
 | Thay bằng ID trả về từ POST /vehicles | [POSTGRESQL_CDC.md](../POSTGRESQL_CDC.md) | [Xem SVG](postgres-replica-lag.svg) | [Source](sources/postgres-replica-lag.mmd) |

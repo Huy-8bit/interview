@@ -62,3 +62,15 @@ traffic-test:
 	sh scripts/traffic_scenarios.sh
 traffic-drills:
 	sh scripts/traffic_drills.sh
+
+.PHONY: monitoring-check lag-demo
+monitoring-check:
+	mkdir -p artifacts/observability
+	$(COMPOSE) run --build --rm --no-deps --user "$$(id -u):$$(id -g)" -v "$(CURDIR)/artifacts/observability:/evidence" toolbox python scripts/monitoring_verify.py --output /evidence/monitoring.json
+lag-demo:
+	bash scripts/lag_demo.sh
+
+.PHONY: cdc-projection-check
+cdc-projection-check:
+	mkdir -p artifacts/observability
+	$(COMPOSE) run --build --rm --no-deps --user "$$(id -u):$$(id -g)" -v "$(CURDIR)/artifacts/observability:/evidence" toolbox python scripts/cdc_projection_verify.py --output /evidence/cdc-projection.json

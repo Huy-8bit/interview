@@ -7,7 +7,8 @@ from uuid import UUID, uuid4
 from aiokafka.admin import AIOKafkaAdminClient
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.exc import TimeoutError as PoolTimeout
@@ -16,6 +17,7 @@ from platform_common import context
 from platform_common.config import Settings
 from platform_common.errors import DomainError, TransientError
 from platform_common.logging import configure_logging
+from platform_common.metrics import HTTPMetricsMiddleware
 from platform_common.runtime import Runtime
 
 log = logging.getLogger(__name__)
@@ -32,7 +34,7 @@ def identifier(value):
         return str(uuid4())
 
 
-def create_app(router, *, handlers=None, extra_workers=(), settings=None):
+def create_app(router, *, handlers=None, extra_workers=(), settings=None, consumer_topics=None, decoder=None):
     settings = settings or Settings()
     configure_logging(settings.service_name, settings.log_level)
 
@@ -40,7 +42,7 @@ def create_app(router, *, handlers=None, extra_workers=(), settings=None):
     async def lifespan(app):
         runtime = Runtime(settings)
         app.state.runtime = runtime
-        await runtime.start(handlers, extra_workers)
+        await runtime.start(handlers, extra_workers, consumer_topics, decoder)
         try:
             yield
         finally:
@@ -48,6 +50,13 @@ def create_app(router, *, handlers=None, extra_workers=(), settings=None):
 
     app = FastAPI(title=settings.service_name, version="1.0.0", lifespan=lifespan)
     app.include_router(router)
+    app.add_middleware(HTTPMetricsMiddleware)
+
+    @app.get("/metrics", include_in_schema=False)
+    async def metrics():
+        runtime = app.state.runtime
+        runtime.metrics.pools(runtime)
+        return Response(generate_latest(runtime.metrics.registry), headers={"Content-Type": CONTENT_TYPE_LATEST})
 
     @app.middleware("http")
     async def request_context(request, call_next):
@@ -106,6 +115,8 @@ def create_app(router, *, handlers=None, extra_workers=(), settings=None):
     @app.exception_handler(DBAPIError)
     @app.exception_handler(OSError)
     async def database_error(request, exc):
+        if isinstance(exc, PoolTimeout):
+            request.app.state.runtime.metrics.pool_errors.inc()
         log.error("database_unavailable", extra={"fields": {"error_type": type(exc).__name__}})
         return error(
             503,

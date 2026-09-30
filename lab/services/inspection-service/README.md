@@ -2,7 +2,7 @@
 
 Sở hữu **Inspection và local vehicle/warranty projection**, database **inspection_db**. Đây là application FastAPI độc lập; không truy cập database của service khác.
 
-Consume vehicle.created và warranty.created. Publish inspection.passed và inspection.failed.
+Consume vehicle.created/updated và warranty-cdc.public.warranties (CDC c/u/d/r/tombstone). Publish inspection.passed và inspection.failed.
 
 InspectionService trong app/services/inspections.py; POST yêu cầu Idempotency-Key; complete giữ row lock và thêm outbox trong cùng transaction.
 

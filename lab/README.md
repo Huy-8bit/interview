@@ -1,14 +1,14 @@
 # Vehicle Service & Warranty Platform
 
-Bài lab backend Python dành cho Senior/Lead: **4 microservice nghiệp vụ và một traffic-generator độc lập**, PostgreSQL primary–replica với database riêng theo service và Debezium CDC, **Redis Cluster 6 node (3 master + 3 replica)**, **Kafka KRaft 3 broker (RF=3)**, REST bất đồng bộ bằng `httpx`, transactional outbox, consumer idempotent và các bài thử lỗi có thể chạy lại.
+Bài lab backend Python dành cho Senior/Lead: **4 microservice nghiệp vụ và một traffic-generator độc lập**, PostgreSQL primary–replica với database riêng theo service và Debezium CDC, **Redis Cluster 6 node (3 master + 3 replica)**, **Kafka KRaft 3 broker (RF=3)**, REST bất đồng bộ bằng `httpx`, transactional outbox, Prometheus/Grafana với 10 dashboards, consumer idempotent và các bài thử lỗi có thể chạy lại.
 
-**Tài liệu thiết kế:** [Traffic Generator](docs/TRAFFIC_GENERATOR.md) · [PostgreSQL & CDC](docs/POSTGRESQL_CDC.md) · [Kafka & Redis Cluster](docs/CLUSTER_INFRASTRUCTURE.md) · [Mục lục docs](docs/README.md) · [System Design](docs/SYSTEM_DESIGN.md) · [ERD và state machines](docs/DATA_MODEL.md) · [Sequence diagrams](docs/REQUEST_FLOWS.md) · [API](docs/API_CONTRACTS.md) · [Events](docs/EVENT_CONTRACTS.md) · [Consistency](docs/CONSISTENCY_AND_FAILURES.md) · [Runbook](docs/OPERATIONS.md) · [Architecture decisions](docs/ARCHITECTURE_DECISIONS.md). Có cả source Mermaid và [bản SVG](docs/diagrams/README.md).
+**Tài liệu thiết kế:** [Observability & bài thử lag/scale](docs/OBSERVABILITY.md) · [Traffic Generator](docs/TRAFFIC_GENERATOR.md) · [PostgreSQL & CDC](docs/POSTGRESQL_CDC.md) · [Kafka & Redis Cluster](docs/CLUSTER_INFRASTRUCTURE.md) · [Mục lục docs](docs/README.md) · [System Design](docs/SYSTEM_DESIGN.md) · [ERD và state machines](docs/DATA_MODEL.md) · [Sequence diagrams](docs/REQUEST_FLOWS.md) · [API](docs/API_CONTRACTS.md) · [Events](docs/EVENT_CONTRACTS.md) · [Consistency](docs/CONSISTENCY_AND_FAILURES.md) · [Runbook](docs/OPERATIONS.md) · [Architecture decisions](docs/ARCHITECTURE_DECISIONS.md). Có cả source Mermaid và [bản SVG](docs/diagrams/README.md).
 
 Chỉ cần Docker và Docker Compose v2+ trên host. `make` là tiện ích tùy chọn; mọi lệnh có bản Docker tương đương. Cấu hình cluster đã được kiểm thử với 8 GB RAM và 8 CPU cấp cho Docker; mức sử dụng thay đổi theo workload. Các image được kiểm thử trên Linux ARM64 qua Docker; không ép kiến trúc CPU trong Compose.
 
 ```sh
 [ -f .env ] || cp .env.example .env
-make up                 # 10 bước RUNNING / WAIT / OK / FAILED
+make up                 # 12 bước RUNNING / WAIT / OK / FAILED
 make ps
 make traffic-status
 make traffic-logs       # Ctrl+C để thoát logs; containers vẫn chạy
@@ -16,7 +16,7 @@ make traffic-logs       # Ctrl+C để thoát logs; containers vẫn chạy
 
 **Thứ tự CLI và log khởi động:** [Getting Started](docs/GETTING_STARTED.md). Không có Make: `bash scripts/up.sh`. Đợi `READY Startup completed`; traffic tự chạy. Log từng lần khởi động lưu trong `artifacts/startup/<timestamp>-<pid>/startup.log`.
 
-Swagger: [Vehicle :8001](http://localhost:8001/docs), [Warranty :8002](http://localhost:8002/docs), [Inspection :8003](http://localhost:8003/docs). Repair nhận một cổng trong dải 8004–8006; lấy địa chỉ bằng `docker compose port --index 1 repair-service 8000` rồi mở `/docs`. [Kafka UI :8080](http://localhost:8080) hiển thị topic, partition, message, group và lag. Kết quả traffic ở [Traffic Validation](docs/TRAFFIC_VALIDATION.md); PostgreSQL ở [PostgreSQL & CDC Validation](docs/POSTGRESQL_CDC_VALIDATION.md); bằng chứng Kafka/Redis ở [Cluster Validation](docs/CLUSTER_VALIDATION.md).
+Swagger: [Vehicle :8001](http://localhost:8001/docs), [Warranty :8002](http://localhost:8002/docs), [Inspection :8003](http://localhost:8003/docs). Repair nhận một cổng trong dải 8004–8006; lấy địa chỉ bằng `docker compose port --index 1 repair-service 8000` rồi mở `/docs`. [Kafka UI :8080](http://localhost:8080) hiển thị topic, partition, message, group và lag. Bản mới đã kiểm chứng 59 tests, 21 targets UP, 10 dashboards và lag/scale: [Observability Validation](docs/OBSERVABILITY_VALIDATION.md). Kết quả traffic trước đó ở [Traffic Validation](docs/TRAFFIC_VALIDATION.md); PostgreSQL ở [PostgreSQL & CDC Validation](docs/POSTGRESQL_CDC_VALIDATION.md); bằng chứng Kafka/Redis ở [Cluster Validation](docs/CLUSTER_VALIDATION.md).
 
 ## 1. Project Overview
 
@@ -30,7 +30,7 @@ Không có SQLite, queue thay thế Kafka hay Redis bằng dictionary. API trả
 |---|---|
 | Vehicle | VIN duy nhất, 17 ký tự theo tập ký tự VIN; không kiểm check digit theo thị trường. VIN không đổi sau tạo. Status ACTIVE/INACTIVE. |
 | Customer | Thông tin owner cơ bản nằm ở `vehicles.owner_name`; không có service customer thứ năm. |
-| Warranty | Mỗi xe tối đa một warranty cho từng loại DEFAULT, EXTENDED, POWERTRAIN. DEFAULT tự tạo ACTIVE, thời hạn 1095 ngày từ ngày event tạo xe. |
+| Warranty | Mỗi xe tối đa một warranty cho từng loại DEFAULT, EXTENDED, POWERTRAIN. DEFAULT tự tạo ACTIVE, thời hạn 1095 ngày từ ngày tạo xe truyền qua REST. |
 | Coverage | `status=ACTIVE` và `start_date <= ngày UTC hiện tại <= end_date`. Chưa nhận dữ liệu warranty trả 404, không kết luận uncovered. |
 | Inspection | PENDING → IN_PROGRESS → COMPLETED; có thể complete thẳng từ PENDING. FAIL bắt buộc có reason; PASS không có failure reason. Completed là immutable. |
 | Repair | Một repair cho mỗi inspection. OPEN → IN_PROGRESS → COMPLETED; OPEN/IN_PROGRESS có thể CANCELLED. Coverage là snapshot tại lúc tạo repair. |
@@ -76,7 +76,6 @@ flowchart LR
     warranty -.-> kafka
     inspection -.-> kafka
     repair -.-> kafka
-    kafka -.-> warranty
     kafka -.-> inspection
     kafka -.-> repair
     repair -->|"GET active warranty"| warranty
@@ -92,8 +91,8 @@ Outbox task trong từng service đọc database của chính service đó và p
 | Service | Host port | Sở hữu | Consume | Publish |
 |---|---:|---|---|---|
 | vehicle-service | 8001 | Vehicle, owner | Không | vehicle.created, vehicle.updated |
-| warranty-service | 8002 | Warranty, coverage, expiry | vehicle.created | warranty.created, warranty.activated, warranty.expired |
-| inspection-service | 8003 | Inspection, projection xe/warranty | vehicle.created, warranty.created | inspection.passed, inspection.failed |
+| warranty-service | 8002 | Warranty, coverage, expiry | REST từ Vehicle | warranty.created, warranty.activated, warranty.expired |
+| inspection-service | 8003 | Inspection, projection xe/warranty | vehicle.created/updated + warranty CDC | inspection.passed, inspection.failed |
 | repair-service | 8004–8006 (cấp động) | Repair, notification | inspection.failed | repair.created |
 
 Service Communication Diagram — nét liền là REST, nét đứt là Kafka:
@@ -104,9 +103,11 @@ flowchart LR
     client -->|"Warranty REST"| warranty["Warranty"]
     client -->|"Inspection REST"| inspection["Inspection"]
     client -->|"Repair REST"| repair["Repair"]
-    vehicle -.->|"vehicle.created via Kafka"| warranty
+    vehicle -->|"REST provision DEFAULT"| warranty
     vehicle -.->|"vehicle.created via Kafka"| inspection
-    warranty -.->|"warranty.created via Kafka"| inspection
+    warranty --> wdb[("warranty_db")]
+    wdb -->|"WAL"| dbz["Debezium"]
+    dbz -.->|"Warranty CDC via Kafka"| inspection
     inspection -.->|"inspection.failed via Kafka"| repair
     repair -->|"GET active warranty"| warranty
 ```
@@ -217,18 +218,20 @@ Kafka Event Flow Diagram:
 
 ```mermaid
 flowchart LR
-    vehicle["Vehicle outbox"] -.->|"created / updated"| vehicleTopic["vehicle-events"]
-    vehicleTopic -.->|"created"| warranty["Warranty consumer"]
-    vehicleTopic -.->|"created"| inspectionRef["Inspection projection"]
-    warranty -.->|"created / activated / expired"| warrantyTopic["warranty-events"]
-    warrantyTopic -.->|"created"| inspectionRef
-    inspection["Inspection outbox"] -.->|"passed / failed"| inspectionTopic["inspection-events"]
-    inspectionTopic -.->|"failed"| repair["Repair consumer"]
-    repair -.->|"created"| repairTopic["repair-events"]
-    warranty -.->|"Exhausted retries"| vehicleDlq["vehicle-events-dlq"]
-    inspectionRef -.->|"Vehicle event failure"| vehicleDlq
-    inspectionRef -.->|"Warranty event failure"| warrantyDlq["warranty-events-dlq"]
-    repair -.->|"Exhausted retries"| inspectionDlq["inspection-events-dlq"]
+    vehicle["Vehicle outbox"] -.-> vehicleTopic["vehicle-events"]
+    vehicleTopic -.->|"created / updated"| inspection["Inspection group v2"]
+    vehicle -->|"REST"| warranty["Warranty API"]
+    warranty --> wdb[("warranty_db")]
+    wdb -->|"WAL"| dbz["Debezium"]
+    dbz -.-> cdc["warranty-cdc.public.warranties"]
+    cdc -.->|"c/u/d/r and tombstone"| inspection
+    warranty -.-> warrantyTopic["warranty-events - observed, no business consumer"]
+    inspection -.-> inspectionTopic["inspection-events"]
+    inspectionTopic -.->|"inspection.failed"| repair["Repair group v1"]
+    repair -.-> repairTopic["repair-events"]
+    inspection -.-> vehicleDlq["vehicle-events-dlq"]
+    inspection -.-> cdcDlq["warranty-cdc.public.warranties-dlq"]
+    repair -.-> inspectionDlq["inspection-events-dlq"]
 ```
 
 `repair-events` có sẵn cho downstream/Kafka UI, hiện không có consumer trong 4 service. `repair-events-dlq` được init để nhất quán, hiện không có consumer nguồn tạo bản ghi vào đó. PASS được publish và Repair bỏ qua vì không thuộc subscription nghiệp vụ.
@@ -273,8 +276,7 @@ Vehicle/warranty/repair events chứa snapshot response model; inspection events
 
 | Group | Topics | Handler |
 |---|---|---|
-| warranty-service-v1 | vehicle-events | Tạo DEFAULT warranty |
-| inspection-service-v1 | vehicle-events, warranty-events | Upsert projection cục bộ |
+| inspection-service-v2 | vehicle-events, warranty-cdc.public.warranties | Ghép domain vehicle và warranty CDC |
 | repair-service-v1 | inspection-events | Warranty REST + repair + notification |
 
 `enable_auto_commit=False`, `auto_offset_reset=earliest`, xử lý từng record tuần tự và commit đúng `{topic-partition: offset + 1}` sau khi DB commit hoặc DLQ ACK. Cơ chế manual commit tham chiếu [aiokafka manual commit](https://aiokafka.readthedocs.io/en/stable/examples/manual_commit.html).
@@ -336,8 +338,9 @@ Business layer sở hữu `sessions.begin()`. Repository chỉ query/lock; khôn
 
 Các transaction quan trọng:
 
-- Vehicle + vehicle event outbox.
-- Processed marker + default warranty + warranty event outbox.
+- Vehicle + vehicle event outbox + durable REST provision command.
+- REST natural-key dedupe + default warranty + warranty event outbox.
+- Inspection processed marker + local CDC/domain projection + workflow readiness.
 - Inspection completion + passed/failed event outbox.
 - Processed marker + repair + notification + repair event outbox.
 - API idempotency record + resource + response, cùng outbox nếu nghiệp vụ phát event.
@@ -347,23 +350,33 @@ Vehicle Creation Sequence Diagram:
 ```mermaid
 sequenceDiagram
     participant Client
-    participant VehicleService
-    participant VehicleDB
-    participant VehicleOutbox
-    participant Kafka
-    participant WarrantyService
-    participant WarrantyDB
-    Client->>VehicleService: POST /vehicles
-    VehicleService->>VehicleDB: BEGIN; insert vehicle and outbox; COMMIT
-    VehicleDB-->>VehicleService: Committed
-    VehicleService-->>Client: 201 vehicle
-    VehicleOutbox->>VehicleDB: Lock pending event
-    VehicleOutbox->>Kafka: vehicle.created
-    Kafka-->>VehicleOutbox: ACK
-    VehicleOutbox->>VehicleDB: Mark PUBLISHED; COMMIT
-    Kafka->>WarrantyService: vehicle.created
-    WarrantyService->>WarrantyDB: BEGIN; reserve event; create default warranty and outbox; COMMIT
-    WarrantyService->>Kafka: Commit source offset plus one
+    participant A as Vehicle A
+    participant ADB as vehicle_db
+    participant B as Warranty B
+    participant BDB as warranty_db
+    participant DBZ as Debezium
+    participant K as Kafka
+    participant C as Inspection C
+    participant CDB as inspection_db
+    Client->>A: POST vehicles
+    A->>ADB: BEGIN vehicle + outbox + REST command, COMMIT
+    par REST provisioning
+        A->>B: POST internal warranties (bounded HTTP attempt)
+        B->>BDB: INSERT DEFAULT + outbox, COMMIT
+        B-->>A: Same warranty ID on retry
+        A-->>Client: 201 local vehicle committed
+        BDB->>DBZ: Logical WAL
+        DBZ->>K: Warranty CDC c/r/u/d
+        K->>C: CDC envelope
+        C->>CDB: Marker + warranty projection + try_prepare, COMMIT
+    and Domain delivery
+        ADB->>K: Outbox publishes vehicle.created
+        K->>C: Domain envelope
+        C->>CDB: Marker + vehicle projection + try_prepare, COMMIT
+    end
+    Note over A,B: B failure leaves durable REST command pending
+    Note over C,CDB: Either input may arrive first, READY requires both
+    C->>K: Commit each processed source offset + 1
 ```
 
 ## 18. Transactional Outbox
@@ -402,7 +415,7 @@ Crash sau ACK nhưng trước mark/commit có thể publish lại cùng `event_i
 - Crash sau DB commit trước offset commit: Kafka replay; marker làm skip.
 - Hai event ID khác nhau diễn tả cùng business action: unique DEFAULT warranty / inspection_id của repair bảo vệ lớp thứ hai.
 
-Inspection projection upsert từng flag `vehicle_seen` / `warranty_seen`, chấp nhận warranty.created đến trước vehicle.created. API tạo inspection trả 409 `vehicle_projection_not_ready` nếu vehicle event chưa tới; client/demo có polling hữu hạn.
+Inspection ghép vehicle domain events và warranty CDC, chấp nhận cả hai thứ tự đến. API tạo inspection trả 409 khi thiếu một trong hai projection; GET `/inspections/workflows/{vehicle_id}` cho biết đang chờ phía nào. Xem [two-input readiness](docs/OBSERVABILITY.md#3-hai-đường-dữ-liệu-chuẩn-bị-inspection).
 
 Inspection Failure → Repair Sequence Diagram:
 
@@ -417,11 +430,11 @@ sequenceDiagram
     participant WarrantyService
     participant RepairDB
     Client->>InspectionService: Complete FAIL with reason
-    InspectionService->>InspectionDB: Update inspection and insert failed outbox; COMMIT
+    InspectionService->>InspectionDB: Update inspection and insert failed outbox, COMMIT
     InspectionService-->>Client: COMPLETED / FAIL
     InspectionService->>Kafka: Outbox publishes inspection.failed
     Kafka->>RepairService: Deliver event
-    RepairService->>RepairDB: BEGIN; insert processed marker
+    RepairService->>RepairDB: BEGIN, insert processed marker
     RepairService->>Redis: Acquire repair lock with TTL
     RepairService->>WarrantyService: GET active warranty
     WarrantyService-->>RepairService: Coverage snapshot
@@ -540,7 +553,7 @@ docker compose logs -f --tail=100
 docker compose --profile tools down -v --remove-orphans
 ```
 
-Khởi động theo 10 bước có status log bằng `make up` hoặc `bash scripts/up.sh`; xem [thứ tự CLI](docs/GETTING_STARTED.md). Lệnh Compose trực tiếp vẫn dùng được, nhưng không có nhãn tổng thể của launcher.
+Khởi động theo 12 bước có status log bằng `make up` hoặc `bash scripts/up.sh`; xem [thứ tự CLI](docs/GETTING_STARTED.md). Lệnh Compose trực tiếp vẫn dùng được, nhưng không có nhãn tổng thể của launcher.
 
 Make targets: `make up`, `down`, `build`, `logs`, `ps`, `demo`, `seed`, `test`, `lint`, `chaos-up`, `test-chaos`, `clean`. `make clean` xóa cả named volumes. Port đang bận: sửa các biến `*_PORT` trong `.env`. Nếu init script thay đổi trên volume cũ, migration không tự tạo lại DB/role; dùng volume mới hoặc thực hiện migration vận hành rõ ràng.
 
@@ -572,7 +585,7 @@ curl -fsS -X PATCH "http://localhost:8001/vehicles/$VEHICLE_ID" \
   -H 'Content-Type: application/json' -d '{"owner_name":"Tran Thi Binh"}'
 curl -i "http://localhost:8001/vehicles/$VEHICLE_ID"
 
-# Get Warranty; retry chờ vehicle.created được consume
+# Get Warranty; chờ REST provision nếu B từng unavailable
 curl -fsS --retry 20 --retry-all-errors --retry-delay 1 \
   "http://localhost:8002/warranties/vehicle/$VEHICLE_ID/active"
 curl -fsS "http://localhost:8002/warranties/vehicle/$VEHICLE_ID"
@@ -771,7 +784,7 @@ Các cải tiến sau chưa được triển khai trong lab:
 - Kubernetes/deployment riêng, API Gateway/Ingress, graceful draining, migration job và autoscaling theo consumer lag; tách API/worker process khi workload lớn.
 - Authentication OAuth2/OIDC, authorization/RBAC, tenant isolation, rate limiting; kiểm tra quyền và nguồn inspection của luồng nhập repair thủ công.
 - TLS, Kafka SASL/ACL, Redis auth, Secrets Manager; không dùng password lab. Quản lý PII owner và dữ liệu trong DLQ/log.
-- Prometheus/Grafana: outbox age/depth, handler latency, retry/DLQ count, pool wait, cache hit, lag. OpenTelemetry propagation và distributed tracing.
+- Prometheus/Grafana đã có: [Observability](docs/OBSERVABILITY.md). Hướng mở rộng: OpenTelemetry propagation, distributed tracing, SLO từ tải production.
 - Kafka tách controller/broker giữa nhiều host/AZ, TLS/ACL; Schema Registry, Avro/Protobuf, compatibility policy và rollout version. Lab đã có 3 broker/controller, RF=3, min ISR=2.
 - PostgreSQL automatic failover/fencing, backup/PITR và diễn tập restore; kiểm soát connection budget, PgBouncer nếu phù hợp, query plan với dữ liệu lớn. Physical replication đã có trong lab.
 - Circuit breaker/bulkhead cho Warranty REST, retry jitter, tổng deadline, phân loại error, retry topics hoặc scheduler để giảm head-of-line blocking.
@@ -846,7 +859,7 @@ aiokafka producer dùng idempotence, acks=all, request timeout 10s, retry backof
 
 ### Consumer Groups
 
-Warranty: `warranty-service-v1`; Inspection: `inspection-service-v1`; Repair: `repair-service-v1`. Member cùng group chia partition, client ID có instance suffix. Polling có deadline và kiểm backlog khi idle để phục hồi fetcher bị kẹt sau outage. Group khác là subscription/ledger namespace khác.
+Warranty nhận REST, không có active consumer group; Inspection: `inspection-service-v2`; Repair: `repair-service-v1`. Member cùng group chia partition, client ID có instance suffix. Polling có deadline và kiểm backlog khi idle để phục hồi fetcher bị kẹt sau outage. Group khác là subscription/ledger namespace khác.
 
 ### Consumer Rebalancing
 
@@ -1090,7 +1103,7 @@ make traffic-drills  # Verify worker khi từng dependency bị dừng rồi kh�
 
 Quan sát realtime khi traffic đang chạy:
 
-1. Mở [Kafka UI](http://localhost:8080): domain topics `*-events`, CDC topics `*-cdc.public.*`, partitions, messages, consumer groups và lag. Domain events filter bằng correlation_id; CDC nối bằng vehicle_id/row ID/run marker, không mang HTTP correlation ID.
+1. Mở [Kafka UI](http://localhost:8080): domain topics `*-events`, CDC topics `*-cdc.public.*`, partitions, messages, consumer groups và lag. Domain events filter bằng correlation_id; CDC nối bằng vehicle_id/row ID/run marker; warranty row còn giữ correlation_id từ REST A→B.
 2. PostgreSQL primary: xem `vehicles` trong vehicle_db, `warranties` trong warranty_db, `inspections` trong inspection_db và `repair_requests` trong repair_db. Ví dụ: `docker compose exec postgres-primary psql -U platform_admin -d vehicle_db -c 'SELECT id,vin,simulation_run_id FROM vehicles ORDER BY created_at DESC LIMIT 10;'`.
 3. Replica: đổi service ở lệnh SQL thành `postgres-replica`, đối chiếu cùng ID; xem `pg_stat_replication` trên primary và `pg_last_wal_replay_lsn()` trên replica. Worker log cả mốc đọc yêu cầu lẫn thời gian thực tế.
 4. Debezium: `curl -fsS http://localhost:8083/connectors/vehicle-postgres-connector/status`, tương tự warranty/inspection/repair; connector và task phải RUNNING.
@@ -1098,3 +1111,66 @@ Quan sát realtime khi traffic đang chạy:
 6. Theo logs: `docker compose logs -f vehicle-service warranty-service inspection-service repair-service`; dùng correlation ID trong `flow_completed` để tìm cùng flow qua API, outbox và consumer.
 
 `make test` tự pause/resume generator. Dừng traffic trước những bài fault drill cũ cần global lag/outbox về 0; riêng `make traffic-drills` cần traffic đang chạy. Continuous mode giữ tạo dữ liệu cho đến khi stop; DELETE 1% không dọn lịch sử downstream/ledgers và không phải retention policy.
+
+## OBSERVABILITY
+
+Mở [Grafana :3000](http://localhost:3000), đăng nhập `admin` / `lab_grafana_password` (đổi bằng `.env` trước lần tạo volume đầu). Datasource Prometheus và **10 dashboard** được provision sẵn. [Prometheus Targets :9090](http://localhost:9090/targets) phải UP; exporter còn phải trả metric thực, được kiểm bằng `make monitoring-check`.
+
+```mermaid
+flowchart LR
+    traffic["Traffic Generator"] --> a["Vehicle A"]
+    a -->|"REST"| b["Warranty B"]
+    b --> db[("PostgreSQL B")]
+    db -->|"WAL"| dbz["Debezium"]
+    dbz -->|"Warranty CDC via Kafka"| c["Inspection C"]
+    a -->|"Outbox vehicle.created via Kafka"| c
+    c --> cdb[("PostgreSQL C + outbox")]
+    cdb -->|"inspection.failed via Kafka"| d["Repair D"]
+    d -->|"REST coverage"| b
+    a --> exporters["Metrics Exporters"]
+    b --> exporters
+    c --> exporters
+    d --> exporters
+    exporters --> prom["Prometheus"] --> grafana["Grafana"]
+```
+
+```mermaid
+flowchart LR
+    apps["FastAPI Services /metrics"] --> prom["Prometheus"] --> grafana["Grafana"]
+    traffic["Traffic Generator /metrics"] --> prom
+    kafka["Kafka"] --> ke["Kafka Exporter / JMX"] --> prom
+    redis["Redis Cluster"] --> re["Redis Exporter"] --> prom
+    pg["PostgreSQL primary + replica"] --> pe["Postgres Exporters"] --> prom
+    dbz["Debezium"] --> jmx["JMX + Connect REST status"] --> prom
+    containers["Containers"] --> cadvisor["cAdvisor"] --> prom
+```
+
+| Xem gì | Dashboard |
+|---|---|
+| Golden Signals: RPS, P95, errors, CPU/RAM/pool/lag | System Overview |
+| Route/method/status, average/P50/P95/P99, active requests | FastAPI Services |
+| Broker/leader/ISR/URP/messages/bytes | Kafka Cluster |
+| Group/topic/partition/offset/lag/member/assignment | Kafka Consumer Groups — Consumer Lag |
+| Connections/transactions/locks/cache/physical lag/WAL | PostgreSQL |
+| Nodes/role/link/memory/ops/cache hits/misses/evictions | Redis Cluster |
+| Connector/task/events/poll/write/queue/snapshot/lag/errors | CDC / Debezium |
+| Per-container CPU/RAM/limit/network | Container Resources |
+| Business counters, A→B/D→B, CDC/domain events, outbox | Business Flow |
+| Workload requests/flows/errors/P95/retries | Synthetic Traffic / Load Generator |
+
+```sh
+make monitoring-check
+make lag-demo
+# Scale Repair, giữ nguyên group ID:
+docker compose up -d --no-deps --scale repair-service=3 repair-service
+```
+
+Bài lag có consumer delay 500ms, controlled REST load có duration/count cap, rồi scale Inspection lên 3. [Hướng dẫn đầy đủ](docs/OBSERVABILITY.md) gồm metrics contracts, cardinality, 10 failure cases, useful PromQL, alerts, cách debug target DOWN và giới hạn Docker Desktop/OrbStack. CPU/RAM từ cAdvisor thuộc Linux VM/containers, không phải toàn host macOS. Metrics dùng route templates và các label có giới hạn; IDs chỉ dùng trong logs/payload.
+
+```promql
+sum by(service)(rate(http_requests_total[2m]))
+histogram_quantile(0.95, sum by(le,service)(rate(http_request_duration_seconds_bucket[2m])))
+sum by(consumergroup,topic)(kafka_consumergroup_lag)
+sum by(service)(rate(container_cpu_usage_seconds_total[2m]))
+sum by(service)(container_memory_working_set_bytes)
+```

@@ -73,15 +73,15 @@
     "id": "warranty-states",
     "document": "DATA_MODEL.md",
     "heading": "3. Warranty database",
-    "source_sha256": "c4087c1e9e00151bedcc2a0b57f0ecf64b7a0cf1134e3c6205fc8a539b2303a9",
-    "svg_sha256": "ec2e968fc5bfcdab346f673a96c041c25792e1150724ac8fd7a20632d49117b5"
+    "source_sha256": "8eb209908f61cfc3e153d2fe99159bc8209f359160a761cf6c9096e8b62e6af3",
+    "svg_sha256": "1db0e2475dbacd3beec29b46b64ba3fdc6644693f5d78590817b98d7c9d5ebc4"
   },
   {
     "id": "inspection-erd",
     "document": "DATA_MODEL.md",
     "heading": "4. Inspection database",
-    "source_sha256": "4d40846b4f456e81f4ede4d57c5b5663b389cca3494b6a7696cb00b24c9b1f7a",
-    "svg_sha256": "d104ae51a58798f317dcc178b0f7eba1348679da1df0243bb3f28c9c0c7663a1"
+    "source_sha256": "d1ea722fa5d763d44355a481a77629653ce8672fa8c99d80c1f7ce47aaaf8d48",
+    "svg_sha256": "f13c55706cc954e92639db5f0b03c7dd202bca7b33bd5d57625a61123f4998fc"
   },
   {
     "id": "inspection-states",
@@ -115,8 +115,29 @@
     "id": "event-topology",
     "document": "EVENT_CONTRACTS.md",
     "heading": "1. Topology và subscriptions",
-    "source_sha256": "223b05e3592edeabfd9e8dec39068ff9b251fcc750290a512680e0baf3fdb01b",
-    "svg_sha256": "abb4c5ad6e8618ee85df084ab32d682f250b5f16b67de19560d8bc2fcce74fe2"
+    "source_sha256": "7cfff985d3cbd46f33811429f5419c09f50d6fb1f41a9997f163e866b44f502c",
+    "svg_sha256": "dee108fa9be2de73bd297b884d369193a9708e40b7a9a649024ac114c40349f9"
+  },
+  {
+    "id": "observable-business-flow",
+    "document": "OBSERVABILITY.md",
+    "heading": "2. Architecture và metrics pipeline",
+    "source_sha256": "8a1db50ee6b56615a91b081d5300bdc0a1511797bdfce1867a8c42f416e30e3c",
+    "svg_sha256": "e54077416908bbbae476524e1b8499e52cc1a1fa0eaf6379750780e478715402"
+  },
+  {
+    "id": "metrics-pipeline",
+    "document": "OBSERVABILITY.md",
+    "heading": "2. Architecture và metrics pipeline",
+    "source_sha256": "60c3d5d3073666b5dcc8c9c6ccba72430d3abdf876616329d45f92abf04a10f8",
+    "svg_sha256": "9ec60725ab621f00e479ee4b3c58dbd672193254510af9155a499429ef0dddd1"
+  },
+  {
+    "id": "inspection-two-input-readiness",
+    "document": "OBSERVABILITY.md",
+    "heading": "3. Hai đường dữ liệu chuẩn bị Inspection",
+    "source_sha256": "a5fb37c01fd76175b7a9212baa53e1452a0f33caacda054cf10e8acfc4a71ad7",
+    "svg_sha256": "a0e12e73ceeef6d328f4ee2dadf26e205b4ec14e85ce5f9d1ffaa69ebb3609b8"
   },
   {
     "id": "incident-triage",
@@ -157,15 +178,15 @@
     "id": "vehicle-creation-sequence",
     "document": "REQUEST_FLOWS.md",
     "heading": "1. Tạo vehicle → default warranty → projection",
-    "source_sha256": "230920bdc76fa8a5039a17059d1f32aa56f159a2ede868899ba2c15bf7e746ac",
-    "svg_sha256": "d7df40a876cd91ea3bc28a75e4bd9ac891ca6186e0163e6116ddbbd64ca7ba51"
+    "source_sha256": "5916945bb38e7106e1451e9734a1a63e97da74ed4fbeff45f57e1c6efdfa0877",
+    "svg_sha256": "3692d465ec5dc5589977f14b54a3b4df80fd2ed11665c70c0343ec2dab8cc9f1"
   },
   {
     "id": "inspection-repair-sequence",
     "document": "REQUEST_FLOWS.md",
     "heading": "2. Complete FAIL → coverage REST → repair và notification",
-    "source_sha256": "df41faf455569cec66cadd90a163c309453762fe8e5babe9620d7d8956aa3a6c",
-    "svg_sha256": "eab2d3fe4881d4f388a48d2c56ab5b2e8aae1179b805ad68e890c958dcfb7b37"
+    "source_sha256": "d98664ea855618bec5a4c69522a5356f64caed6cbad065877e8439eafbed2800",
+    "svg_sha256": "917e8f5104129723ac1c5e3f8f93c2f3ac6b93266c3c504130131053ebad6c80"
   },
   {
     "id": "api-idempotency-sequence",
@@ -220,8 +241,8 @@
     "id": "startup-dependencies",
     "document": "SYSTEM_DESIGN.md",
     "heading": "6. Deployment và lifecycle",
-    "source_sha256": "15817a9dd98b8c2feebc6d76f1b5613712bfceae4d8567e992873082066fa2f0",
-    "svg_sha256": "374a7b96a1079c7ef8b1127790897c297f0178f789e4affbe933a90a07f60f0d"
+    "source_sha256": "c56ce802a3583a3f9471887c757e1de8e0849b7184b6e74872a69920d33f9367",
+    "svg_sha256": "78027c0fc2eb111de30b78482f9f2aa3fd5f0f67139d1bc5b0d86c3ea0062c73"
   },
   {
     "id": "production-target",
@@ -234,15 +255,15 @@
     "id": "traffic-architecture",
     "document": "TRAFFIC_GENERATOR.md",
     "heading": "1. Mục tiêu và ranh giới",
-    "source_sha256": "625e0b45a6611c2f093e43273914896c3f177e8f20919e5cf934e0fe1e9668f1",
-    "svg_sha256": "259491dcaa180987aaebe2503967e9b617e8ef708ed58bda7ffdfd7dc13d1493"
+    "source_sha256": "d170e4a65240e7d1f5fd7f430af788deee7d575bb00eea91dc38a0ccf6240161",
+    "svg_sha256": "02d26fa034bd931bc3d17255d25bd88695afa1be0d22c447764cce8d6edf144a"
   },
   {
     "id": "traffic-lifecycle",
     "document": "TRAFFIC_GENERATOR.md",
     "heading": "2. Một lifecycle",
-    "source_sha256": "726a7a6259b75a0f2658b496bb38c3939e49195d8d72a692463853031a7160f2",
-    "svg_sha256": "45457526538a371fb830ddec996906357a1d9db0118773f57c44ccb6401c2aae"
+    "source_sha256": "715cde556c0294a017edcfdb2333cf8d10fd5ba6191b9832136cf8d4ae0d7f86",
+    "svg_sha256": "6be6d7230328d599f4abeeea4502c0ebd26a18927ea888ddc81f4ce9fb2bb1de"
   },
   {
     "id": "traffic-retry",

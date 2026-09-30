@@ -1,27 +1,30 @@
 sequenceDiagram
     %% diagram: vehicle-creation-sequence
     participant Client
-    participant VehicleAPI
-    participant VehicleDB
-    participant VehicleOutbox
-    participant Kafka
-    participant WarrantyConsumer
-    participant WarrantyDB
-    participant InspectionConsumer
-    participant InspectionDB
-    Client->>VehicleAPI: POST vehicles
-    VehicleAPI->>VehicleDB: BEGIN, insert vehicle and outbox
-    VehicleAPI->>VehicleDB: COMMIT
-    VehicleAPI-->>Client: 201 VehicleRead
-    VehicleOutbox->>VehicleDB: Lock pending row
-    VehicleOutbox->>Kafka: vehicle.created keyed by vehicle ID
-    Kafka-->>VehicleOutbox: ACK
-    VehicleOutbox->>VehicleDB: Mark PUBLISHED, COMMIT
-    Kafka->>WarrantyConsumer: Deliver vehicle.created
-    WarrantyConsumer->>WarrantyDB: BEGIN, reserve processed event
-    WarrantyConsumer->>WarrantyDB: Insert DEFAULT warranty and warranty outbox
-    WarrantyConsumer->>WarrantyDB: COMMIT
-    WarrantyConsumer->>Kafka: Commit offset plus one
-    Kafka->>InspectionConsumer: Deliver vehicle.created in another group
-    InspectionConsumer->>InspectionDB: BEGIN, marker and vehicle_seen upsert, COMMIT
-    InspectionConsumer->>Kafka: Commit own group offset plus one
+    participant A as Vehicle A
+    participant ADB as vehicle_db
+    participant B as Warranty B
+    participant BDB as warranty_db
+    participant DBZ as Debezium
+    participant K as Kafka
+    participant C as Inspection C
+    participant CDB as inspection_db
+    Client->>A: POST vehicles
+    A->>ADB: BEGIN vehicle + outbox + REST command, COMMIT
+    par REST provisioning
+        A->>B: POST internal warranties (bounded HTTP attempt)
+        B->>BDB: INSERT DEFAULT + outbox, COMMIT
+        B-->>A: Same warranty ID on retry
+        A-->>Client: 201 local vehicle committed
+        BDB->>DBZ: Logical WAL
+        DBZ->>K: Warranty CDC c/r/u/d
+        K->>C: CDC envelope
+        C->>CDB: Marker + warranty projection + try_prepare, COMMIT
+    and Domain delivery
+        ADB->>K: Outbox publishes vehicle.created
+        K->>C: Domain envelope
+        C->>CDB: Marker + vehicle projection + try_prepare, COMMIT
+    end
+    Note over A,B: B failure leaves durable REST command pending
+    Note over C,CDB: Either input may arrive first, READY requires both
+    C->>K: Commit each processed source offset + 1

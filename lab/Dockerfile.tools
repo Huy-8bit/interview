@@ -5,6 +5,7 @@ COPY requirements.txt requirements.lock ./
 RUN pip install --no-cache-dir -r requirements.txt -c requirements.lock && useradd --create-home lab
 COPY common /opt/common
 COPY scripts /opt/lab/scripts
+COPY monitoring /opt/lab/monitoring
 COPY tests /opt/lab/tests
 COPY traffic_generator /opt/lab/traffic_generator
 COPY pyproject.toml /opt/lab/

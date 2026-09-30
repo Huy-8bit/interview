@@ -1,0 +1,30 @@
+lab_pg_role:
+  query: "SELECT pg_is_in_recovery()::int AS is_replica, CASE WHEN NOT pg_is_in_recovery() THEN pg_wal_lsn_diff(pg_current_wal_lsn(), '0/0') ELSE pg_wal_lsn_diff(pg_last_wal_replay_lsn(), '0/0') END AS wal_position_bytes, CASE WHEN pg_is_in_recovery() THEN EXTRACT(EPOCH FROM now()-pg_last_xact_replay_timestamp()) ELSE 0 END AS last_replay_age_seconds"
+  metrics:
+    - is_replica: {usage: GAUGE, description: '1 on physical standby, 0 on primary'}
+    - wal_position_bytes: {usage: GAUGE, description: 'Primary current LSN or replica replay LSN in bytes'}
+    - last_replay_age_seconds: {usage: GAUGE, description: 'Age of last replayed transaction; grows when idle, NOT replication lag'}
+lab_pg_replication:
+  master: true
+  query: "SELECT application_name, state, sync_state, pg_wal_lsn_diff(pg_current_wal_lsn(),replay_lsn) AS lag_bytes, EXTRACT(EPOCH FROM replay_lag) AS replay_lag_seconds FROM pg_stat_replication WHERE application_name='postgres-replica'"
+  metrics:
+    - application_name: {usage: LABEL, description: 'Standby application name'}
+    - state: {usage: LABEL, description: 'WAL sender state'}
+    - sync_state: {usage: LABEL, description: 'Sync/async mode'}
+    - lag_bytes: {usage: GAUGE, description: 'Primary WAL position minus standby replay position'}
+    - replay_lag_seconds: {usage: GAUGE, description: 'Measured WAL replay acknowledgement latency; absent on idle'}
+lab_pg_slot:
+  master: true
+  query: "SELECT slot_name, slot_type, active::int AS active, pg_wal_lsn_diff(pg_current_wal_lsn(),restart_lsn) AS retained_bytes FROM pg_replication_slots"
+  metrics:
+    - slot_name: {usage: LABEL, description: 'Replication slot name'}
+    - slot_type: {usage: LABEL, description: 'Physical or logical'}
+    - active: {usage: GAUGE, description: 'Slot has an active consumer'}
+    - retained_bytes: {usage: GAUGE, description: 'WAL retained behind restart LSN'}
+lab_pg_activity:
+  query: "SELECT datname, state, count(*) AS connections, COALESCE(max(EXTRACT(EPOCH FROM now()-xact_start)) FILTER (WHERE xact_start IS NOT NULL AND pid<>pg_backend_pid()),0) AS longest_transaction_seconds FROM pg_stat_activity WHERE datname IS NOT NULL GROUP BY datname,state"
+  metrics:
+    - datname: {usage: LABEL, description: 'Owned application database'}
+    - state: {usage: LABEL, description: 'Connection state'}
+    - connections: {usage: GAUGE, description: 'Connections by state'}
+    - longest_transaction_seconds: {usage: GAUGE, description: 'Oldest transaction duration'}

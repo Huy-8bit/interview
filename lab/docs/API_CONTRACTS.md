@@ -61,7 +61,7 @@ Create/update enqueue vehicle.created/updated trong cùng transaction. GET dùng
 | POST | `/warranties/{warranty_id}/activate` | Không cần body | 200 WarrantyRead | 404; 409 invalid_transition |
 | POST | `/warranties/{warranty_id}/expire` | Không cần body | 200 WarrantyRead | 404 |
 
-WarrantyCreate gồm `vehicle_id`, `warranty_type` EXTENDED/POWERTRAIN (default EXTENDED), `start_date`, `end_date`. End date không trước start date. DEFAULT chỉ được tạo từ event. Manual create cần xe đã có warranty history; không gọi Vehicle REST để xác minh.
+WarrantyCreate gồm `vehicle_id`, `warranty_type` EXTENDED/POWERTRAIN (default EXTENDED), `start_date`, `end_date`. End date không trước start date. DEFAULT tạo bằng `POST /internal/warranties` từ A; body gồm vehicle_id và vehicle_created_at. Natural key vehicle/type dedupe REST retries. Manual create cần xe đã có warranty history; không gọi Vehicle REST để xác minh.
 
 WarrantyRead: `id`, `vehicle_id`, `warranty_type`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`.
 
@@ -76,7 +76,7 @@ Coverage response:
 }
 ```
 
-`covered=false` đi với `warranty_id=null` khi đã có history nhưng không có warranty active theo ngày. 404 có thể là xe chưa tồn tại hoặc vehicle.created chưa được xử lý; endpoint chưa phân biệt hai trường hợp. Khi nhiều warranty active, implementation chọn record hợp lệ đầu tiên theo thứ tự created_at; repair chỉ giữ boolean coverage.
+`covered=false` đi với `warranty_id=null` khi đã có history nhưng không có warranty active theo ngày. 404 có thể là xe chưa tồn tại hoặc REST provision chưa được xử lý; endpoint chưa phân biệt hai trường hợp. Khi nhiều warranty active, implementation chọn record hợp lệ đầu tiên theo thứ tự created_at; repair giữ boolean coverage và nullable warranty_id.
 
 Activate/expire gọi lại cùng trạng thái thành công, không phát lại event. Activate EXPIRED hoặc PENDING ngoài khoảng ngày trả 409. Expire thủ công cho phép kết thúc trước hạn.
 
@@ -90,7 +90,7 @@ Activate/expire gọi lại cùng trạng thái thành công, không phát lại
 | PATCH | `/inspections/{inspection_id}` | notes/status | 200 InspectionRead | 409 inspection_completed |
 | POST | `/inspections/{inspection_id}/complete` | result/reason/notes | 200 InspectionRead | 409 completion_conflict; 422 result/reason sai |
 
-InspectionCreate gồm `vehicle_id`, `inspection_type` DELIVERY/PERIODIC/DIAGNOSTIC (default PERIODIC), `notes` nullable tối đa 4000 ký tự. Header Idempotency-Key dài 1–128. Response fields: id, vehicle_id, inspection_type, status, result, failure_reason, notes, created_at, updated_at, completed_at.
+InspectionCreate gồm `vehicle_id`, `inspection_type` DELIVERY/PERIODIC/DIAGNOSTIC (default PERIODIC), `notes` nullable tối đa 4000 ký tự. Header Idempotency-Key dài 1–128. Response fields: id, vehicle_id, warranty_id, inspection_type, status, result, failure_reason, notes, created_at, updated_at, completed_at.
 
 PATCH nhận `status="IN_PROGRESS"` và/hoặc notes; `notes=null` để xóa ghi chú. Không nhận status=null hoặc empty patch. Completed inspection không sửa được qua PATCH, kể cả notes.
 
@@ -118,7 +118,7 @@ Complete PASS: `{"result":"PASS"}`. FAIL bắt buộc reason không rỗng; PASS
 | PATCH | `/repairs/{repair_id}` | status | 200 RepairRead | 409 invalid_transition |
 | GET | `/repairs/{repair_id}/notifications` | UUID | 200 array NotificationRead | 404 nếu repair không tồn tại |
 
-RepairCreate: `vehicle_id`, `inspection_id`, `description` 1–4000 ký tự sau trim. RepairRead thêm `id`, `warranty_covered`, `status`, `created_at`, `updated_at`. POST cùng inspection_id đã có repair sẽ trả resource có sẵn nếu vehicle_id khớp, kể cả caller dùng idempotency key mới; response vẫn là 201 theo route hiện tại.
+RepairCreate: `vehicle_id`, `inspection_id`, `description` 1–4000 ký tự sau trim. RepairRead thêm `id`, `warranty_id` nullable, `warranty_covered`, `status`, `created_at`, `updated_at`. POST cùng inspection_id đã có repair sẽ trả resource có sẵn nếu vehicle_id khớp, kể cả caller dùng idempotency key mới; response vẫn là 201 theo route hiện tại.
 
 POST thủ công chưa kiểm inspection có tồn tại/FAIL qua Inspection Service; caller chịu trách nhiệm tham chiếu đúng. Description khác với repair hiện có không ghi đè record. Vehicle_id khác cho inspection đã dùng trả 409 `inspection_vehicle_conflict`.
 
@@ -133,7 +133,7 @@ Một key đại diện cho **một ý định tạo**. Payload hash được t�
 | Cùng key + payload tương đương | 201, body snapshot lần tạo đầu | Dùng ID cũ; GET để xem trạng thái mới |
 | Cùng key + payload khác | 409 idempotency_key_reused | Sửa lỗi caller; chỉ dùng key mới cho ý định mới |
 | 503 hoặc client timeout khi create | Kết quả có thể chưa rõ với client | Retry cùng key/payload, backoff hữu hạn |
-| 409 vehicle_projection_not_ready | Event xe chưa đến Inspection | Chờ ngắn và retry cùng key; có deadline |
+| 409 vehicle_projection_not_ready / warranty_projection_not_ready | Domain event xe hoặc CDC warranty chưa đến Inspection | Chờ ngắn và retry cùng key; có deadline |
 | 422 | Request contract sai | Sửa input, không retry mù |
 | POST vehicle/warranty timeout | Không có API idempotency-key contract | Reconcile bằng VIN/warranty list và xử lý unique conflict |
 
@@ -156,7 +156,7 @@ Các lỗi do domain/shared handlers xử lý dùng:
 | HTTP | Codes hiện có | Ý nghĩa |
 |---:|---|---|
 | 404 | vehicle_not_found, warranty_not_found, inspection_not_found, repair_not_found, warranty_not_ready | Resource không có hoặc warranty chưa được quan sát |
-| 409 | constraint_conflict, idempotency_key_reused, invalid_transition, vehicle_not_ready, vehicle_projection_not_ready, inspection_completed, completion_conflict, inspection_vehicle_conflict | Conflict dữ liệu/trạng thái hoặc eventual dependency |
+| 409 | constraint_conflict, idempotency_key_reused, invalid_transition, vehicle_not_ready, vehicle_projection_not_ready, warranty_projection_not_ready, inspection_completed, completion_conflict, inspection_vehicle_conflict | Conflict dữ liệu/trạng thái hoặc eventual dependency |
 | 422 | validation_error | Pydantic/path/query/header validation |
 | 503 | database_unavailable, dependency_unavailable | Dependency/pool/lock transient error; có Retry-After: 2 |
 | 500 | internal_error | Lỗi chưa dự kiến; cần kiểm log |
@@ -172,3 +172,14 @@ Các `/lab/*` chỉ tồn tại khi LAB_MODE=true; chi tiết và giới hạn t
 ## 9. Source of truth
 
 Contracts trong tài liệu được đối chiếu với router/schema của [Vehicle](../services/vehicle-service/app/api/routes.py), [Warranty](../services/warranty-service/app/api/routes.py), [Inspection](../services/inspection-service/app/api/routes.py), [Repair](../services/repair-service/app/api/routes.py) và [shared error/middleware](../common/platform_common/api.py). JSON OpenAPI sống là nguồn kiểm kiểu/required fields chính xác khi implementation thay đổi.
+
+## Internal REST, workflow và metrics
+
+| Method | Path | Contract |
+|---|---|---|
+| POST | B `/internal/warranties` | Body vehicle_id UUID, vehicle_created_at datetime; 201 WarrantyRead. Retry dedupe theo vehicle/type DEFAULT |
+| GET | B `/internal/warranties/vehicle/{vehicle_id}/coverage` | Coverage tại primary; D dùng endpoint này |
+| GET | C `/inspections/workflows/{vehicle_id}` | READY / WAITING_VEHICLE / WAITING_WARRANTY, flags, warranty IDs và source LSN; 404 nếu chưa có input |
+| GET | Mọi API `/metrics` | Prometheus exposition format, không đưa vào business RPS |
+
+Internal là ranh giới sử dụng, chưa phải authentication boundary. Lab chưa có mTLS/service auth. Vehicle POST 201 xác nhận vehicle+outbox+REST command durable; B lỗi thì command PENDING được retry. Inspection POST yêu cầu đủ cả domain vehicle và CDC warranty, trả 409 tương ứng khi còn thiếu input. InspectionRead và RepairRead thêm nullable warranty_id cho dữ liệu cũ.

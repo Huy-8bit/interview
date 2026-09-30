@@ -4,7 +4,7 @@
 
 ## 1. Mục tiêu và ranh giới
 
-`traffic-generator` là process Python riêng mô phỏng client bằng `asyncio` và `httpx.AsyncClient`. Sau `docker compose up --build`, mặc định năm virtual users tạo dữ liệu liên tục qua REST của bốn service nghiệp vụ. Worker không có database credentials, Redis/Kafka clients, Docker socket hoặc port HTTP. Image chỉ cài HTTPX, Pydantic Settings và các dependency của chúng; không import shared platform runtime.
+`traffic-generator` là process Python riêng mô phỏng client bằng `asyncio` và `httpx.AsyncClient`. Sau `docker compose up --build`, mặc định năm virtual users tạo dữ liệu liên tục qua REST của bốn service nghiệp vụ. Worker không có database credentials, Redis/Kafka clients, Docker socket. Port HTTP 9101 chỉ expose Prometheus /metrics. Image cài HTTPX, Pydantic Settings, prometheus-client và dependencies; không import shared platform runtime.
 
 Bốn domain vẫn là Vehicle, Warranty, Inspection, Repair. Generator giữ trạng thái flow trong RAM và metrics trong file cục bộ; dừng rồi chạy lại tạo `run_id` mới, không resume flow dang dở. Đây là công cụ quan sát và kiểm thử workload, không phải workflow engine nghiệp vụ.
 
@@ -28,11 +28,13 @@ flowchart TB
     primary -->|"Logical WAL"| debezium["Debezium - 4 connectors"]
     debezium -->|"Row c / u / d"| cdc["Kafka CDC topics"]
     apps <-->|"Outbox / idempotent consumers"| domain["Kafka domain topics"]
+    vehicle -->|"REST provision"| warranty
+    cdc -->|"Warranty row stream"| inspection
     cdc --> ui["Kafka UI"]
     domain --> ui
 ```
 
-[Xem SVG](diagrams/traffic-architecture.svg). **Consumer nghiệp vụ hiện subscribe domain topics do outbox phát**. CDC là luồng quan sát row độc lập, không kích hoạt warranty/repair; subscribe cả hai để xử lý cùng side effect sẽ gây xử lý trùng.
+[Xem SVG](diagrams/traffic-architecture.svg). **C subscribe vehicle domain events và warranty CDC để ghép hai projection**. Warranty được tạo qua REST A→B; Repair vẫn subscribe inspection.failed. C không còn xử lý warranty.created domain để tránh tạo hai đường cập nhật warranty.
 
 ## 2. Một lifecycle
 
@@ -43,12 +45,14 @@ sequenceDiagram
     participant V as Vehicle API
     participant I as Inspection API
     participant K as Domain Kafka
-    participant W as Warranty API and consumer
+    participant W as Warranty API
     participant R as Repair API and consumer
     T->>V: POST vehicle with simulation_run_id
     V-->>T: 201 vehicle_id
     V-->>K: vehicle.created via outbox
-    K-->>W: Create default warranty
+    V->>W: REST provision DEFAULT
+    W-->>K: Actual PostgreSQL WAL via Debezium
+    K-->>I: Warranty CDC projection
     K-->>I: Update vehicle projection
     loop Targets 0 / 100 / 500 / 1000 ms
         T->>V: GET consistency=eventual
@@ -109,7 +113,7 @@ flowchart TD
 
 - Transport error, timeout, 5xx: tối đa `MAX_RETRIES` lần retry sau attempt đầu. Default 3 → tối đa 4 attempts. Backoff bắt đầu 200ms, tăng gấp đôi, capped 5s trước jitter ±20% (tối đa thực tế 6s).
 - Deadline toàn attempt dùng `asyncio.timeout`; HTTPX đồng thời giới hạn các phase connect/read/write/pool. Latency ghi cho từng attempt không bao gồm backoff. [HTTPX timeout semantics](https://www.python-httpx.org/advanced/timeouts/) và [transport retry scope](https://www.python-httpx.org/advanced/transports/) giải thích vì sao worker tự điều phối retry.
-- 400/401/422 và business 409 không retry chung. `vehicle_projection_not_ready` là 409 được polling có thời hạn vì projection phụ thuộc event. Warranty 404 `warranty_not_ready` và repair list rỗng cũng là trạng thái đang chờ consumer. Convergence deadline 45s; toàn flow tối đa 120s.
+- 400/401/422 và business 409 không retry chung. `vehicle_projection_not_ready` và `warranty_projection_not_ready` là 409 được polling có thời hạn vì projection phụ thuộc event. Warranty 404 `warranty_not_ready` và repair list rỗng cũng là trạng thái đang chờ consumer. Convergence deadline 45s; toàn flow tối đa 120s.
 - POST vehicle giữ nguyên VIN/body qua retries. Nếu response bị mất sau commit hoặc gặp VIN conflict, tra `GET /vehicles?vin=...` trên primary rồi đối chiếu toàn bộ payload và `simulation_run_id`; chỉ nhận lại đúng xe của flow. Không tự đổi VIN và tạo xe thứ hai khi kết quả commit chưa rõ.
 - PATCH giữ nguyên body; complete inspection cùng nội dung là idempotent theo API. DELETE retry có thể nhận 404 sau lần đầu đã commit; worker xác nhận VIN không còn trên primary.
 
@@ -190,9 +194,9 @@ Marker/header chống xóa nhầm; **không phải authentication** vì lab chư
 
 ### Kafka UI và consumer
 
-Mở [Kafka UI](http://localhost:8080) → Topics → Messages. Domain topics: `vehicle-events`, `warranty-events`, `inspection-events`, `repair-events`. CDC topics: `vehicle-cdc.public.vehicles`, `warranty-cdc.public.warranties`, `inspection-cdc.public.inspections`, `repair-cdc.public.repair_requests`. Xem partition/leader/ISR rồi Consumer Groups: `warranty-service-v1`, `inspection-service-v1`, `repair-service-v1`; đối chiếu lag với tốc độ traffic.
+Mở [Kafka UI](http://localhost:8080) → Topics → Messages. Domain topics: `vehicle-events`, `warranty-events`, `inspection-events`, `repair-events`. CDC topics: `vehicle-cdc.public.vehicles`, `warranty-cdc.public.warranties`, `inspection-cdc.public.inspections`, `repair-cdc.public.repair_requests`. Xem partition/leader/ISR rồi Consumer Groups: `inspection-service-v2`, `repair-service-v1`; đối chiếu lag với tốc độ traffic.
 
-Lọc domain message theo `correlation_id` lấy từ `flow_completed`; tất cả domain events của flow giữ ID này qua middleware/outbox/consumers. CDC native envelope không có HTTP correlation ID: nối theo key row ID, `vehicle_id`, và `simulation_run_id` trên vehicle before/after. `source.lsn`, `source.db`, `source.table`, `op` giúp xác nhận thay đổi xuất phát từ WAL. DELETE_RATE thấp có thể chưa thấy `d` trong vài flow; chạy scenario ép DELETE=1 để quan sát chắc chắn.
+Lọc domain message theo `correlation_id` lấy từ `flow_completed`; tất cả domain events của flow giữ ID này qua middleware/outbox/consumers. Warranty CDC row giữ correlation_id từ A→B; các CDC row khác nối bằng business keys: nối theo key row ID, `vehicle_id`, và `simulation_run_id` trên vehicle before/after. `source.lsn`, `source.db`, `source.table`, `op` giúp xác nhận thay đổi xuất phát từ WAL. DELETE_RATE thấp có thể chưa thấy `d` trong vài flow; chạy scenario ép DELETE=1 để quan sát chắc chắn.
 
 ```sh
 docker compose exec kafka-1 /opt/kafka/bin/kafka-consumer-groups.sh \
@@ -259,7 +263,7 @@ JSON request logs có timestamp, run_id, flow_id, virtual_user, correlation_id, 
 
 Summary mỗi 30s gồm `total_requests`, `successful_requests` (2xx), `failed_requests` (4xx/5xx/transport), `expected_error_responses` là **tập con** failed gồm injected422/pending404/409, retries, flows started/completed/failed/cancelled, vehicles/inspections/repairs, PASS/FAIL, duplicate verified, deleted vehicles, cache và replica counters. Counter chưa phát sinh có thể vắng mặt (=0). `created_repairs` nghĩa là repair do consumer tạo đã được worker quan sát qua API; không phải POST từ worker.
 
-Average latency tính trên toàn process; p95 nearest-rank tính trên tối đa 10.000 attempts gần nhất để bộ nhớ có giới hạn. Latency không phải thời gian toàn lifecycle. Metrics reset khi process restart. Chưa có control API/Prometheus endpoint; dùng Compose start/stop/config và file status. Docker giới hạn JSON logs 3 files ×10MB, nhưng PostgreSQL rows/ledger/WAL và Kafka lưu trữ vẫn tăng theo traffic; DELETE 1% không phải retention policy cho toàn hệ thống.
+Average latency tính trên toàn process; p95 nearest-rank tính trên tối đa 10.000 attempts gần nhất để bộ nhớ có giới hạn. Latency không phải thời gian toàn lifecycle. Metrics reset khi process restart. Có `/metrics` port 9101, Prometheus scrape và dashboard Synthetic Traffic. Dùng Compose start/stop/config và file status để điều khiển. Docker giới hạn JSON logs 3 files ×10MB, nhưng PostgreSQL rows/ledger/WAL và Kafka lưu trữ vẫn tăng theo traffic; DELETE 1% không phải retention policy cho toàn hệ thống.
 
 ## 8. Thử lỗi và kiểm chứng
 
@@ -283,3 +287,5 @@ make traffic-drills   # Dừng từng dependency và chứng minh worker vẫn t
 Warranty outage có thể khiến Repair consumer retry rồi DLQ; generator không tự replay DLQ. Xem [Operations](OPERATIONS.md) để xử lý event cũ, không suy luận mọi flow lỗi tự hồi phục. Các drill cũ vốn chờ global outbox/lag về 0 nên dừng traffic trước; riêng `traffic-drills` cần worker đang chạy.
 
 Code: [worker](../traffic_generator/worker.py), [metrics](../traffic_generator/metrics.py), [healthcheck](../traffic_generator/healthcheck.py), [Dockerfile](../Dockerfile.traffic), [scenario observer](../scripts/traffic_verify.py). Observer trong toolbox được phép đọc Kafka để kiểm bằng chứng; generator vẫn chỉ gọi REST.
+
+Mode controlled load và metrics/Grafana: [Observability](OBSERVABILITY.md#7-bài-thực-hành-lag--scale). Default vẫn là full lifecycle. Khi Debezium down, A/B có thể commit nhưng C chờ warranty CDC; không cam kết inspection mới hoàn tất trước recovery.

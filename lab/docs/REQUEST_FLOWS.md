@@ -10,37 +10,38 @@ Sơ đồ dưới đây theo đúng transaction boundary của code. Thời đi�
 sequenceDiagram
     %% diagram: vehicle-creation-sequence
     participant Client
-    participant VehicleAPI
-    participant VehicleDB
-    participant VehicleOutbox
-    participant Kafka
-    participant WarrantyConsumer
-    participant WarrantyDB
-    participant InspectionConsumer
-    participant InspectionDB
-    Client->>VehicleAPI: POST vehicles
-    VehicleAPI->>VehicleDB: BEGIN, insert vehicle and outbox
-    VehicleAPI->>VehicleDB: COMMIT
-    VehicleAPI-->>Client: 201 VehicleRead
-    VehicleOutbox->>VehicleDB: Lock pending row
-    VehicleOutbox->>Kafka: vehicle.created keyed by vehicle ID
-    Kafka-->>VehicleOutbox: ACK
-    VehicleOutbox->>VehicleDB: Mark PUBLISHED, COMMIT
-    Kafka->>WarrantyConsumer: Deliver vehicle.created
-    WarrantyConsumer->>WarrantyDB: BEGIN, reserve processed event
-    WarrantyConsumer->>WarrantyDB: Insert DEFAULT warranty and warranty outbox
-    WarrantyConsumer->>WarrantyDB: COMMIT
-    WarrantyConsumer->>Kafka: Commit offset plus one
-    Kafka->>InspectionConsumer: Deliver vehicle.created in another group
-    InspectionConsumer->>InspectionDB: BEGIN, marker and vehicle_seen upsert, COMMIT
-    InspectionConsumer->>Kafka: Commit own group offset plus one
+    participant A as Vehicle A
+    participant ADB as vehicle_db
+    participant B as Warranty B
+    participant BDB as warranty_db
+    participant DBZ as Debezium
+    participant K as Kafka
+    participant C as Inspection C
+    participant CDB as inspection_db
+    Client->>A: POST vehicles
+    A->>ADB: BEGIN vehicle + outbox + REST command, COMMIT
+    par REST provisioning
+        A->>B: POST internal warranties (bounded HTTP attempt)
+        B->>BDB: INSERT DEFAULT + outbox, COMMIT
+        B-->>A: Same warranty ID on retry
+        A-->>Client: 201 local vehicle committed
+        BDB->>DBZ: Logical WAL
+        DBZ->>K: Warranty CDC c/r/u/d
+        K->>C: CDC envelope
+        C->>CDB: Marker + warranty projection + try_prepare, COMMIT
+    and Domain delivery
+        ADB->>K: Outbox publishes vehicle.created
+        K->>C: Domain envelope
+        C->>CDB: Marker + vehicle projection + try_prepare, COMMIT
+    end
+    Note over A,B: B failure leaves durable REST command pending
+    Note over C,CDB: Either input may arrive first, READY requires both
+    C->>K: Commit each processed source offset + 1
 ```
 
 [Xem sơ đồ SVG](diagrams/vehicle-creation-sequence.svg)
 
-Warranty handler còn dùng Redis lock theo vehicle ID quanh default creation; sơ đồ tập trung commit/offset. Warranty outbox sau đó publish warranty.created, Inspection set warranty_seen. Hai group tiến độc lập; thứ tự trên hình minh họa một execution, không ép Warranty phải commit trước Inspection.
-
-Nếu vehicle.created bị nhận lại, processed ledger skip handler. Nếu event ID mới nhưng cùng vehicle, unique `(vehicle_id,warranty_type)` vẫn ngăn default warranty thứ hai. Nếu handler rollback, marker chưa durable và delivery sau vẫn được xử lý.
+A giữ REST command trong vehicle_db; một lỗi sau local commit không làm mất ý định tạo warranty. B dedupe bằng natural key, kể cả mất HTTP response. C không consume warranty.created để chuẩn bị workflow: CDC thật là đầu vào thứ hai. Handler domain và CDC đều lấy advisory lock theo vehicle ID, UPSERT và gọi try_prepare_inspection trong cùng transaction với marker. API inspection chờ đủ hai phía.
 
 Điểm đọc code: [VehicleService.create](../services/vehicle-service/app/services/vehicles.py), [create_default](../services/warranty-service/app/services/warranties.py), [update_reference](../services/inspection-service/app/messaging/handlers.py).
 
@@ -66,8 +67,8 @@ sequenceDiagram
     RepairConsumer->>RepairDB: BEGIN, reserve processed marker
     RepairConsumer->>RepairDB: Find repair by inspection ID
     RepairConsumer->>Redis: Acquire token lock with TTL
-    RepairConsumer->>WarrantyAPI: GET active warranty with correlation ID
-    WarrantyAPI-->>RepairConsumer: 200 covered boolean
+    RepairConsumer->>WarrantyAPI: GET internal coverage with correlation ID
+    WarrantyAPI-->>RepairConsumer: 200 covered, warranty_id, checked_at
     RepairConsumer->>RepairDB: Insert repair, notification and repair.created outbox
     RepairConsumer->>Redis: Release lock if token matches
     RepairConsumer->>RepairDB: COMMIT

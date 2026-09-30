@@ -18,6 +18,7 @@ class RepairRequest(Timestamps, Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     vehicle_id: Mapped[UUID]
     inspection_id: Mapped[UUID]
+    warranty_id: Mapped[UUID | None] = mapped_column(nullable=True)
     warranty_covered: Mapped[bool]
     status: Mapped[str] = mapped_column(String(20), default="OPEN")
     description: Mapped[str] = mapped_column(Text)

@@ -54,7 +54,13 @@ async def test_real_kafka_duplicate_events_do_not_duplicate_resources(client, db
     )[0]["payload"]
     for _ in range(2):
         ack = await publish("vehicle-events", vehicle["id"], created)
-    await wait_committed("warranty-service-v1", ack)
+    await wait_committed("inspection-service-v2", ack)
+    processed = await db(
+        "inspection",
+        "SELECT event_id FROM processed_events WHERE event_id = CAST(:id AS uuid) AND consumer_name = :consumer",
+        id=created["event_id"], consumer="inspection-service-v2",
+    )
+    assert len(processed) == 1
     warranties = await client.json("warranty", "GET", f"/warranties/vehicle/{vehicle['id']}")
     assert len(warranties) == 1
     inspection = await client.inspection(vehicle["id"])

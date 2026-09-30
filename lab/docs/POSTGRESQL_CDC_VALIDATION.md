@@ -1,5 +1,7 @@
 # PostgreSQL replication và CDC — kết quả kiểm chứng
 
+> Bằng chứng lịch sử của phiên bản trước thay đổi REST A→B và Inspection CDC. Luồng/monitoring hiện tại xem [Observability](OBSERVABILITY.md); không dùng số liệu này như kết quả đo phiên bản mới.
+
 [Mục lục](README.md) · [Thiết kế và runbook](POSTGRESQL_CDC.md) · [Kafka/Redis validation](CLUSTER_VALIDATION.md)
 
 Ngày chạy: **2026-09-30**, Docker trên macOS/ARM64, engine 8 GB RAM/8 CPU. PostgreSQL 16.9, Debezium 3.2.4.Final, Kafka 3.9.1, Redis 7.4.4. Đây là kết quả workload kiểm chứng chức năng, không phải benchmark/SLO.

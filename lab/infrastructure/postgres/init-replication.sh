@@ -2,7 +2,10 @@
 set -euo pipefail
 # Runs on every Compose initialization, including an existing primary volume.
 psql -v ON_ERROR_STOP=1 -d postgres \
-  -v replication_password="$REPLICATION_PASSWORD" -v cdc_password="$DEBEZIUM_PASSWORD" <<'SQL'
+  -v monitoring_password="${MONITORING_PASSWORD:-monitoring_password}" -v replication_password="$REPLICATION_PASSWORD" -v cdc_password="$DEBEZIUM_PASSWORD" <<'SQL'
+SELECT 'CREATE ROLE lab_monitor LOGIN' WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname='lab_monitor') \gexec
+ALTER ROLE lab_monitor WITH LOGIN NOSUPERUSER PASSWORD :'monitoring_password';
+GRANT pg_monitor TO lab_monitor;
 SELECT 'CREATE ROLE replicator LOGIN REPLICATION' WHERE NOT EXISTS
   (SELECT FROM pg_roles WHERE rolname='replicator') \gexec
 ALTER ROLE replicator WITH LOGIN REPLICATION NOSUPERUSER PASSWORD :'replication_password';

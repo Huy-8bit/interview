@@ -39,16 +39,24 @@ async def process_event(runtime, event: Event, handler) -> bool:
     return True
 
 
-async def deliver(runtime, message, handlers):
+async def deliver(runtime, message, handlers, decoder=None):
+    started = time.perf_counter()
+    labels = (runtime.settings.service_name, "invalid", message.topic)
     original = None
     error = None
-    ct = et = None
+    ct = et = rt = None
     try:
         try:
-            original = json.loads(message.value)
-            event = Event.model_validate(original)
+            original = json.loads(message.value) if message.value else None
+            event = decoder(message) if decoder else Event.model_validate(original)
+            if event is None:  # A valid Debezium tombstone.
+                runtime.metrics.cdc_events.labels(runtime.settings.service_name, "tombstone").inc()
+                return
+            labels = (runtime.settings.service_name, event.event_type if event.event_type in handlers else "unhandled", message.topic)
+            runtime.metrics.events["consumed"].labels(*labels).inc()
             ct = context.correlation_id.set(event.correlation_id)
             et = context.event_id.set(str(event.event_id))
+            rt = context.request_id.set(event.request_id or str(event.event_id))
         except Exception as exc:
             error = exc
         else:
@@ -60,6 +68,7 @@ async def deliver(runtime, message, handlers):
                     if runtime.consumer_delay:
                         await asyncio.sleep(runtime.consumer_delay)
                     applied = await process_event(runtime, event, handler)
+                    runtime.metrics.events["processed" if applied else "duplicate"].labels(*labels).inc()
                     if applied and runtime.settings.lab_mode and CRASH_MARKER.exists():
                         CRASH_MARKER.unlink()
                         log.critical("lab_crash_after_db_commit_before_offset_commit")
@@ -67,6 +76,7 @@ async def deliver(runtime, message, handlers):
                     return
                 except Exception as exc:
                     error = exc
+                    runtime.metrics.events["failed"].labels(*labels).inc()
                     log.warning(
                         "consumer_retry",
                         extra={
@@ -78,6 +88,7 @@ async def deliver(runtime, message, handlers):
                         },
                     )
                     if attempt < runtime.settings.consumer_max_retries:
+                        runtime.metrics.events["retried"].labels(*labels).inc()
                         await asyncio.sleep(backoff(attempt, runtime.settings.retry_base_seconds))
         # DLQ ACK is required before committing the source offset. If this fails,
         # the consumer is recreated from its last committed offset.
@@ -99,10 +110,14 @@ async def deliver(runtime, message, handlers):
                 },
             },
         )
+        runtime.metrics.events["dlq"].labels(*labels).inc()
         log.error(
             "consumer_sent_to_dlq", extra={"fields": {"topic": message.topic, "error": str(error)}}
         )
     finally:
+        runtime.metrics.event_duration.labels(*labels).observe(time.perf_counter() - started)
+        if rt is not None:
+            context.request_id.reset(rt)
         if ct is not None:
             context.correlation_id.reset(ct)
         if et is not None:
@@ -120,8 +135,8 @@ async def ensure_fetch_progress(consumer):
             raise TimeoutError(f"Consumer fetch stalled with backlog on {partition}")
 
 
-async def consumer_loop(runtime, handlers: dict):
-    topics = sorted({name.split(".")[0] + "-events" for name in handlers})
+async def consumer_loop(runtime, handlers: dict, topics=None, decoder=None):
+    topics = topics or sorted({name.split(".")[0] + "-events" for name in handlers})
     while True:
         consumer = AIOKafkaConsumer(
             *topics,
@@ -152,7 +167,7 @@ async def consumer_loop(runtime, handlers: dict):
                     continue
                 for messages in batches.values():
                     for message in messages:
-                        await deliver(runtime, message, handlers)
+                        await deliver(runtime, message, handlers, decoder)
                         async with asyncio.timeout(runtime.settings.consumer_fetch_timeout):
                             await consumer.commit(
                                 {TopicPartition(message.topic, message.partition): message.offset + 1}

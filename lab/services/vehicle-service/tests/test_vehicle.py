@@ -66,3 +66,30 @@ async def test_simulation_delete_requires_persisted_matching_marker(runtime):
     assert absent.value.status == 404
     assert (await service.get(UUID(ordinary["id"])))[0]["id"] == ordinary["id"]
     assert len(await service.list(20, 0, ordinary["vin"])) == 1
+
+
+async def test_failed_rest_keeps_vehicle_outbox_and_durable_delivery(runtime):
+    from datetime import timedelta
+
+    import httpx
+
+    from app.models.vehicle import WarrantyProvisionRequest
+    from app.services.warranty_provision import deliver_pending
+    from platform_common.db import utcnow
+
+    await runtime.http.aclose()
+    runtime.http = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(503)))
+    created = await VehicleService(runtime).create(VehicleCreate(vin="LAB" + uuid4().hex[:14].upper(), model="EV", manufacturer="Lab", production_year=2026, owner_name="An"))
+    async with runtime.sessions.begin() as session:
+        row = await session.get(WarrantyProvisionRequest, UUID(created["id"]))
+        assert row.status == "PENDING" and row.attempts == 1
+        assert (await session.scalar(select(OutboxEvent))).payload["data"]["id"] == created["id"]
+        row.next_attempt_at = utcnow() - timedelta(seconds=1)
+    warranty_id = str(uuid4())
+    await runtime.http.aclose()
+    runtime.http = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(201, json={"id": warranty_id, "vehicle_id": created["id"], "warranty_type": "DEFAULT"})))
+    assert await deliver_pending(runtime)
+    assert not await deliver_pending(runtime)
+    async with runtime.sessions() as session:
+        row = await session.get(WarrantyProvisionRequest, UUID(created["id"]))
+        assert row.status == "DELIVERED" and str(row.warranty_id) == warranty_id

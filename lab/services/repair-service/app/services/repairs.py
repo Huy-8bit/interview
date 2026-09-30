@@ -10,6 +10,7 @@ from app.schemas.repair import NotificationRead, RepairRead
 from platform_common.errors import DomainError
 from platform_common.events import enqueue
 from platform_common.idempotency import execute_idempotent
+from platform_common.metrics import committed
 
 log = logging.getLogger(__name__)
 
@@ -31,13 +32,14 @@ async def create_in_transaction(session, runtime, body):
         verify_vehicle(existing, body)
         return serialize(existing)
     async with runtime.cache.lock(f"repair:{body.inspection_id}"):
-        covered = await check_coverage(runtime, body.vehicle_id)
+        coverage = await check_coverage(runtime, body.vehicle_id)
         row = await session.scalar(
             insert(RepairRequest)
             .values(
                 id=uuid4(),
                 **body.model_dump(),
-                warranty_covered=covered,
+                warranty_covered=coverage.covered,
+                warranty_id=coverage.warranty_id,
                 status="OPEN",
             )
             .on_conflict_do_nothing(index_elements=["inspection_id"])
@@ -47,10 +49,11 @@ async def create_in_transaction(session, runtime, body):
             existing = await repository.by_inspection(session, body.inspection_id)
             verify_vehicle(existing, body)
             return serialize(existing)
+        committed(session, runtime.metrics.business["repairs_created_total"])
         notification = Notification(
             vehicle_id=row.vehicle_id,
             repair_id=row.id,
-            message=f"Repair {row.id} opened. Warranty covered: {covered}.",
+            message=f"Repair {row.id} opened. Warranty covered: {coverage.covered}.",
         )
         session.add(notification)
         await session.flush()

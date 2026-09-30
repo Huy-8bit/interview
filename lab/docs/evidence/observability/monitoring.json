@@ -1,0 +1,4007 @@
+{
+  "recorded_at_unix": 1790758689.6079755,
+  "metrics": {
+    "api_rps": {
+      "query": "sum(rate(http_requests_total[2m]))",
+      "series": 1,
+      "samples": [
+        {
+          "metric": {},
+          "value": [
+            1790758689.903,
+            "14.311352691334543"
+          ]
+        }
+      ]
+    },
+    "generator_requests": {
+      "query": "traffic_requests_total",
+      "series": 1,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "traffic_requests_total",
+            "instance": "traffic-generator:9101",
+            "job": "traffic",
+            "service": "traffic-generator"
+          },
+          "value": [
+            1790758689.909,
+            "1312"
+          ]
+        }
+      ]
+    },
+    "consumer_lag": {
+      "query": "kafka_consumergroup_lag{consumergroup=\"inspection-service-v2\"}",
+      "series": 6,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "kafka_consumergroup_lag",
+            "consumergroup": "inspection-service-v2",
+            "instance": "kafka-exporter:9308",
+            "job": "kafka",
+            "partition": "0",
+            "topic": "vehicle-events"
+          },
+          "value": [
+            1790758689.915,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumergroup_lag",
+            "consumergroup": "inspection-service-v2",
+            "instance": "kafka-exporter:9308",
+            "job": "kafka",
+            "partition": "0",
+            "topic": "warranty-cdc.public.warranties"
+          },
+          "value": [
+            1790758689.915,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumergroup_lag",
+            "consumergroup": "inspection-service-v2",
+            "instance": "kafka-exporter:9308",
+            "job": "kafka",
+            "partition": "1",
+            "topic": "vehicle-events"
+          },
+          "value": [
+            1790758689.915,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumergroup_lag",
+            "consumergroup": "inspection-service-v2",
+            "instance": "kafka-exporter:9308",
+            "job": "kafka",
+            "partition": "1",
+            "topic": "warranty-cdc.public.warranties"
+          },
+          "value": [
+            1790758689.915,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumergroup_lag",
+            "consumergroup": "inspection-service-v2",
+            "instance": "kafka-exporter:9308",
+            "job": "kafka",
+            "partition": "2",
+            "topic": "vehicle-events"
+          },
+          "value": [
+            1790758689.915,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumergroup_lag",
+            "consumergroup": "inspection-service-v2",
+            "instance": "kafka-exporter:9308",
+            "job": "kafka",
+            "partition": "2",
+            "topic": "warranty-cdc.public.warranties"
+          },
+          "value": [
+            1790758689.915,
+            "0"
+          ]
+        }
+      ]
+    },
+    "pg_connections": {
+      "query": "pg_stat_database_numbackends{datname=\"vehicle_db\",role=\"primary\"}",
+      "series": 1,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "pg_stat_database_numbackends",
+            "datid": "16386",
+            "datname": "vehicle_db",
+            "instance": "postgres-exporter:9187",
+            "job": "postgres",
+            "role": "primary"
+          },
+          "value": [
+            1790758689.922,
+            "9"
+          ]
+        }
+      ]
+    },
+    "pg_replica": {
+      "query": "lab_pg_role_is_replica{role=\"replica\"}",
+      "series": 1,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "lab_pg_role_is_replica",
+            "instance": "postgres-replica-exporter:9187",
+            "job": "postgres",
+            "role": "replica",
+            "server": "postgres-replica:5432"
+          },
+          "value": [
+            1790758689.928,
+            "1"
+          ]
+        }
+      ]
+    },
+    "pg_wal": {
+      "query": "lab_pg_role_wal_position_bytes",
+      "series": 2,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "lab_pg_role_wal_position_bytes",
+            "instance": "postgres-exporter:9187",
+            "job": "postgres",
+            "role": "primary",
+            "server": "postgres-primary:5432"
+          },
+          "value": [
+            1790758689.935,
+            "220993288"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "lab_pg_role_wal_position_bytes",
+            "instance": "postgres-replica-exporter:9187",
+            "job": "postgres",
+            "role": "replica",
+            "server": "postgres-replica:5432"
+          },
+          "value": [
+            1790758689.935,
+            "221190992"
+          ]
+        }
+      ]
+    },
+    "redis_memory": {
+      "query": "redis_memory_used_bytes",
+      "series": 6,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "redis_memory_used_bytes",
+            "instance": "redis://redis-6:6379",
+            "job": "redis"
+          },
+          "value": [
+            1790758689.939,
+            "4989072"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_memory_used_bytes",
+            "instance": "redis://redis-3:6379",
+            "job": "redis"
+          },
+          "value": [
+            1790758689.939,
+            "5253952"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_memory_used_bytes",
+            "instance": "redis://redis-1:6379",
+            "job": "redis"
+          },
+          "value": [
+            1790758689.939,
+            "5283936"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_memory_used_bytes",
+            "instance": "redis://redis-4:6379",
+            "job": "redis"
+          },
+          "value": [
+            1790758689.939,
+            "5030376"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_memory_used_bytes",
+            "instance": "redis://redis-5:6379",
+            "job": "redis"
+          },
+          "value": [
+            1790758689.939,
+            "5023088"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_memory_used_bytes",
+            "instance": "redis://redis-2:6379",
+            "job": "redis"
+          },
+          "value": [
+            1790758689.939,
+            "5343864"
+          ]
+        }
+      ]
+    },
+    "redis_roles": {
+      "query": "redis_instance_info",
+      "series": 6,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "redis_instance_info",
+            "instance": "redis://redis-6:6379",
+            "job": "redis",
+            "master_replid": "08060e4b9acd4fadb91e60dfa405069435fe9c9b",
+            "maxmemory_policy": "noeviction",
+            "os": "Linux 7.0.14-orbstack-00380-ga7e0a2dc9535 aarch64",
+            "process_id": "1",
+            "redis_build_id": "b61818b61036ef01",
+            "redis_mode": "cluster",
+            "redis_version": "7.4.4",
+            "role": "slave",
+            "run_id": "c50f706ece7001d259050688bc3278115232bb2b",
+            "tcp_port": "6379"
+          },
+          "value": [
+            1790758689.943,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_instance_info",
+            "instance": "redis://redis-3:6379",
+            "job": "redis",
+            "master_replid": "bd3386932d4a0b21e7215dcfa7da6981d4159e9e",
+            "maxmemory_policy": "noeviction",
+            "os": "Linux 7.0.14-orbstack-00380-ga7e0a2dc9535 aarch64",
+            "process_id": "1",
+            "redis_build_id": "b61818b61036ef01",
+            "redis_mode": "cluster",
+            "redis_version": "7.4.4",
+            "role": "master",
+            "run_id": "8f62844b9abcfc0ec2c3966242fb1a1f10fef6a2",
+            "tcp_port": "6379"
+          },
+          "value": [
+            1790758689.943,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_instance_info",
+            "instance": "redis://redis-1:6379",
+            "job": "redis",
+            "master_replid": "6f648f96b728ed4db24e7d5dcd66b616dc44d8c0",
+            "maxmemory_policy": "noeviction",
+            "os": "Linux 7.0.14-orbstack-00380-ga7e0a2dc9535 aarch64",
+            "process_id": "1",
+            "redis_build_id": "b61818b61036ef01",
+            "redis_mode": "cluster",
+            "redis_version": "7.4.4",
+            "role": "master",
+            "run_id": "70ef9657cabd7854caca75577405dd7540f96b30",
+            "tcp_port": "6379"
+          },
+          "value": [
+            1790758689.943,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_instance_info",
+            "instance": "redis://redis-4:6379",
+            "job": "redis",
+            "master_replid": "bd3386932d4a0b21e7215dcfa7da6981d4159e9e",
+            "maxmemory_policy": "noeviction",
+            "os": "Linux 7.0.14-orbstack-00380-ga7e0a2dc9535 aarch64",
+            "process_id": "1",
+            "redis_build_id": "b61818b61036ef01",
+            "redis_mode": "cluster",
+            "redis_version": "7.4.4",
+            "role": "slave",
+            "run_id": "dae5524cb760146dd54a55338f7f277e8936d2c3",
+            "tcp_port": "6379"
+          },
+          "value": [
+            1790758689.943,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_instance_info",
+            "instance": "redis://redis-5:6379",
+            "job": "redis",
+            "master_replid": "6f648f96b728ed4db24e7d5dcd66b616dc44d8c0",
+            "maxmemory_policy": "noeviction",
+            "os": "Linux 7.0.14-orbstack-00380-ga7e0a2dc9535 aarch64",
+            "process_id": "1",
+            "redis_build_id": "b61818b61036ef01",
+            "redis_mode": "cluster",
+            "redis_version": "7.4.4",
+            "role": "slave",
+            "run_id": "c8d1cdd2ca0d05e795c5c3c3a81e789551f7a074",
+            "tcp_port": "6379"
+          },
+          "value": [
+            1790758689.943,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "redis_instance_info",
+            "instance": "redis://redis-2:6379",
+            "job": "redis",
+            "master_replid": "08060e4b9acd4fadb91e60dfa405069435fe9c9b",
+            "maxmemory_policy": "noeviction",
+            "os": "Linux 7.0.14-orbstack-00380-ga7e0a2dc9535 aarch64",
+            "process_id": "1",
+            "redis_build_id": "b61818b61036ef01",
+            "redis_mode": "cluster",
+            "redis_version": "7.4.4",
+            "role": "master",
+            "run_id": "58be08785d9ce0f731e720da6056e4afefe63db2",
+            "tcp_port": "6379"
+          },
+          "value": [
+            1790758689.943,
+            "1"
+          ]
+        }
+      ]
+    },
+    "container_cpu": {
+      "query": "container_cpu_usage_seconds_total",
+      "series": 31,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "cadvisor",
+            "cpu": "total",
+            "id": "/docker/3abadb24ea600dd63ccefeb2bbd79e39447fedbf7eb6ad87a6c699003bad775b",
+            "image": "ghcr.io/google/cadvisor:0.55.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-cadvisor-1",
+            "service": "cadvisor"
+          },
+          "value": [
+            1790758689.949,
+            "116.75449"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "grafana",
+            "cpu": "total",
+            "id": "/docker/b8b4947230e62f9df1fe474c8a2829d2f8f97a563e3c0fe11063a68eda37302e",
+            "image": "grafana/grafana:12.1.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-grafana-1",
+            "service": "grafana"
+          },
+          "value": [
+            1790758689.949,
+            "296.9385"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-api",
+            "cpu": "total",
+            "id": "/docker/3fcecdd045c820248620e1e872732630e91ae582f59c3b41a60ff5aa0d150c40",
+            "image": "nginx:1.28.0-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-api-1",
+            "service": "inspection-api"
+          },
+          "value": [
+            1790758689.949,
+            "17.318826"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-exporter",
+            "cpu": "total",
+            "id": "/docker/1a065d5eac9710745d5df869e46b2368258c562ed4c85b108e757171f8bc94a3",
+            "image": "danielqsj/kafka-exporter:v1.9.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-exporter-1",
+            "service": "kafka-exporter"
+          },
+          "value": [
+            1790758689.949,
+            "38.048846"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-ui",
+            "cpu": "total",
+            "id": "/docker/bbee389afa5666fb5acc32ce1fb1dc0afce42ddec7704aa598e18bae01b3f35d",
+            "image": "provectuslabs/kafka-ui:v0.7.2",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-ui-1",
+            "service": "kafka-ui"
+          },
+          "value": [
+            1790758689.949,
+            "141.964323"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-exporter",
+            "cpu": "total",
+            "id": "/docker/d0f64e7f057cecb4e43f73ffb1ed97dde331ec08ca41da69f3dded30e0695190",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-exporter-1",
+            "service": "postgres-exporter"
+          },
+          "value": [
+            1790758689.949,
+            "26.358193"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-primary",
+            "cpu": "total",
+            "id": "/docker/183d380334fd3fda48fbb96f477cb5fd5141883eca2cd5ded76fe7c7e852425a",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-primary-1",
+            "service": "postgres-primary"
+          },
+          "value": [
+            1790758689.949,
+            "413.756411"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica",
+            "cpu": "total",
+            "id": "/docker/f096dfbff950b1448eb8f43a072b8f0b68d6eed1300ca284ddb9a71352d9cde4",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-1",
+            "service": "postgres-replica"
+          },
+          "value": [
+            1790758689.949,
+            "202.488167"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica-exporter",
+            "cpu": "total",
+            "id": "/docker/18f7d9e15b1a1951e62370f581342a4b08e7eb217c94234eb5ccb5bc339224d6",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-exporter-1",
+            "service": "postgres-replica-exporter"
+          },
+          "value": [
+            1790758689.949,
+            "26.180326"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "prometheus",
+            "cpu": "total",
+            "id": "/docker/f6391558a8eaaaa46ee10f0e82ca8cbf79be30a959de0fbd41152007f3f91043",
+            "image": "prom/prometheus:v3.5.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-prometheus-1",
+            "service": "prometheus"
+          },
+          "value": [
+            1790758689.949,
+            "201.891393"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-1",
+            "cpu": "total",
+            "id": "/docker/b50670d7a436f8feab796ba95f85348235f920f312562d72eb398dd2f1e22cca",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-1-1",
+            "service": "redis-1"
+          },
+          "value": [
+            1790758689.949,
+            "137.852553"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-2",
+            "cpu": "total",
+            "id": "/docker/baf1e8161b89b94bd2fee27f43091fd08714b57bfce62e0cc8b9e4fac733bdd4",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-2-1",
+            "service": "redis-2"
+          },
+          "value": [
+            1790758689.949,
+            "138.206187"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-3",
+            "cpu": "total",
+            "id": "/docker/365bfd5ad5ba5d75f093f486ac36e44080c0bff8560f616632b3b06ae57bdd53",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-3-1",
+            "service": "redis-3"
+          },
+          "value": [
+            1790758689.949,
+            "135.296681"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-4",
+            "cpu": "total",
+            "id": "/docker/8bca8beaff57021b978c7ecd9cd52a0ab1be68227582b9d51cc1795875be96c6",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-4-1",
+            "service": "redis-4"
+          },
+          "value": [
+            1790758689.949,
+            "128.383505"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-5",
+            "cpu": "total",
+            "id": "/docker/8bdb9adb274aaf42f2b72c52cc31de970e593bd01032a71cdfda77e4237e185b",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-5-1",
+            "service": "redis-5"
+          },
+          "value": [
+            1790758689.949,
+            "129.468388"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-6",
+            "cpu": "total",
+            "id": "/docker/af7e77b860f68edba1b5f6de13f28458bdbc505435ac1fb5a4ad8caea515038f",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-6-1",
+            "service": "redis-6"
+          },
+          "value": [
+            1790758689.949,
+            "128.235199"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-exporter",
+            "cpu": "total",
+            "id": "/docker/5821db65162a63b8ee037d65c04865e971ff76c08cbae1bfb606efaeb1da0a30",
+            "image": "oliver006/redis_exporter:v1.77.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-exporter-1",
+            "service": "redis-exporter"
+          },
+          "value": [
+            1790758689.949,
+            "85.097441"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "platform-exporter",
+            "cpu": "total",
+            "id": "/docker/5903b3896cde676d63b4f9f571e21b01fe619bebe57478a786b1a789e0742c6f",
+            "image": "vehicle-platform-lab-platform-exporter",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-platform-exporter-1",
+            "service": "platform-exporter"
+          },
+          "value": [
+            1790758689.949,
+            "26.137278"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "traffic-generator",
+            "cpu": "total",
+            "id": "/docker/917ca1fcef523e90c7b6c690188a620fcacb4dc4e80c1fecf81da53c2a81a484",
+            "image": "vehicle-platform-lab-traffic-generator",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-traffic-generator-1",
+            "service": "traffic-generator"
+          },
+          "value": [
+            1790758689.949,
+            "5.303341"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "debezium-connect",
+            "cpu": "total",
+            "id": "/docker/fb2371aba5d728b152edda67b07a118a8f64eb413dfe5da56304b016d9cdadb8",
+            "image": "vehicle-lab-connect:3.2.4-jmx",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-debezium-connect-1",
+            "service": "debezium-connect"
+          },
+          "value": [
+            1790758689.949,
+            "77.060515"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-1",
+            "cpu": "total",
+            "id": "/docker/9fd9864fae31ab24374c6e07c081ece6a999ab9a74b73b3b6a128ec739ac7d79",
+            "image": "vehicle-platform-lab-kafka-1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-1-1",
+            "service": "kafka-1"
+          },
+          "value": [
+            1790758689.949,
+            "247.5771"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-2",
+            "cpu": "total",
+            "id": "/docker/05776b5bda98782c40ad215bbd23e7dd967fd794e9575f4734ee33ef5709e27a",
+            "image": "vehicle-platform-lab-kafka-2",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-2-1",
+            "service": "kafka-2"
+          },
+          "value": [
+            1790758689.949,
+            "238.317696"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-3",
+            "cpu": "total",
+            "id": "/docker/e2207eb2f63c38c6ce9802d0a7c4c5178854897d6296cdc07394dad9c0ef1d8a",
+            "image": "vehicle-platform-lab-kafka-3",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-3-1",
+            "service": "kafka-3"
+          },
+          "value": [
+            1790758689.949,
+            "237.162927"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-service",
+            "cpu": "total",
+            "id": "/docker/472b7dc8d6509890ed3fbf17e3647e3f214210d187104bfef96717c9d252f4cd",
+            "image": "vehicle-platform-lab-inspection-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-service-3",
+            "service": "inspection-service"
+          },
+          "value": [
+            1790758689.949,
+            "29.724549"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "cpu": "total",
+            "id": "/docker/4c73084cb58256ec55c93c202cd4af780ebcb4f48ea824cfd6bc9088e09d5608",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-1",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.949,
+            "19.246474"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "vehicle-service",
+            "cpu": "total",
+            "id": "/docker/51530c32cc0d51419070e1d7cbd311061c21068b879de7c160a01af15e3103c1",
+            "image": "vehicle-platform-lab-vehicle-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-vehicle-service-1",
+            "service": "vehicle-service"
+          },
+          "value": [
+            1790758689.949,
+            "27.46267"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "warranty-service",
+            "cpu": "total",
+            "id": "/docker/a825bbc8cfd2966312e09c96dce9258ec594926316935f6df3a5fa6151950e37",
+            "image": "vehicle-platform-lab-warranty-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-warranty-service-1",
+            "service": "warranty-service"
+          },
+          "value": [
+            1790758689.949,
+            "18.291206"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "cpu": "total",
+            "id": "/docker/f5d71aafc582ec79698ca7c820b0486ccfbcdef3cbfb5144ea4c7b1ab6e11298",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-8348bbe5f303",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.949,
+            "3.387413"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "cpu": "total",
+            "id": "/docker/450e4fb465a9db6999a324fccc15e3dedee4a2170c8fa9eea8cdfaaaccad1d81",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-4521e70f4ac1",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.949,
+            "2.780693"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "cpu": "total",
+            "id": "/docker/310fdbc0e48180667a11c02a2c1d39d754489aa5d7b6bc6304f225f53cc86c6d",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-2",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.949,
+            "0.034262"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_cpu_usage_seconds_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "cpu": "total",
+            "id": "/docker/ccc25f25b40b792f7a723d61bddf43703ca0f0e0bb53eb2e16340ee1a243d6d0",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-3",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.949,
+            "0.033688"
+          ]
+        }
+      ]
+    },
+    "container_memory": {
+      "query": "container_memory_working_set_bytes",
+      "series": 31,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "cadvisor",
+            "id": "/docker/3abadb24ea600dd63ccefeb2bbd79e39447fedbf7eb6ad87a6c699003bad775b",
+            "image": "ghcr.io/google/cadvisor:0.55.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-cadvisor-1",
+            "service": "cadvisor"
+          },
+          "value": [
+            1790758689.954,
+            "24764416"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "grafana",
+            "id": "/docker/b8b4947230e62f9df1fe474c8a2829d2f8f97a563e3c0fe11063a68eda37302e",
+            "image": "grafana/grafana:12.1.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-grafana-1",
+            "service": "grafana"
+          },
+          "value": [
+            1790758689.954,
+            "125792256"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-api",
+            "id": "/docker/3fcecdd045c820248620e1e872732630e91ae582f59c3b41a60ff5aa0d150c40",
+            "image": "nginx:1.28.0-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-api-1",
+            "service": "inspection-api"
+          },
+          "value": [
+            1790758689.954,
+            "1593344"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-exporter",
+            "id": "/docker/1a065d5eac9710745d5df869e46b2368258c562ed4c85b108e757171f8bc94a3",
+            "image": "danielqsj/kafka-exporter:v1.9.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-exporter-1",
+            "service": "kafka-exporter"
+          },
+          "value": [
+            1790758689.954,
+            "19283968"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-ui",
+            "id": "/docker/bbee389afa5666fb5acc32ce1fb1dc0afce42ddec7704aa598e18bae01b3f35d",
+            "image": "provectuslabs/kafka-ui:v0.7.2",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-ui-1",
+            "service": "kafka-ui"
+          },
+          "value": [
+            1790758689.954,
+            "64012288"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-exporter",
+            "id": "/docker/d0f64e7f057cecb4e43f73ffb1ed97dde331ec08ca41da69f3dded30e0695190",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-exporter-1",
+            "service": "postgres-exporter"
+          },
+          "value": [
+            1790758689.954,
+            "10002432"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-primary",
+            "id": "/docker/183d380334fd3fda48fbb96f477cb5fd5141883eca2cd5ded76fe7c7e852425a",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-primary-1",
+            "service": "postgres-primary"
+          },
+          "value": [
+            1790758689.954,
+            "137920512"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica",
+            "id": "/docker/f096dfbff950b1448eb8f43a072b8f0b68d6eed1300ca284ddb9a71352d9cde4",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-1",
+            "service": "postgres-replica"
+          },
+          "value": [
+            1790758689.954,
+            "36016128"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica-exporter",
+            "id": "/docker/18f7d9e15b1a1951e62370f581342a4b08e7eb217c94234eb5ccb5bc339224d6",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-exporter-1",
+            "service": "postgres-replica-exporter"
+          },
+          "value": [
+            1790758689.954,
+            "11669504"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "prometheus",
+            "id": "/docker/f6391558a8eaaaa46ee10f0e82ca8cbf79be30a959de0fbd41152007f3f91043",
+            "image": "prom/prometheus:v3.5.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-prometheus-1",
+            "service": "prometheus"
+          },
+          "value": [
+            1790758689.954,
+            "120180736"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-1",
+            "id": "/docker/b50670d7a436f8feab796ba95f85348235f920f312562d72eb398dd2f1e22cca",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-1-1",
+            "service": "redis-1"
+          },
+          "value": [
+            1790758689.954,
+            "6692864"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-2",
+            "id": "/docker/baf1e8161b89b94bd2fee27f43091fd08714b57bfce62e0cc8b9e4fac733bdd4",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-2-1",
+            "service": "redis-2"
+          },
+          "value": [
+            1790758689.954,
+            "5558272"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-3",
+            "id": "/docker/365bfd5ad5ba5d75f093f486ac36e44080c0bff8560f616632b3b06ae57bdd53",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-3-1",
+            "service": "redis-3"
+          },
+          "value": [
+            1790758689.954,
+            "6709248"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-4",
+            "id": "/docker/8bca8beaff57021b978c7ecd9cd52a0ab1be68227582b9d51cc1795875be96c6",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-4-1",
+            "service": "redis-4"
+          },
+          "value": [
+            1790758689.954,
+            "5763072"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-5",
+            "id": "/docker/8bdb9adb274aaf42f2b72c52cc31de970e593bd01032a71cdfda77e4237e185b",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-5-1",
+            "service": "redis-5"
+          },
+          "value": [
+            1790758689.954,
+            "5206016"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-6",
+            "id": "/docker/af7e77b860f68edba1b5f6de13f28458bdbc505435ac1fb5a4ad8caea515038f",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-6-1",
+            "service": "redis-6"
+          },
+          "value": [
+            1790758689.954,
+            "5824512"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-exporter",
+            "id": "/docker/5821db65162a63b8ee037d65c04865e971ff76c08cbae1bfb606efaeb1da0a30",
+            "image": "oliver006/redis_exporter:v1.77.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-exporter-1",
+            "service": "redis-exporter"
+          },
+          "value": [
+            1790758689.954,
+            "21966848"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "platform-exporter",
+            "id": "/docker/5903b3896cde676d63b4f9f571e21b01fe619bebe57478a786b1a789e0742c6f",
+            "image": "vehicle-platform-lab-platform-exporter",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-platform-exporter-1",
+            "service": "platform-exporter"
+          },
+          "value": [
+            1790758689.954,
+            "25100288"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "traffic-generator",
+            "id": "/docker/917ca1fcef523e90c7b6c690188a620fcacb4dc4e80c1fecf81da53c2a81a484",
+            "image": "vehicle-platform-lab-traffic-generator",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-traffic-generator-1",
+            "service": "traffic-generator"
+          },
+          "value": [
+            1790758689.954,
+            "31051776"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "debezium-connect",
+            "id": "/docker/fb2371aba5d728b152edda67b07a118a8f64eb413dfe5da56304b016d9cdadb8",
+            "image": "vehicle-lab-connect:3.2.4-jmx",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-debezium-connect-1",
+            "service": "debezium-connect"
+          },
+          "value": [
+            1790758689.954,
+            "494948352"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-1",
+            "id": "/docker/9fd9864fae31ab24374c6e07c081ece6a999ab9a74b73b3b6a128ec739ac7d79",
+            "image": "vehicle-platform-lab-kafka-1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-1-1",
+            "service": "kafka-1"
+          },
+          "value": [
+            1790758689.954,
+            "360443904"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-2",
+            "id": "/docker/05776b5bda98782c40ad215bbd23e7dd967fd794e9575f4734ee33ef5709e27a",
+            "image": "vehicle-platform-lab-kafka-2",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-2-1",
+            "service": "kafka-2"
+          },
+          "value": [
+            1790758689.954,
+            "391667712"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-3",
+            "id": "/docker/e2207eb2f63c38c6ce9802d0a7c4c5178854897d6296cdc07394dad9c0ef1d8a",
+            "image": "vehicle-platform-lab-kafka-3",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-3-1",
+            "service": "kafka-3"
+          },
+          "value": [
+            1790758689.954,
+            "391270400"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-service",
+            "id": "/docker/472b7dc8d6509890ed3fbf17e3647e3f214210d187104bfef96717c9d252f4cd",
+            "image": "vehicle-platform-lab-inspection-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-service-3",
+            "service": "inspection-service"
+          },
+          "value": [
+            1790758689.954,
+            "77119488"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/4c73084cb58256ec55c93c202cd4af780ebcb4f48ea824cfd6bc9088e09d5608",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-1",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.954,
+            "72183808"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "vehicle-service",
+            "id": "/docker/51530c32cc0d51419070e1d7cbd311061c21068b879de7c160a01af15e3103c1",
+            "image": "vehicle-platform-lab-vehicle-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-vehicle-service-1",
+            "service": "vehicle-service"
+          },
+          "value": [
+            1790758689.954,
+            "75829248"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "warranty-service",
+            "id": "/docker/a825bbc8cfd2966312e09c96dce9258ec594926316935f6df3a5fa6151950e37",
+            "image": "vehicle-platform-lab-warranty-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-warranty-service-1",
+            "service": "warranty-service"
+          },
+          "value": [
+            1790758689.954,
+            "70823936"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "id": "/docker/f5d71aafc582ec79698ca7c820b0486ccfbcdef3cbfb5144ea4c7b1ab6e11298",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-8348bbe5f303",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.954,
+            "83251200"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "id": "/docker/450e4fb465a9db6999a324fccc15e3dedee4a2170c8fa9eea8cdfaaaccad1d81",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-4521e70f4ac1",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.954,
+            "79585280"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/310fdbc0e48180667a11c02a2c1d39d754489aa5d7b6bc6304f225f53cc86c6d",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-2",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.954,
+            "2543616"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_memory_working_set_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/ccc25f25b40b792f7a723d61bddf43703ca0f0e0bb53eb2e16340ee1a243d6d0",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-3",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.954,
+            "8761344"
+          ]
+        }
+      ]
+    },
+    "container_limit": {
+      "query": "container_spec_memory_limit_bytes",
+      "series": 27,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "cadvisor",
+            "id": "/docker/3abadb24ea600dd63ccefeb2bbd79e39447fedbf7eb6ad87a6c699003bad775b",
+            "image": "ghcr.io/google/cadvisor:0.55.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-cadvisor-1",
+            "service": "cadvisor"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "grafana",
+            "id": "/docker/b8b4947230e62f9df1fe474c8a2829d2f8f97a563e3c0fe11063a68eda37302e",
+            "image": "grafana/grafana:12.1.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-grafana-1",
+            "service": "grafana"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-api",
+            "id": "/docker/3fcecdd045c820248620e1e872732630e91ae582f59c3b41a60ff5aa0d150c40",
+            "image": "nginx:1.28.0-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-api-1",
+            "service": "inspection-api"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-exporter",
+            "id": "/docker/1a065d5eac9710745d5df869e46b2368258c562ed4c85b108e757171f8bc94a3",
+            "image": "danielqsj/kafka-exporter:v1.9.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-exporter-1",
+            "service": "kafka-exporter"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-ui",
+            "id": "/docker/bbee389afa5666fb5acc32ce1fb1dc0afce42ddec7704aa598e18bae01b3f35d",
+            "image": "provectuslabs/kafka-ui:v0.7.2",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-ui-1",
+            "service": "kafka-ui"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-exporter",
+            "id": "/docker/d0f64e7f057cecb4e43f73ffb1ed97dde331ec08ca41da69f3dded30e0695190",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-exporter-1",
+            "service": "postgres-exporter"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-primary",
+            "id": "/docker/183d380334fd3fda48fbb96f477cb5fd5141883eca2cd5ded76fe7c7e852425a",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-primary-1",
+            "service": "postgres-primary"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica",
+            "id": "/docker/f096dfbff950b1448eb8f43a072b8f0b68d6eed1300ca284ddb9a71352d9cde4",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-1",
+            "service": "postgres-replica"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica-exporter",
+            "id": "/docker/18f7d9e15b1a1951e62370f581342a4b08e7eb217c94234eb5ccb5bc339224d6",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-exporter-1",
+            "service": "postgres-replica-exporter"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "prometheus",
+            "id": "/docker/f6391558a8eaaaa46ee10f0e82ca8cbf79be30a959de0fbd41152007f3f91043",
+            "image": "prom/prometheus:v3.5.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-prometheus-1",
+            "service": "prometheus"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-1",
+            "id": "/docker/b50670d7a436f8feab796ba95f85348235f920f312562d72eb398dd2f1e22cca",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-1-1",
+            "service": "redis-1"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-2",
+            "id": "/docker/baf1e8161b89b94bd2fee27f43091fd08714b57bfce62e0cc8b9e4fac733bdd4",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-2-1",
+            "service": "redis-2"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-3",
+            "id": "/docker/365bfd5ad5ba5d75f093f486ac36e44080c0bff8560f616632b3b06ae57bdd53",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-3-1",
+            "service": "redis-3"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-4",
+            "id": "/docker/8bca8beaff57021b978c7ecd9cd52a0ab1be68227582b9d51cc1795875be96c6",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-4-1",
+            "service": "redis-4"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-5",
+            "id": "/docker/8bdb9adb274aaf42f2b72c52cc31de970e593bd01032a71cdfda77e4237e185b",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-5-1",
+            "service": "redis-5"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-6",
+            "id": "/docker/af7e77b860f68edba1b5f6de13f28458bdbc505435ac1fb5a4ad8caea515038f",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-6-1",
+            "service": "redis-6"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-exporter",
+            "id": "/docker/5821db65162a63b8ee037d65c04865e971ff76c08cbae1bfb606efaeb1da0a30",
+            "image": "oliver006/redis_exporter:v1.77.0",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-exporter-1",
+            "service": "redis-exporter"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "platform-exporter",
+            "id": "/docker/5903b3896cde676d63b4f9f571e21b01fe619bebe57478a786b1a789e0742c6f",
+            "image": "vehicle-platform-lab-platform-exporter",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-platform-exporter-1",
+            "service": "platform-exporter"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "traffic-generator",
+            "id": "/docker/917ca1fcef523e90c7b6c690188a620fcacb4dc4e80c1fecf81da53c2a81a484",
+            "image": "vehicle-platform-lab-traffic-generator",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-traffic-generator-1",
+            "service": "traffic-generator"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "debezium-connect",
+            "id": "/docker/fb2371aba5d728b152edda67b07a118a8f64eb413dfe5da56304b016d9cdadb8",
+            "image": "vehicle-lab-connect:3.2.4-jmx",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-debezium-connect-1",
+            "service": "debezium-connect"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-1",
+            "id": "/docker/9fd9864fae31ab24374c6e07c081ece6a999ab9a74b73b3b6a128ec739ac7d79",
+            "image": "vehicle-platform-lab-kafka-1",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-1-1",
+            "service": "kafka-1"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-2",
+            "id": "/docker/05776b5bda98782c40ad215bbd23e7dd967fd794e9575f4734ee33ef5709e27a",
+            "image": "vehicle-platform-lab-kafka-2",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-2-1",
+            "service": "kafka-2"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-3",
+            "id": "/docker/e2207eb2f63c38c6ce9802d0a7c4c5178854897d6296cdc07394dad9c0ef1d8a",
+            "image": "vehicle-platform-lab-kafka-3",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-3-1",
+            "service": "kafka-3"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-service",
+            "id": "/docker/472b7dc8d6509890ed3fbf17e3647e3f214210d187104bfef96717c9d252f4cd",
+            "image": "vehicle-platform-lab-inspection-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-service-3",
+            "service": "inspection-service"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/4c73084cb58256ec55c93c202cd4af780ebcb4f48ea824cfd6bc9088e09d5608",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-1",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "vehicle-service",
+            "id": "/docker/51530c32cc0d51419070e1d7cbd311061c21068b879de7c160a01af15e3103c1",
+            "image": "vehicle-platform-lab-vehicle-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-vehicle-service-1",
+            "service": "vehicle-service"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_spec_memory_limit_bytes",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "warranty-service",
+            "id": "/docker/a825bbc8cfd2966312e09c96dce9258ec594926316935f6df3a5fa6151950e37",
+            "image": "vehicle-platform-lab-warranty-service",
+            "instance": "cadvisor:8080",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-warranty-service-1",
+            "service": "warranty-service"
+          },
+          "value": [
+            1790758689.957,
+            "0"
+          ]
+        }
+      ]
+    },
+    "container_network": {
+      "query": "container_network_receive_bytes_total",
+      "series": 40,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "cadvisor",
+            "id": "/docker/3abadb24ea600dd63ccefeb2bbd79e39447fedbf7eb6ad87a6c699003bad775b",
+            "image": "ghcr.io/google/cadvisor:0.55.1",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-cadvisor-1",
+            "service": "cadvisor"
+          },
+          "value": [
+            1790758689.964,
+            "482349"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "grafana",
+            "id": "/docker/b8b4947230e62f9df1fe474c8a2829d2f8f97a563e3c0fe11063a68eda37302e",
+            "image": "grafana/grafana:12.1.1",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-grafana-1",
+            "service": "grafana"
+          },
+          "value": [
+            1790758689.964,
+            "23520578"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-api",
+            "id": "/docker/3fcecdd045c820248620e1e872732630e91ae582f59c3b41a60ff5aa0d150c40",
+            "image": "nginx:1.28.0-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-api-1",
+            "service": "inspection-api"
+          },
+          "value": [
+            1790758689.964,
+            "314147"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-exporter",
+            "id": "/docker/1a065d5eac9710745d5df869e46b2368258c562ed4c85b108e757171f8bc94a3",
+            "image": "danielqsj/kafka-exporter:v1.9.0",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-exporter-1",
+            "service": "kafka-exporter"
+          },
+          "value": [
+            1790758689.964,
+            "14250029"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-ui",
+            "id": "/docker/bbee389afa5666fb5acc32ce1fb1dc0afce42ddec7704aa598e18bae01b3f35d",
+            "image": "provectuslabs/kafka-ui:v0.7.2",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-ui-1",
+            "service": "kafka-ui"
+          },
+          "value": [
+            1790758689.964,
+            "14004388"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-exporter",
+            "id": "/docker/d0f64e7f057cecb4e43f73ffb1ed97dde331ec08ca41da69f3dded30e0695190",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-exporter-1",
+            "service": "postgres-exporter"
+          },
+          "value": [
+            1790758689.964,
+            "18671419"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-primary",
+            "id": "/docker/183d380334fd3fda48fbb96f477cb5fd5141883eca2cd5ded76fe7c7e852425a",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-primary-1",
+            "service": "postgres-primary"
+          },
+          "value": [
+            1790758689.964,
+            "154128551"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica",
+            "id": "/docker/f096dfbff950b1448eb8f43a072b8f0b68d6eed1300ca284ddb9a71352d9cde4",
+            "image": "postgres:16.9-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-1",
+            "service": "postgres-replica"
+          },
+          "value": [
+            1790758689.964,
+            "245482767"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "postgres-replica-exporter",
+            "id": "/docker/18f7d9e15b1a1951e62370f581342a4b08e7eb217c94234eb5ccb5bc339224d6",
+            "image": "prometheuscommunity/postgres-exporter:v0.18.1",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-postgres-replica-exporter-1",
+            "service": "postgres-replica-exporter"
+          },
+          "value": [
+            1790758689.964,
+            "17272212"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "prometheus",
+            "id": "/docker/f6391558a8eaaaa46ee10f0e82ca8cbf79be30a959de0fbd41152007f3f91043",
+            "image": "prom/prometheus:v3.5.0",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-prometheus-1",
+            "service": "prometheus"
+          },
+          "value": [
+            1790758689.964,
+            "87982188"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-1",
+            "id": "/docker/b50670d7a436f8feab796ba95f85348235f920f312562d72eb398dd2f1e22cca",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-1-1",
+            "service": "redis-1"
+          },
+          "value": [
+            1790758689.964,
+            "76557895"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-2",
+            "id": "/docker/baf1e8161b89b94bd2fee27f43091fd08714b57bfce62e0cc8b9e4fac733bdd4",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-2-1",
+            "service": "redis-2"
+          },
+          "value": [
+            1790758689.964,
+            "74054239"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-3",
+            "id": "/docker/365bfd5ad5ba5d75f093f486ac36e44080c0bff8560f616632b3b06ae57bdd53",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-3-1",
+            "service": "redis-3"
+          },
+          "value": [
+            1790758689.964,
+            "75358277"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-4",
+            "id": "/docker/8bca8beaff57021b978c7ecd9cd52a0ab1be68227582b9d51cc1795875be96c6",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-4-1",
+            "service": "redis-4"
+          },
+          "value": [
+            1790758689.964,
+            "66764368"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-5",
+            "id": "/docker/8bdb9adb274aaf42f2b72c52cc31de970e593bd01032a71cdfda77e4237e185b",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-5-1",
+            "service": "redis-5"
+          },
+          "value": [
+            1790758689.964,
+            "67718336"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-6",
+            "id": "/docker/af7e77b860f68edba1b5f6de13f28458bdbc505435ac1fb5a4ad8caea515038f",
+            "image": "redis:7.4.4-alpine",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-6-1",
+            "service": "redis-6"
+          },
+          "value": [
+            1790758689.964,
+            "66489129"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-exporter",
+            "id": "/docker/5821db65162a63b8ee037d65c04865e971ff76c08cbae1bfb606efaeb1da0a30",
+            "image": "oliver006/redis_exporter:v1.77.0",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-exporter-1",
+            "service": "redis-exporter"
+          },
+          "value": [
+            1790758689.964,
+            "1402266"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "redis-exporter",
+            "id": "/docker/5821db65162a63b8ee037d65c04865e971ff76c08cbae1bfb606efaeb1da0a30",
+            "image": "oliver006/redis_exporter:v1.77.0",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-redis-exporter-1",
+            "service": "redis-exporter"
+          },
+          "value": [
+            1790758689.964,
+            "48715810"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "platform-exporter",
+            "id": "/docker/5903b3896cde676d63b4f9f571e21b01fe619bebe57478a786b1a789e0742c6f",
+            "image": "vehicle-platform-lab-platform-exporter",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-platform-exporter-1",
+            "service": "platform-exporter"
+          },
+          "value": [
+            1790758689.964,
+            "6160130"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "traffic-generator",
+            "id": "/docker/917ca1fcef523e90c7b6c690188a620fcacb4dc4e80c1fecf81da53c2a81a484",
+            "image": "vehicle-platform-lab-traffic-generator",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-traffic-generator-1",
+            "service": "traffic-generator"
+          },
+          "value": [
+            1790758689.964,
+            "987160"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "debezium-connect",
+            "id": "/docker/fb2371aba5d728b152edda67b07a118a8f64eb413dfe5da56304b016d9cdadb8",
+            "image": "vehicle-lab-connect:3.2.4-jmx",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-debezium-connect-1",
+            "service": "debezium-connect"
+          },
+          "value": [
+            1790758689.964,
+            "6170298"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-1",
+            "id": "/docker/9fd9864fae31ab24374c6e07c081ece6a999ab9a74b73b3b6a128ec739ac7d79",
+            "image": "vehicle-platform-lab-kafka-1",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-1-1",
+            "service": "kafka-1"
+          },
+          "value": [
+            1790758689.964,
+            "9186291"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-2",
+            "id": "/docker/05776b5bda98782c40ad215bbd23e7dd967fd794e9575f4734ee33ef5709e27a",
+            "image": "vehicle-platform-lab-kafka-2",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-2-1",
+            "service": "kafka-2"
+          },
+          "value": [
+            1790758689.964,
+            "7208183"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "kafka-3",
+            "id": "/docker/e2207eb2f63c38c6ce9802d0a7c4c5178854897d6296cdc07394dad9c0ef1d8a",
+            "image": "vehicle-platform-lab-kafka-3",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-kafka-3-1",
+            "service": "kafka-3"
+          },
+          "value": [
+            1790758689.964,
+            "7232626"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-service",
+            "id": "/docker/472b7dc8d6509890ed3fbf17e3647e3f214210d187104bfef96717c9d252f4cd",
+            "image": "vehicle-platform-lab-inspection-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-service-3",
+            "service": "inspection-service"
+          },
+          "value": [
+            1790758689.964,
+            "5941256"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "inspection-service",
+            "id": "/docker/472b7dc8d6509890ed3fbf17e3647e3f214210d187104bfef96717c9d252f4cd",
+            "image": "vehicle-platform-lab-inspection-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-inspection-service-3",
+            "service": "inspection-service"
+          },
+          "value": [
+            1790758689.964,
+            "1043845"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/4c73084cb58256ec55c93c202cd4af780ebcb4f48ea824cfd6bc9088e09d5608",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-1",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.964,
+            "1872316"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/4c73084cb58256ec55c93c202cd4af780ebcb4f48ea824cfd6bc9088e09d5608",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-1",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.964,
+            "519269"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "vehicle-service",
+            "id": "/docker/51530c32cc0d51419070e1d7cbd311061c21068b879de7c160a01af15e3103c1",
+            "image": "vehicle-platform-lab-vehicle-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-vehicle-service-1",
+            "service": "vehicle-service"
+          },
+          "value": [
+            1790758689.964,
+            "4004158"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "vehicle-service",
+            "id": "/docker/51530c32cc0d51419070e1d7cbd311061c21068b879de7c160a01af15e3103c1",
+            "image": "vehicle-platform-lab-vehicle-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-vehicle-service-1",
+            "service": "vehicle-service"
+          },
+          "value": [
+            1790758689.964,
+            "831488"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "warranty-service",
+            "id": "/docker/a825bbc8cfd2966312e09c96dce9258ec594926316935f6df3a5fa6151950e37",
+            "image": "vehicle-platform-lab-warranty-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-warranty-service-1",
+            "service": "warranty-service"
+          },
+          "value": [
+            1790758689.964,
+            "728626"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "warranty-service",
+            "id": "/docker/a825bbc8cfd2966312e09c96dce9258ec594926316935f6df3a5fa6151950e37",
+            "image": "vehicle-platform-lab-warranty-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-warranty-service-1",
+            "service": "warranty-service"
+          },
+          "value": [
+            1790758689.964,
+            "1745303"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "id": "/docker/f5d71aafc582ec79698ca7c820b0486ccfbcdef3cbfb5144ea4c7b1ab6e11298",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-8348bbe5f303",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.964,
+            "530803"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "id": "/docker/f5d71aafc582ec79698ca7c820b0486ccfbcdef3cbfb5144ea4c7b1ab6e11298",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-8348bbe5f303",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.964,
+            "399032"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "id": "/docker/450e4fb465a9db6999a324fccc15e3dedee4a2170c8fa9eea8cdfaaaccad1d81",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-4521e70f4ac1",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.964,
+            "397986"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "toolbox",
+            "id": "/docker/450e4fb465a9db6999a324fccc15e3dedee4a2170c8fa9eea8cdfaaaccad1d81",
+            "image": "vehicle-platform-lab-toolbox",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-toolbox-run-4521e70f4ac1",
+            "service": "toolbox"
+          },
+          "value": [
+            1790758689.964,
+            "333729"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/310fdbc0e48180667a11c02a2c1d39d754489aa5d7b6bc6304f225f53cc86c6d",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-2",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.964,
+            "110"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/310fdbc0e48180667a11c02a2c1d39d754489aa5d7b6bc6304f225f53cc86c6d",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-2",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.964,
+            "152"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/ccc25f25b40b792f7a723d61bddf43703ca0f0e0bb53eb2e16340ee1a243d6d0",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth0",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-3",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.964,
+            "110"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "container_network_receive_bytes_total",
+            "container_label_com_docker_compose_project": "vehicle-platform-lab",
+            "container_label_com_docker_compose_service": "repair-service",
+            "id": "/docker/ccc25f25b40b792f7a723d61bddf43703ca0f0e0bb53eb2e16340ee1a243d6d0",
+            "image": "vehicle-platform-lab-repair-service",
+            "instance": "cadvisor:8080",
+            "interface": "eth1",
+            "job": "cadvisor",
+            "name": "vehicle-platform-lab-repair-service-3",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.964,
+            "236"
+          ]
+        }
+      ]
+    },
+    "connectors": {
+      "query": "connect_connector_running",
+      "series": 4,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "connect_connector_running",
+            "connector": "vehicle-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform"
+          },
+          "value": [
+            1790758689.968,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "connect_connector_running",
+            "connector": "warranty-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform"
+          },
+          "value": [
+            1790758689.968,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "connect_connector_running",
+            "connector": "inspection-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform"
+          },
+          "value": [
+            1790758689.968,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "connect_connector_running",
+            "connector": "repair-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform"
+          },
+          "value": [
+            1790758689.968,
+            "1"
+          ]
+        }
+      ]
+    },
+    "connect_tasks": {
+      "query": "connect_task_running",
+      "series": 4,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "connect_task_running",
+            "connector": "vehicle-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "task": "0"
+          },
+          "value": [
+            1790758689.97,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "connect_task_running",
+            "connector": "warranty-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "task": "0"
+          },
+          "value": [
+            1790758689.97,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "connect_task_running",
+            "connector": "inspection-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "task": "0"
+          },
+          "value": [
+            1790758689.97,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "connect_task_running",
+            "connector": "repair-postgres-connector",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "task": "0"
+          },
+          "value": [
+            1790758689.97,
+            "1"
+          ]
+        }
+      ]
+    },
+    "cdc_events": {
+      "query": "debezium_events_seen_total",
+      "series": 8,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "snapshot",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "inspection-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "snapshot",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "repair-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "snapshot",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "vehicle-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "snapshot",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "warranty-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "0"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "streaming",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "inspection-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "472"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "streaming",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "repair-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "213"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "streaming",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "vehicle-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "610"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "debezium_events_seen_total",
+            "context": "streaming",
+            "instance": "debezium-connect:9404",
+            "job": "debezium",
+            "server": "warranty-cdc"
+          },
+          "value": [
+            1790758689.972,
+            "397"
+          ]
+        }
+      ]
+    },
+    "cdc_delay": {
+      "query": "cdc_source_to_consumer_seconds_count",
+      "series": 1,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "cdc_source_to_consumer_seconds_count",
+            "connector": "warranty-postgres-connector",
+            "instance": "192.168.147.8:8000",
+            "job": "fastapi",
+            "service": "inspection-service"
+          },
+          "value": [
+            1790758689.975,
+            "233"
+          ]
+        }
+      ]
+    },
+    "broker_throughput": {
+      "query": "kafka_broker_messagesinpersec_total",
+      "series": 3,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "kafka_broker_messagesinpersec_total",
+            "instance": "kafka-3:9404",
+            "job": "kafka-jmx"
+          },
+          "value": [
+            1790758689.978,
+            "1357"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_broker_messagesinpersec_total",
+            "instance": "kafka-2:9404",
+            "job": "kafka-jmx"
+          },
+          "value": [
+            1790758689.978,
+            "875"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_broker_messagesinpersec_total",
+            "instance": "kafka-1:9404",
+            "job": "kafka-jmx"
+          },
+          "value": [
+            1790758689.978,
+            "1012"
+          ]
+        }
+      ]
+    },
+    "outbox": {
+      "query": "outbox_published_total",
+      "series": 4,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "outbox_published_total",
+            "instance": "192.168.147.8:8000",
+            "job": "fastapi",
+            "service": "inspection-service"
+          },
+          "value": [
+            1790758689.981,
+            "152"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "outbox_published_total",
+            "instance": "192.168.147.7:8000",
+            "job": "fastapi",
+            "service": "repair-service"
+          },
+          "value": [
+            1790758689.981,
+            "42"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "outbox_published_total",
+            "instance": "192.168.147.10:8000",
+            "job": "fastapi",
+            "service": "warranty-service"
+          },
+          "value": [
+            1790758689.981,
+            "175"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "outbox_published_total",
+            "instance": "192.168.147.9:8000",
+            "job": "fastapi",
+            "service": "vehicle-service"
+          },
+          "value": [
+            1790758689.981,
+            "353"
+          ]
+        }
+      ]
+    },
+    "assignments": {
+      "query": "kafka_consumer_partition_assigned",
+      "series": 9,
+      "samples": [
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.8",
+            "consumergroup": "inspection-service-v2",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "0",
+            "topic": "vehicle-events"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.8",
+            "consumergroup": "inspection-service-v2",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "1",
+            "topic": "vehicle-events"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.8",
+            "consumergroup": "inspection-service-v2",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "2",
+            "topic": "vehicle-events"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.8",
+            "consumergroup": "inspection-service-v2",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "0",
+            "topic": "warranty-cdc.public.warranties"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.8",
+            "consumergroup": "inspection-service-v2",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "1",
+            "topic": "warranty-cdc.public.warranties"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.8",
+            "consumergroup": "inspection-service-v2",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "2",
+            "topic": "warranty-cdc.public.warranties"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.7",
+            "consumergroup": "repair-service-v1",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "0",
+            "topic": "inspection-events"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.7",
+            "consumergroup": "repair-service-v1",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "1",
+            "topic": "inspection-events"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        },
+        {
+          "metric": {
+            "__name__": "kafka_consumer_partition_assigned",
+            "client_host": "/192.168.147.7",
+            "consumergroup": "repair-service-v1",
+            "instance": "platform-exporter:9102",
+            "job": "platform",
+            "partition": "2",
+            "topic": "inspection-events"
+          },
+          "value": [
+            1790758689.982,
+            "1"
+          ]
+        }
+      ]
+    }
+  },
+  "dashboards": [
+    {
+      "uid": "lab-business",
+      "title": "Business Flow",
+      "panels": [
+        {
+          "title": "Vehicles Created/sec",
+          "query": "sum by(service)(rate(vehicles_created_total{job=\"fastapi\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Warranties Created/sec",
+          "query": "sum by(service)(rate(warranties_created_total{job=\"fastapi\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Inspections Created/sec",
+          "query": "sum by(service)(rate(inspections_created_total{job=\"fastapi\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Inspection PASS/sec",
+          "query": "sum by(service)(rate(inspections_passed_total{job=\"fastapi\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Inspection FAIL/sec",
+          "query": "sum by(service)(rate(inspections_failed_total{job=\"fastapi\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Repairs Created/sec",
+          "query": "sum by(service)(rate(repairs_created_total{job=\"fastapi\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Warranty Coverage Checks/sec",
+          "query": "sum by(service)(rate(warranty_coverage_check_total{job=\"fastapi\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "CDC Events/sec",
+          "query": "sum by(operation)(rate(warranty_cdc_events_total[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Kafka Domain Events/sec",
+          "query": "sum by(service,event_type)(rate(events_processed_total{event_type!=\"warranty.cdc\"}[2m]))",
+          "series": 3
+        },
+        {
+          "title": "Outbox Backlog",
+          "query": "max by(service)(outbox_pending_events)",
+          "series": 4
+        },
+        {
+          "title": "Outbox Publishes/sec",
+          "query": "sum by(service)(rate(outbox_published_total[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Outbox Publish Failures/sec",
+          "query": "sum by(service)(rate(outbox_publish_failed_total[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Vehicle \u2192 Warranty Pending REST",
+          "query": "max(warranty_provision_pending_requests{service=\"vehicle-service\"})",
+          "series": 1
+        },
+        {
+          "title": "A \u2192 B / D \u2192 B REST P95",
+          "query": "histogram_quantile(0.95,sum by(le,service,target_service,endpoint)(rate(service_client_request_duration_seconds_bucket[2m])))",
+          "series": 2
+        },
+        {
+          "title": "Service REST Errors",
+          "query": "sum by(service,target_service,status_code)(rate(service_client_errors_total[2m])) or on(service,target_service) (0 * sum by(service,target_service)(rate(service_client_requests_total[2m])))",
+          "series": 2
+        },
+        {
+          "title": "DB Metrics Collection Health",
+          "query": "metrics_db_collection_success",
+          "series": 4
+        }
+      ]
+    },
+    {
+      "uid": "lab-cdc",
+      "title": "CDC / Debezium",
+      "panels": [
+        {
+          "title": "Connector RUNNING",
+          "query": "connect_connector_running",
+          "series": 4
+        },
+        {
+          "title": "Task RUNNING",
+          "query": "connect_task_running",
+          "series": 4
+        },
+        {
+          "title": "Captured Events/sec",
+          "query": "rate(debezium_events_seen_total{context=\"streaming\"}[2m])",
+          "series": 4
+        },
+        {
+          "title": "Source Record Poll Rate",
+          "query": "rate(kafka_connect_source_record_poll_total[2m])",
+          "series": 4
+        },
+        {
+          "title": "Source Record Write Rate",
+          "query": "rate(kafka_connect_source_record_write_total[2m])",
+          "series": 4
+        },
+        {
+          "title": "CDC Processing Lag \u2014 Connector",
+          "query": "debezium_millisecondsbehindsource / 1000",
+          "series": 4
+        },
+        {
+          "title": "CDC Processing Lag \u2014 Source to C P95",
+          "query": "histogram_quantile(0.95,sum by(le,connector)(rate(cdc_source_to_consumer_seconds_bucket[2m])))",
+          "series": 1
+        },
+        {
+          "title": "Queue Utilization",
+          "query": "100 * (1 - debezium_queueremainingcapacity / clamp_min(debezium_queuetotalcapacity,1))",
+          "series": 8
+        },
+        {
+          "title": "Snapshot Running",
+          "query": "debezium_snapshotrunning",
+          "series": 4
+        },
+        {
+          "title": "Snapshot Completed",
+          "query": "debezium_snapshotcompleted",
+          "series": 4
+        },
+        {
+          "title": "Connector Record Errors",
+          "query": "kafka_connect_record_errors_total",
+          "series": 4
+        },
+        {
+          "title": "Retained WAL \u2014 Logical Slots",
+          "query": "lab_pg_slot_retained_bytes{slot_type=\"logical\"}",
+          "series": 4
+        },
+        {
+          "title": "CDC Operations at Inspection",
+          "query": "sum by(operation)(rate(warranty_cdc_events_total[2m]))",
+          "series": 4
+        }
+      ]
+    },
+    {
+      "uid": "lab-consumers",
+      "title": "Kafka Consumer Groups \u2014 Consumer Lag",
+      "panels": [
+        {
+          "title": "Total Consumer Lag",
+          "query": "sum(kafka_consumergroup_lag{consumergroup=~\".*\",topic=~\".*\"})",
+          "series": 1
+        },
+        {
+          "title": "Consumer Lag by Group",
+          "query": "sum by(consumergroup)(kafka_consumergroup_lag{consumergroup=~\".*\",topic=~\".*\"})",
+          "series": 2
+        },
+        {
+          "title": "Consumer Lag by Topic",
+          "query": "sum by(consumergroup,topic)(kafka_consumergroup_lag{consumergroup=~\".*\",topic=~\".*\"})",
+          "series": 3
+        },
+        {
+          "title": "Top Lagging Partitions",
+          "query": "topk(10,kafka_consumergroup_lag{consumergroup=~\".*\",topic=~\".*\"})",
+          "series": 9
+        },
+        {
+          "title": "Current Committed Offset",
+          "query": "kafka_consumergroup_current_offset{consumergroup=~\".*\",topic=~\".*\"}",
+          "series": 9
+        },
+        {
+          "title": "Log End Offset",
+          "query": "kafka_topic_partition_current_offset{topic=~\".*\"}",
+          "series": 100
+        },
+        {
+          "title": "Consumer Members",
+          "query": "kafka_consumer_members{consumergroup=~\".*\"}",
+          "series": 2
+        },
+        {
+          "title": "Partition Assignment",
+          "query": "kafka_consumer_partition_assigned{consumergroup=~\".*\",topic=~\".*\"}",
+          "series": 9
+        },
+        {
+          "title": "Processed Events/sec",
+          "query": "sum by(service,topic)(rate(events_processed_total{topic=~\".*\"}[2m]))",
+          "series": 3
+        },
+        {
+          "title": "Event Processing P95",
+          "query": "histogram_quantile(0.95,sum by(le,service)(rate(event_processing_duration_seconds_bucket{topic=~\".*\"}[2m])))",
+          "series": 2
+        },
+        {
+          "title": "Retry / Duplicate / DLQ",
+          "query": "sum by(__name__,service)({__name__=~\"events_(retried|duplicate|dlq)_total\"})",
+          "series": 6
+        },
+        {
+          "title": "Metadata Collection Success",
+          "query": "platform_collection_success{component=\"kafka\"}",
+          "series": 1
+        }
+      ]
+    },
+    {
+      "uid": "lab-containers",
+      "title": "Container Resources",
+      "panels": [
+        {
+          "title": "CPU by Container",
+          "query": "rate(container_cpu_usage_seconds_total{service=~\".*\"}[2m])",
+          "series": 28
+        },
+        {
+          "title": "RAM Working Set",
+          "query": "container_memory_working_set_bytes{service=~\".*\"}",
+          "series": 31
+        },
+        {
+          "title": "RAM Usage",
+          "query": "container_memory_usage_bytes{service=~\".*\"}",
+          "series": 31
+        },
+        {
+          "title": "Memory Limit",
+          "query": "container_spec_memory_limit_bytes{service=~\".*\"}",
+          "series": 27
+        },
+        {
+          "title": "Network Receive",
+          "query": "rate(container_network_receive_bytes_total{service=~\".*\"}[2m])",
+          "series": 34
+        },
+        {
+          "title": "Network Transmit",
+          "query": "rate(container_network_transmit_bytes_total{service=~\".*\"}[2m])",
+          "series": 34
+        },
+        {
+          "title": "Container Start Time",
+          "query": "container_start_time_seconds{service=~\".*\"}",
+          "series": 27
+        }
+      ]
+    },
+    {
+      "uid": "lab-fastapi",
+      "title": "FastAPI Services",
+      "panels": [
+        {
+          "title": "Requests/sec by Service",
+          "query": "sum by(service)(rate(http_requests_total{service=~\".*\",instance=~\".*\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "RPS by Endpoint / Method",
+          "query": "sum by(service,route,method)(rate(http_requests_total{service=~\".*\",instance=~\".*\"}[2m]))",
+          "series": 18
+        },
+        {
+          "title": "Average Latency",
+          "query": "sum by(service)(rate(http_request_duration_seconds_sum{service=~\".*\",instance=~\".*\"}[2m])) / clamp_min(sum by(service)(rate(http_request_duration_seconds_count{service=~\".*\",instance=~\".*\"}[2m])),0.001)",
+          "series": 4
+        },
+        {
+          "title": "P50 Latency",
+          "query": "histogram_quantile(0.5, sum by (le,service) (rate(http_request_duration_seconds_bucket{service=~\".*\",instance=~\".*\"}[2m])))",
+          "series": 4
+        },
+        {
+          "title": "P95 Latency",
+          "query": "histogram_quantile(0.95, sum by (le,service) (rate(http_request_duration_seconds_bucket{service=~\".*\",instance=~\".*\"}[2m])))",
+          "series": 4
+        },
+        {
+          "title": "P99 Latency",
+          "query": "histogram_quantile(0.99, sum by (le,service) (rate(http_request_duration_seconds_bucket{service=~\".*\",instance=~\".*\"}[2m])))",
+          "series": 4
+        },
+        {
+          "title": "Errors by Service",
+          "query": "sum by(service,status_code)(rate(http_request_errors_total{service=~\".*\",instance=~\".*\"}[2m]))",
+          "series": 6
+        },
+        {
+          "title": "Errors by Endpoint",
+          "query": "sum by(service,route,status_code)(rate(http_request_errors_total{service=~\".*\",instance=~\".*\"}[2m]))",
+          "series": 9
+        },
+        {
+          "title": "Responses 2xx / 4xx / 5xx",
+          "query": "sum by(service,status_class)(label_replace(rate(http_requests_total{service=~\".*\",instance=~\".*\"}[2m]),\"status_class\",\"$1xx\",\"status_code\",\"([245])..\"))",
+          "series": 4
+        },
+        {
+          "title": "Active Requests",
+          "query": "sum by(service)(http_requests_in_progress{service=~\".*\",instance=~\".*\"})",
+          "series": 4
+        },
+        {
+          "title": "DB Pool Checked Out",
+          "query": "db_pool_checked_out{service=~\".*\",instance=~\".*\"}",
+          "series": 8
+        },
+        {
+          "title": "DB Pool Idle Connections",
+          "query": "db_pool_idle_connections{service=~\".*\",instance=~\".*\"}",
+          "series": 8
+        },
+        {
+          "title": "DB Pool Timeouts",
+          "query": "sum by(service)(rate(db_pool_timeouts_total{service=~\".*\",instance=~\".*\"}[2m]))",
+          "series": 4
+        },
+        {
+          "title": "Vehicle Service RPS",
+          "query": "sum(rate(http_requests_total{service=\"vehicle-service\"}[2m]))",
+          "series": 1
+        },
+        {
+          "title": "Warranty Service RPS",
+          "query": "sum(rate(http_requests_total{service=\"warranty-service\"}[2m]))",
+          "series": 1
+        },
+        {
+          "title": "Inspection Service RPS",
+          "query": "sum(rate(http_requests_total{service=\"inspection-service\"}[2m]))",
+          "series": 1
+        },
+        {
+          "title": "Repair Service RPS",
+          "query": "sum(rate(http_requests_total{service=\"repair-service\"}[2m]))",
+          "series": 1
+        }
+      ]
+    },
+    {
+      "uid": "lab-kafka",
+      "title": "Kafka Cluster",
+      "panels": [
+        {
+          "title": "Broker Availability",
+          "query": "up{job=\"kafka-jmx\"}",
+          "series": 3
+        },
+        {
+          "title": "Broker Count",
+          "query": "kafka_brokers",
+          "series": 1
+        },
+        {
+          "title": "Topic Count",
+          "query": "count(kafka_topic_partitions)",
+          "series": 1
+        },
+        {
+          "title": "Partition Count",
+          "query": "sum(kafka_topic_partitions{topic=~\".*\"})",
+          "series": 1
+        },
+        {
+          "title": "Partition Leaders",
+          "query": "kafka_topic_partition_leader{topic=~\".*\"}",
+          "series": 100
+        },
+        {
+          "title": "In-Sync Replicas",
+          "query": "kafka_topic_partition_in_sync_replica{topic=~\".*\"}",
+          "series": 100
+        },
+        {
+          "title": "Under Replicated Partitions",
+          "query": "sum(kafka_replica_underreplicatedpartitions)",
+          "series": 1
+        },
+        {
+          "title": "Offline Partitions",
+          "query": "max(kafka_controller_offlinepartitionscount)",
+          "series": 1
+        },
+        {
+          "title": "Messages In/sec",
+          "query": "sum by(instance)(rate(kafka_broker_messagesinpersec_total[2m]))",
+          "series": 3
+        },
+        {
+          "title": "Bytes In/sec",
+          "query": "sum by(instance)(rate(kafka_broker_bytesinpersec_total[2m]))",
+          "series": 3
+        },
+        {
+          "title": "Bytes Out/sec",
+          "query": "sum by(instance)(rate(kafka_broker_bytesoutpersec_total[2m]))",
+          "series": 3
+        },
+        {
+          "title": "Broker Request Mean Latency",
+          "query": "kafka_request_latency_seconds",
+          "series": 264
+        }
+      ]
+    },
+    {
+      "uid": "lab-overview",
+      "title": "System Overview",
+      "panels": [
+        {
+          "title": "Total RPS",
+          "query": "sum(rate(http_requests_total[2m]))",
+          "series": 1
+        },
+        {
+          "title": "P95 API Latency",
+          "query": "histogram_quantile(0.95, sum by (le,service) (rate(http_request_duration_seconds_bucket[2m])))",
+          "series": 4
+        },
+        {
+          "title": "HTTP Success Rate",
+          "query": "100 * sum(rate(http_requests_total{status_code=~\"2..\"}[2m])) / clamp_min(sum(rate(http_requests_total[2m])),0.001)",
+          "series": 1
+        },
+        {
+          "title": "HTTP Error Rate \u2014 5xx",
+          "query": "100 * (sum(rate(http_requests_total{status_code=~\"5..\"}[2m])) or vector(0)) / clamp_min(sum(rate(http_requests_total[2m])),0.001)",
+          "series": 1
+        },
+        {
+          "title": "Service Availability",
+          "query": "up{job=\"fastapi\"}",
+          "series": 4
+        },
+        {
+          "title": "Total Consumer Lag",
+          "query": "sum(kafka_consumergroup_lag)",
+          "series": 1
+        },
+        {
+          "title": "PostgreSQL Connections",
+          "query": "sum by(role) (pg_stat_database_numbackends)",
+          "series": 2
+        },
+        {
+          "title": "Redis Memory",
+          "query": "sum(redis_memory_used_bytes)",
+          "series": 1
+        },
+        {
+          "title": "Container CPU",
+          "query": "sum by(service) (rate(container_cpu_usage_seconds_total[2m]))",
+          "series": 28
+        },
+        {
+          "title": "Container RAM",
+          "query": "sum by(service) (container_memory_working_set_bytes)",
+          "series": 28
+        },
+        {
+          "title": "DB Pool Saturation",
+          "query": "100 * sum by(service) (db_pool_checked_out{role=\"primary\"}) / sum by(service)(db_pool_capacity{role=\"primary\"})",
+          "series": 4
+        },
+        {
+          "title": "Outbox Backlog",
+          "query": "max by(service)(outbox_pending_events)",
+          "series": 4
+        }
+      ]
+    },
+    {
+      "uid": "lab-postgres",
+      "title": "PostgreSQL",
+      "panels": [
+        {
+          "title": "Primary / Replica Exporter DB Status",
+          "query": "pg_up",
+          "series": 2
+        },
+        {
+          "title": "Physical Replica Role",
+          "query": "lab_pg_role_is_replica",
+          "series": 2
+        },
+        {
+          "title": "Connections by DB",
+          "query": "pg_stat_database_numbackends{datname=~\".*\"}",
+          "series": 16
+        },
+        {
+          "title": "Active / Idle Connections",
+          "query": "lab_pg_activity_connections{datname=~\".*\"}",
+          "series": 13
+        },
+        {
+          "title": "Transactions/sec",
+          "query": "sum by(datname,role)(rate(pg_stat_database_xact_commit{datname=~\".*\"}[2m]) + rate(pg_stat_database_xact_rollback{datname=~\".*\"}[2m]))",
+          "series": 16
+        },
+        {
+          "title": "Commits/sec",
+          "query": "rate(pg_stat_database_xact_commit{datname=~\".*\"}[2m])",
+          "series": 16
+        },
+        {
+          "title": "Rollbacks/sec",
+          "query": "rate(pg_stat_database_xact_rollback{datname=~\".*\"}[2m])",
+          "series": 16
+        },
+        {
+          "title": "Deadlocks",
+          "query": "pg_stat_database_deadlocks{datname=~\".*\"}",
+          "series": 16
+        },
+        {
+          "title": "Locks",
+          "query": "pg_locks_count{datname=~\".*\"}",
+          "series": 144
+        },
+        {
+          "title": "Database Size",
+          "query": "pg_database_size_bytes{datname=~\".*\"}",
+          "series": 16
+        },
+        {
+          "title": "Buffer Cache Hit Ratio",
+          "query": "100 * rate(pg_stat_database_blks_hit{datname=~\".*\"}[2m]) / clamp_min(rate(pg_stat_database_blks_hit{datname=~\".*\"}[2m]) + rate(pg_stat_database_blks_read{datname=~\".*\"}[2m]),0.001)",
+          "series": 16
+        },
+        {
+          "title": "Replication Lag Bytes",
+          "query": "lab_pg_replication_lag_bytes",
+          "series": 1
+        },
+        {
+          "title": "Replication Replay Ack Delay",
+          "query": "lab_pg_replication_replay_lag_seconds",
+          "series": 1
+        },
+        {
+          "title": "WAL Position \u2014 Primary / Replica",
+          "query": "lab_pg_role_wal_position_bytes",
+          "series": 2
+        },
+        {
+          "title": "Age of Last Replayed Transaction",
+          "query": "lab_pg_role_last_replay_age_seconds{role=\"replica\"}",
+          "series": 1
+        },
+        {
+          "title": "Retained WAL by Slot",
+          "query": "lab_pg_slot_retained_bytes",
+          "series": 5
+        },
+        {
+          "title": "Replication Slot Active",
+          "query": "lab_pg_slot_active",
+          "series": 5
+        },
+        {
+          "title": "Longest Transactions",
+          "query": "lab_pg_activity_longest_transaction_seconds{datname=~\".*\"}",
+          "series": 13
+        },
+        {
+          "title": "Rows Inserted/sec",
+          "query": "rate(pg_stat_database_tup_inserted{datname=~\".*\"}[2m])",
+          "series": 16
+        },
+        {
+          "title": "Rows Updated/sec",
+          "query": "rate(pg_stat_database_tup_updated{datname=~\".*\"}[2m])",
+          "series": 16
+        },
+        {
+          "title": "Rows Deleted/sec",
+          "query": "rate(pg_stat_database_tup_deleted{datname=~\".*\"}[2m])",
+          "series": 16
+        }
+      ]
+    },
+    {
+      "uid": "lab-redis",
+      "title": "Redis Cluster",
+      "panels": [
+        {
+          "title": "Redis Node Up",
+          "query": "redis_up{instance=~\".*\"}",
+          "series": 6
+        },
+        {
+          "title": "Master / Replica Role",
+          "query": "redis_instance_info{instance=~\".*\"}",
+          "series": 6
+        },
+        {
+          "title": "Memory Used",
+          "query": "redis_memory_used_bytes{instance=~\".*\"}",
+          "series": 6
+        },
+        {
+          "title": "Memory Limit",
+          "query": "redis_memory_max_bytes{instance=~\".*\"}",
+          "series": 6
+        },
+        {
+          "title": "Connected Clients",
+          "query": "redis_connected_clients{instance=~\".*\"}",
+          "series": 6
+        },
+        {
+          "title": "Commands/sec",
+          "query": "rate(redis_commands_processed_total{instance=~\".*\"}[2m])",
+          "series": 6
+        },
+        {
+          "title": "Cache Hit Rate",
+          "query": "rate(redis_keyspace_hits_total{instance=~\".*\"}[2m])",
+          "series": 6
+        },
+        {
+          "title": "Cache Miss Rate",
+          "query": "rate(redis_keyspace_misses_total{instance=~\".*\"}[2m])",
+          "series": 6
+        },
+        {
+          "title": "Cache Hit Ratio",
+          "query": "100 * rate(redis_keyspace_hits_total{instance=~\".*\"}[2m]) / clamp_min(rate(redis_keyspace_hits_total{instance=~\".*\"}[2m]) + rate(redis_keyspace_misses_total{instance=~\".*\"}[2m]),0.001)",
+          "series": 6
+        },
+        {
+          "title": "Application Vehicle Cache Hits/Misses",
+          "query": "sum by(__name__)({__name__=~\"vehicle_cache_(hit|miss)_total\",job=\"fastapi\"})",
+          "series": 2
+        },
+        {
+          "title": "Key Count",
+          "query": "redis_db_keys{instance=~\".*\"}",
+          "series": 6
+        },
+        {
+          "title": "Expired Keys/sec",
+          "query": "rate(redis_expired_keys_total{instance=~\".*\"}[2m])",
+          "series": 6
+        },
+        {
+          "title": "Evicted Keys/sec",
+          "query": "rate(redis_evicted_keys_total{instance=~\".*\"}[2m])",
+          "series": 6
+        },
+        {
+          "title": "Replica Master Link",
+          "query": "redis_master_link_up{instance=~\".*\"}",
+          "series": 3
+        }
+      ]
+    },
+    {
+      "uid": "lab-traffic",
+      "title": "Synthetic Traffic / Load Generator",
+      "panels": [
+        {
+          "title": "Traffic Requests/sec",
+          "query": "rate(traffic_requests_total[2m])",
+          "series": 1
+        },
+        {
+          "title": "Traffic Failed Requests/sec",
+          "query": "rate(traffic_requests_failed_total[2m])",
+          "series": 1
+        },
+        {
+          "title": "Completed Flows/sec",
+          "query": "rate(traffic_flow_completed_total[2m])",
+          "series": 1
+        },
+        {
+          "title": "Failed Flows/sec",
+          "query": "rate(traffic_flow_failed_total[2m])",
+          "series": 1
+        },
+        {
+          "title": "Traffic P95 Latency",
+          "query": "histogram_quantile(0.95,sum by(le)(rate(traffic_request_duration_seconds_bucket[2m])))",
+          "series": 1
+        },
+        {
+          "title": "Traffic Retries/sec",
+          "query": "rate(traffic_retries_total[2m])",
+          "series": 1
+        },
+        {
+          "title": "Observed Vehicles / Inspections / Repairs",
+          "query": "{__name__=~\"(vehicles|inspections|repairs)_created_total\",job=\"traffic\"}",
+          "series": 3
+        },
+        {
+          "title": "Controlled Load Creates/sec",
+          "query": "rate(traffic_load_creates_total[2m])",
+          "series": 1
+        },
+        {
+          "title": "Generator CPU",
+          "query": "rate(container_cpu_usage_seconds_total{service=\"traffic-generator\"}[2m])",
+          "series": 1
+        },
+        {
+          "title": "Generator RAM",
+          "query": "container_memory_working_set_bytes{service=\"traffic-generator\"}",
+          "series": 1
+        }
+      ]
+    }
+  ],
+  "targets": [
+    {
+      "job": "cadvisor",
+      "instance": "cadvisor:8080",
+      "health": "up"
+    },
+    {
+      "job": "debezium",
+      "instance": "debezium-connect:9404",
+      "health": "up"
+    },
+    {
+      "job": "fastapi",
+      "instance": "192.168.147.10:8000",
+      "health": "up"
+    },
+    {
+      "job": "fastapi",
+      "instance": "192.168.147.7:8000",
+      "health": "up"
+    },
+    {
+      "job": "fastapi",
+      "instance": "192.168.147.8:8000",
+      "health": "up"
+    },
+    {
+      "job": "fastapi",
+      "instance": "192.168.147.9:8000",
+      "health": "up"
+    },
+    {
+      "job": "kafka",
+      "instance": "kafka-exporter:9308",
+      "health": "up"
+    },
+    {
+      "job": "kafka-jmx",
+      "instance": "kafka-1:9404",
+      "health": "up"
+    },
+    {
+      "job": "kafka-jmx",
+      "instance": "kafka-2:9404",
+      "health": "up"
+    },
+    {
+      "job": "kafka-jmx",
+      "instance": "kafka-3:9404",
+      "health": "up"
+    },
+    {
+      "job": "platform",
+      "instance": "platform-exporter:9102",
+      "health": "up"
+    },
+    {
+      "job": "postgres",
+      "instance": "postgres-exporter:9187",
+      "health": "up"
+    },
+    {
+      "job": "postgres",
+      "instance": "postgres-replica-exporter:9187",
+      "health": "up"
+    },
+    {
+      "job": "prometheus",
+      "instance": "localhost:9090",
+      "health": "up"
+    },
+    {
+      "job": "redis",
+      "instance": "redis://redis-1:6379",
+      "health": "up"
+    },
+    {
+      "job": "redis",
+      "instance": "redis://redis-2:6379",
+      "health": "up"
+    },
+    {
+      "job": "redis",
+      "instance": "redis://redis-3:6379",
+      "health": "up"
+    },
+    {
+      "job": "redis",
+      "instance": "redis://redis-4:6379",
+      "health": "up"
+    },
+    {
+      "job": "redis",
+      "instance": "redis://redis-5:6379",
+      "health": "up"
+    },
+    {
+      "job": "redis",
+      "instance": "redis://redis-6:6379",
+      "health": "up"
+    },
+    {
+      "job": "traffic",
+      "instance": "traffic-generator:9101",
+      "health": "up"
+    }
+  ],
+  "datasource": {
+    "uid": "lab-prometheus",
+    "url": "http://prometheus:9090"
+  }
+}

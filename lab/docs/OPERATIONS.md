@@ -13,7 +13,7 @@ Database layer hiện có primary–replica và Debezium; xem [runbook PostgreSQ
 [Getting Started](GETTING_STARTED.md) ghi thứ tự CLI đầy đủ. `make up` lưu log vào `artifacts/startup/<timestamp>-<pid>/startup.log`, dừng ở bước lỗi và in lệnh chẩn đoán. Init job exit0 là thành công; service dài hạn cần healthcheck.
 
 ```sh
-make up  # Startup RUNNING / WAIT / OK / FAILED theo 10 bước
+make up  # Startup RUNNING / WAIT / OK / FAILED theo 12 bước
 docker compose ps
 docker compose logs --tail=100 vehicle-service warranty-service inspection-service repair-service
 docker compose run --build --rm toolbox python scripts/demo.py
@@ -53,7 +53,7 @@ Liveness 200 chỉ cho biết process còn phục vụ HTTP. Readiness kiểm Po
 | Cache behavior | X-Cache, TTL và log | HIT/MISS không cho biết dữ liệu chắc chắn mới |
 | Process restart | `/health.instance_id`, Docker restart state | Dùng để xác nhận crash drill |
 
-Chưa có `/metrics`, Prometheus, Grafana hoặc exporter được cấu hình. Dashboard/alert production là đề xuất, không phải thành phần đang chạy.
+Có `/metrics`, Prometheus, Grafana, JMX/Kafka/Redis/PostgreSQL exporters và cAdvisor; 10 dashboards provision sẵn. Xem [Observability](OBSERVABILITY.md), chạy `make monitoring-check` và `make lag-demo`.
 
 ## 3. Truy vấn chẩn đoán
 

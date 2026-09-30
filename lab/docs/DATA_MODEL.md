@@ -91,7 +91,7 @@ stateDiagram-v2
     %% diagram: warranty-states
     direction LR
     [*] --> Pending: manual create
-    [*] --> Active: default from event
+    [*] --> Active: default from REST
     Pending: PENDING
     Active: ACTIVE
     Expired: EXPIRED
@@ -120,8 +120,27 @@ erDiagram
         uuid vehicle_id PK "No cross-database FK"
         boolean vehicle_seen
         boolean warranty_seen
+        jsonb vehicle_payload
+        uuid warranty_id "Selected local projection"
+        varchar workflow_status
+        timestamptz source_updated_at
+        timestamptz prepared_at
         timestamptz created_at
         timestamptz updated_at
+    }
+    vehicle_warranty_projection {
+        uuid warranty_id PK
+        uuid vehicle_id "Local indexed reference"
+        varchar warranty_status
+        varchar warranty_type
+        date start_date
+        date end_date
+        timestamptz source_updated_at
+        timestamptz synced_at
+        bigint source_lsn
+        integer source_partition
+        bigint source_offset
+        boolean is_deleted "Retained replay checkpoint"
     }
     inspections {
         uuid id PK
@@ -139,7 +158,7 @@ erDiagram
 
 [Xem sơ đồ SVG](diagrams/inspection-erd.svg)
 
-Không vẽ cạnh FK giữa hai bảng vì migration không tạo FK đó. Business layer kiểm `vehicle_references.vehicle_seen=True` trước khi tạo inspection. `warranty_seen` chỉ là dấu đã nhận event, không phải điều kiện bắt buộc tạo inspection và không diễn tả warranty còn hiệu lực.
+Không vẽ cạnh FK giữa hai bảng vì migration không tạo FK đó. Business layer kiểm cả vehicle_seen và warranty_seen/workflow_status=READY trước khi tạo inspection. Warranty projection đến từ CDC; READY không diễn tả coverage còn hiệu lực.
 
 `inspection_type` qua API thuộc DELIVERY/PERIODIC/DIAGNOSTIC, default PERIODIC. Notes tối đa 4000 ký tự ở API; failure_reason 1–4000 và bắt buộc cho FAIL. DB dùng TEXT, vì vậy giới hạn độ dài tối đa nằm ở schema validation.
 
@@ -207,7 +226,7 @@ erDiagram
 
 ERD thể hiện cardinality schema: repair có thể có 0..N notifications, mỗi notification thuộc đúng một repair. Service hiện tại tạo đúng một LOG notification cùng transaction với repair. Unique `(repair_id,channel)` giới hạn mỗi channel một record; không có FK nào ép một repair phải có notification hoặc ép hai vehicle_id bằng nhau. Business layer thực hiện invariant đó.
 
-`warranty_covered` NOT NULL là snapshot. Khi Warranty unavailable, lab rollback creation, không lưu NULL hoặc tự chọn false. Chưa lưu warranty_id/checked_at vào repair nên chưa đủ bằng chứng cho audit claim production. `description` do API nhập hoặc lấy từ failure_reason của event.
+`warranty_covered` NOT NULL là snapshot. Khi Warranty unavailable, lab rollback creation, không lưu NULL hoặc tự chọn false. Repair đã lưu nullable warranty_id; chưa lưu checked_at/terms version nên chưa đủ cho audit claim production. `description` do API nhập hoặc lấy từ failure_reason của event.
 
 ```mermaid
 stateDiagram-v2
@@ -294,3 +313,12 @@ docker compose exec postgres-primary psql -U platform_admin -d warranty_db \
 Danh sách vehicle/inspection/repair dùng limit/offset. Query ordering có thêm ID để ổn định khi timestamp trùng. Index inspections/repairs chưa chứa ID trong khóa index; PostgreSQL có thể cần sort phần bổ sung. Chưa claim tất cả list query đều index-only hoặc phù hợp hàng triệu row.
 
 Retention hiện tại: không có cleanup cho business history, outbox/processed/idempotency ledger hay Redis generation keys. Đề xuất production phải xác định thời gian client retry, Kafka replay/backup restore horizon và audit requirements trước khi archive/delete. Không dùng TTL Redis thay cho retention policy của durable ledger.
+
+## Bổ sung cho REST và CDC
+
+- vehicle_db có `warranty_provision_requests`: vehicle_id PK, correlation_id, status PENDING/DELIVERED, attempts, next_attempt_at, last_error, warranty_id, timestamps. Không FK sang warranty_db. Row được insert cùng vehicle/outbox; worker chỉ đánh dấu DELIVERED sau REST thành công.
+- warranty_db thêm nullable correlation_id trên warranties để nối WAL row image về HTTP flow.
+- inspection_db thêm `vehicle_warranty_projection`, vehicle_payload/status/prepared_at/warranty_id tại reference; inspection lưu warranty_id đã chọn lúc tạo. Projection checkpoint delete ngăn replay cũ làm sống lại row.
+- repair_db thêm nullable warranty_id từ coverage REST. ID là tham chiếu logic; coverage owner vẫn là B.
+
+Migrations additive: Vehicle 0003, các domain còn lại 0002; migration lock theo DB cho phép scale nhiều process cùng startup. Consumer group v2 đọc lại retained vehicle/CDC streams để xây projection mới; nếu topic lịch sử đã bị retention xóa, cần kế hoạch backfill/snapshot trước khi nâng cấp production.

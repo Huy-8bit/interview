@@ -110,3 +110,22 @@ def test_configuration_ranges_and_concurrency_alias(monkeypatch):
         Config(delete_rate=1.1)
     with pytest.raises(ValidationError):
         Config(replica_delays="500,0")
+
+
+async def test_controlled_load_cap_stops_new_requests_but_keeps_worker_alive():
+    import asyncio
+    calls = []
+    def handle(request):
+        calls.append(request)
+        return httpx.Response(201, json={"id": str(uuid4())})
+    traffic = Traffic(Config(load_test_mode=True, load_test_max_vehicles=1), transport=httpx.MockTransport(handle))
+    try:
+        await traffic.load_create(1)
+        blocked = asyncio.create_task(traffic.load_create(2))
+        await asyncio.sleep(.01)
+        assert len(calls) == 1 and not blocked.done()
+        assert traffic.metrics.counts["load_creates"] == 1
+        traffic.stop.set()
+        await blocked
+    finally:
+        await traffic.close()

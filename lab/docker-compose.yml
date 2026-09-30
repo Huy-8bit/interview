@@ -28,6 +28,7 @@ x-app-env: &app-env
   CONSUMER_MAX_POLL_INTERVAL_MS: ${CONSUMER_MAX_POLL_INTERVAL_MS:-300000}
   CONSUMER_FETCH_TIMEOUT: ${CONSUMER_FETCH_TIMEOUT:-15}
   CONSUMER_STALL_TIMEOUT: ${CONSUMER_STALL_TIMEOUT:-15}
+  SIMULATE_CONSUMER_DELAY_MS: ${SIMULATE_CONSUMER_DELAY_MS:-0}
   LAB_MODE: ${LAB_MODE:-false}
 
 x-app: &app
@@ -67,11 +68,13 @@ x-kafka-env: &kafka-env
   KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xmx384M -Xms256M}
 
 x-kafka: &kafka
-  image: apache/kafka:3.9.1
+  build: {context: ., dockerfile: monitoring/exporters/Dockerfile.kafka}
+  # Compose adds a different service label per build: use its per-service image
+  # names so parallel builds cannot overwrite one shared tag and force restarts.
   restart: unless-stopped
   stop_grace_period: 30s
   healthcheck:
-    test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+    test: ["CMD-SHELL", "KAFKA_OPTS= /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
     interval: 10s
     timeout: 10s
     retries: 30
@@ -107,6 +110,7 @@ services:
       INSPECTION_READ_PASSWORD: ${INSPECTION_READ_PASSWORD:-inspection_read_password}
       REPAIR_READ_PASSWORD: ${REPAIR_READ_PASSWORD:-repair_read_password}
       REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-replication_password}
+      MONITORING_PASSWORD: ${MONITORING_PASSWORD:-monitoring_password}
       DEBEZIUM_PASSWORD: ${DEBEZIUM_PASSWORD:-debezium_password}
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -159,9 +163,12 @@ services:
       repair-service: {condition: service_healthy}
 
   debezium-connect:
-    image: quay.io/debezium/connect:3.2.4.Final
+    init: true
+    build: {context: ., dockerfile: monitoring/exporters/Dockerfile.connect}
+    image: vehicle-lab-connect:3.2.4-jmx
     ports: ["127.0.0.1:${CONNECT_PORT:-8083}:8083"]
     environment:
+      JAVA_TOOL_OPTIONS: -javaagent:/opt/metrics/jmx.jar=9404:/opt/metrics/jmx.yml
       BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
       GROUP_ID: vehicle-lab-connect
       CONFIG_STORAGE_TOPIC: connect-configs
@@ -353,6 +360,7 @@ services:
     environment:
       <<: *app-env
       SERVICE_NAME: vehicle-service
+      WARRANTY_SERVICE_URL: http://warranty-service:8000
       WRITE_DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres-primary:5432/vehicle_db
       READ_DATABASE_URL: postgresql+asyncpg://vehicle_reader:${VEHICLE_READ_PASSWORD:-vehicle_read_password}@postgres-replica:5432/vehicle_db
 
@@ -372,13 +380,12 @@ services:
   inspection-service:
     <<: *app
     build: {context: ., dockerfile: services/inspection-service/Dockerfile}
-    ports: ["127.0.0.1:${INSPECTION_PORT:-8003}:8000"]
     environment:
       <<: *app-env
       SERVICE_NAME: inspection-service
       WRITE_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres-primary:5432/inspection_db
       READ_DATABASE_URL: postgresql+asyncpg://inspection_reader:${INSPECTION_READ_PASSWORD:-inspection_read_password}@postgres-replica:5432/inspection_db
-      KAFKA_CONSUMER_GROUP: inspection-service-v1
+      KAFKA_CONSUMER_GROUP: inspection-service-v2
 
   repair-service:
     <<: *app
@@ -392,12 +399,28 @@ services:
       KAFKA_CONSUMER_GROUP: repair-service-v1
       WARRANTY_SERVICE_URL: http://warranty-service:8000
 
+  inspection-api:
+    image: nginx:1.28.0-alpine
+    ports: ["127.0.0.1:${INSPECTION_PORT:-8003}:8000"]
+    volumes: ["./infrastructure/nginx/inspection.conf:/etc/nginx/conf.d/default.conf:ro"]
+    depends_on:
+      inspection-service: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   traffic-generator:
     build: {context: ., dockerfile: Dockerfile.traffic}
     init: true
     restart: "no"
     stop_grace_period: 15s
     environment:
+      LOAD_TEST_MODE: ${LOAD_TEST_MODE:-false}
+      LOAD_TEST_DURATION_SECONDS: ${LOAD_TEST_DURATION_SECONDS:-180}
+      LOAD_TEST_MAX_VEHICLES: ${LOAD_TEST_MAX_VEHICLES:-1000}
       TRAFFIC_ENABLED: ${TRAFFIC_ENABLED:-true}
       TRAFFIC_MODE: ${TRAFFIC_MODE:-continuous}
       VIRTUAL_USERS: ${VIRTUAL_USERS:-${TRAFFIC_CONCURRENCY:-5}}
@@ -433,11 +456,102 @@ services:
       driver: json-file
       options: {max-size: "10m", max-file: "3"}
 
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus", "--storage.tsdb.retention.time=3d", "--storage.tsdb.retention.size=1GB"]
+    ports: ["127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"]
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9090/-/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    ports: ["127.0.0.1:${GRAFANA_PORT:-3000}:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-lab_grafana_password}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      prometheus: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    command: ["--kafka.server=kafka-1:9092", "--kafka.server=kafka-2:9092", "--kafka.server=kafka-3:9092", "--kafka.version=3.9.0", "--refresh.metadata=10s", "--topic.workers=4", "--group.filter=^(inspection-service-v2|repair-service-v1)$"]
+    depends_on:
+      kafka-init: {condition: service_completed_successfully}
+    restart: unless-stopped
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.77.0
+    command: ["--redis.addr=", "--is-cluster", "--connection-timeout=3s"]
+    networks: [default, redis-cluster]
+    restart: unless-stopped
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    environment:
+      DATA_SOURCE_NAME: postgresql://lab_monitor:${MONITORING_PASSWORD:-monitoring_password}@postgres-primary:5432/postgres?sslmode=disable
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yml
+    volumes: ["./monitoring/exporters/postgres-queries.yml:/etc/postgres-exporter/queries.yml:ro"]
+    depends_on:
+      postgres-init: {condition: service_completed_successfully}
+    restart: unless-stopped
+
+  postgres-replica-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.18.1
+    environment:
+      DATA_SOURCE_NAME: postgresql://lab_monitor:${MONITORING_PASSWORD:-monitoring_password}@postgres-replica:5432/postgres?sslmode=disable
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yml
+    volumes: ["./monitoring/exporters/postgres-queries.yml:/etc/postgres-exporter/queries.yml:ro"]
+    depends_on:
+      postgres-replica: {condition: service_healthy}
+    restart: unless-stopped
+
+  platform-exporter:
+    build: {context: ., dockerfile: monitoring/exporters/Dockerfile.platform}
+    restart: unless-stopped
+
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.55.1
+    entrypoint: ["sh", "/start-cadvisor.sh"]
+    environment:
+      CADVISOR_CONTAINERD_SOCKET: ${CADVISOR_CONTAINERD_SOCKET:-}
+      CADVISOR_CONTAINERD_NAMESPACE: ${CADVISOR_CONTAINERD_NAMESPACE:-k8s.io}
+    privileged: true
+    cgroup: host
+    command: ["--docker_only=true", "--housekeeping_interval=10s", "--store_container_labels=false", "--whitelisted_container_labels=com.docker.compose.service,com.docker.compose.project", "--disable_metrics=disk,diskIO,udp,tcp,percpu,sched,process,hugetlb,resctrl,referenced_memory"]
+    volumes:
+      - ./monitoring/exporters/start-cadvisor.sh:/start-cadvisor.sh:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    restart: unless-stopped
+
   toolbox:
     networks: [default, redis-cluster]
     profiles: [tools]
     build: {context: ., dockerfile: Dockerfile.tools}
     environment:
+      GRAFANA_USER: ${GRAFANA_USER:-admin}
+      GRAFANA_PASSWORD: ${GRAFANA_PASSWORD:-lab_grafana_password}
       CONNECT_URL: http://debezium-connect:8083
       POSTGRES_ADMIN_PASSWORD: ${POSTGRES_PASSWORD:-lab_admin_password}
       VEHICLE_READ_DATABASE_URL: postgresql+asyncpg://vehicle_reader:${VEHICLE_READ_PASSWORD:-vehicle_read_password}@postgres-replica:5432/vehicle_db
@@ -458,6 +572,8 @@ services:
       repair-service: {condition: service_healthy}
 
 volumes:
+  prometheus-data:
+  grafana-data:
   postgres-data:
   postgres-replica-data:
   redis-1-data:

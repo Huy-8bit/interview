@@ -1,5 +1,7 @@
 # Traffic Generator — kết quả kiểm chứng
 
+> Bằng chứng lịch sử của phiên bản trước thay đổi REST A→B và Inspection CDC. Luồng/monitoring hiện tại xem [Observability](OBSERVABILITY.md); không dùng số liệu này như kết quả đo phiên bản mới.
+
 [Mục lục](README.md) · [Thiết kế và live guide](TRAFFIC_GENERATOR.md) · [API contracts](API_CONTRACTS.md)
 
 Chạy ngày **2026-09-30** trên Docker Desktop/macOS ARM64, engine 8 GB/8 CPU. PostgreSQL 16.9 primary/replica, Kafka 3.9.1 ba brokers, Redis 7.4.4 sáu nodes, Debezium 3.2.4.Final. Các số latency dưới đây là snapshot của workload chức năng trong máy lab, không phải benchmark hay SLO.

@@ -46,3 +46,5 @@ for entry in vehicle:vehicles warranty:warranties inspection:inspections repair:
   create_cdc_topic "$domain-cdc.public.$table" 3 delete
   create_cdc_topic "__debezium-heartbeat.$domain-cdc" 1 compact
 done
+
+create_cdc_topic warranty-cdc.public.warranties-dlq 3 delete

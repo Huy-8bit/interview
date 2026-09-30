@@ -29,6 +29,8 @@ class Traffic:
         self.run_id = str(uuid4())
         self.metrics = Metrics()
         self.stop = asyncio.Event()
+        self.load_started = time.monotonic()
+        self.load_claimed = 0
         self.tasks = []
         self.http = httpx.AsyncClient(
             timeout=self.config.timeout, transport=transport,
@@ -170,7 +172,7 @@ class Traffic:
                     async def attempt():
                         r = await self.request(flow, "create_inspection", "inspection", "POST", "/inspections", headers={"Idempotency-Key": key}, json=body, allowed=(409,))
                         if r.status_code == 409:
-                            if r.json().get("error", {}).get("code") != "vehicle_projection_not_ready":
+                            if r.json().get("error", {}).get("code") not in ("vehicle_projection_not_ready", "warranty_projection_not_ready"):
                                 raise RequestFailed("Unexpected inspection business conflict")
                             return None
                         return r.json()
@@ -208,7 +210,8 @@ class Traffic:
                         raise RequestFailed("Unexpected warranty query error")
                     return r.json() if r.status_code == 200 else None
 
-                await self.converge(flow, "warranty", warranty_ready)
+                coverage = await self.converge(flow, "warranty", warranty_ready)
+                flow["warranty_id"] = coverage["warranty_id"]
                 if failed:
                     async def repair_ready():
                         r = await self.request(flow, "query_repair", "repair", "GET", "/repairs", params={"inspection_id": inspection["id"]})
@@ -262,15 +265,32 @@ class Traffic:
             except TimeoutError:
                 pass
 
+    async def load_create(self, number):
+        if self.load_claimed >= self.config.load_test_max_vehicles or time.monotonic() - self.load_started >= self.config.load_test_duration_seconds:
+            await self.stop.wait()  # Keep the endpoint and heartbeat available after bounded load.
+            return
+        self.load_claimed += 1  # No await between cap check and claim.
+        flow = dict(run_id=self.run_id, correlation_id=str(uuid4()), virtual_user=number)
+        try:
+            vehicle = await self.create_vehicle(flow)
+            self.metrics.counts["created_vehicles"] += 1
+            self.metrics.counts["load_creates"] += 1
+            emit("load_vehicle_created", flow=flow, vehicle_id=vehicle["id"])
+        except Exception as exc:
+            self.metrics.counts["flows_failed"] += 1
+            emit("load_create_failed", flow=flow, error=type(exc).__name__)
+
     async def virtual_user(self, number):
         while not self.stop.is_set():
-            await self.lifecycle(number)
+            await (self.load_create(number) if self.config.load_test_mode else self.lifecycle(number))
             try:
                 await asyncio.wait_for(self.stop.wait(), timeout=max(self.config.interval_ms / 1000, 0.001))
             except TimeoutError:
                 pass
 
     async def run(self):
+        self.metrics.start_server(self.config.metrics_port)
+        self.load_started = time.monotonic()
         loop = asyncio.get_running_loop()
         for signum in (signal.SIGTERM, signal.SIGINT):
             loop.add_signal_handler(signum, self.stop.set)
@@ -299,4 +319,5 @@ class Traffic:
             await reporter
             emit("summary_final", **self.write_status("stopped"))
             await self.close()
+            await asyncio.to_thread(self.metrics.close_server)
         return success
