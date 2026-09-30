@@ -1,13 +1,14 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Header, Query, Response
 
 from app.schemas.inspection import (
     InspectionComplete,
     InspectionCreate,
     InspectionRead,
     InspectionUpdate,
+    ReportRead,
 )
 from app.services.inspections import InspectionService
 from platform_common.api import get_runtime
@@ -48,6 +49,18 @@ async def update(inspection_id: UUID, body: InspectionUpdate, svc=Depends(servic
 @router.post("/{inspection_id}/complete", response_model=InspectionRead)
 async def complete(inspection_id: UUID, body: InspectionComplete, svc=Depends(service)):
     return await svc.complete(inspection_id, body)
+
+
+@router.get("/{inspection_id}/report", response_model=ReportRead)
+async def report(inspection_id: UUID, svc=Depends(service)):
+    return await svc.report(inspection_id)
+
+
+@router.get("/{inspection_id}/report.pdf", response_class=Response, responses={200: {"content": {"application/pdf": {}}}})
+async def report_pdf(inspection_id: UUID, svc=Depends(service)):
+    row = await svc.report(inspection_id, document=True)
+    return Response(row.document, media_type="application/pdf", headers={
+        "Content-Disposition": f'inline; filename="{row.report_number}.pdf"', "ETag": f'"{row.sha256}"'})
 
 
 @router.get("/workflows/{vehicle_id}")

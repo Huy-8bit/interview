@@ -1,6 +1,11 @@
-from app.models.inspection import Inspection
+from sqlalchemy import select
+from sqlalchemy.orm import undefer
+
+from app.models.inspection import Inspection, InspectionReport
+from app.reports.celery_app import HIGH_PRIORITY, NORMAL_PRIORITY
 from app.repositories import inspections as repository
-from app.schemas.inspection import InspectionRead
+from app.schemas.inspection import InspectionRead, ReportRead
+from platform_common import context
 from platform_common.db import utcnow
 from platform_common.errors import DomainError
 from platform_common.events import enqueue
@@ -74,6 +79,16 @@ class InspectionService:
             row.completed_at = utcnow()
             if "notes" in body.model_fields_set:
                 row.notes = body.notes
+            # Same transaction as the result: the report request cannot be lost or
+            # created for an uncommitted result. A defect report gates the repair
+            # workshop, so it jumps ahead of PASS certificates in the queue.
+            failed = body.result == "FAIL"
+            session.add(InspectionReport(
+                inspection_id=row.id, vehicle_id=row.vehicle_id,
+                kind="DEFECT_REPORT" if failed else "CERTIFICATE",
+                priority=HIGH_PRIORITY if failed else NORMAL_PRIORITY,
+                correlation_id=context.correlation_id.get(),
+            ))
             await session.flush()
             enqueue(
                 session,
@@ -89,3 +104,16 @@ class InspectionService:
                 },
             )
             return serialize(row)
+
+    async def report(self, inspection_id, *, document=False):
+        async with self.runtime.sessions() as session:
+            query = select(InspectionReport).where(InspectionReport.inspection_id == inspection_id)
+            if document:
+                query = query.options(undefer(InspectionReport.document))
+            row = await session.scalar(query)
+        if row is None:
+            await self.get(inspection_id)  # 404 inspection_not_found when the inspection itself is missing
+            raise DomainError(404, "report_not_found", "Reports exist only for inspections completed after reports were enabled")
+        if document and row.status != "GENERATED":
+            raise DomainError(409, "report_not_ready", f"Report is {row.status}; retry after it is GENERATED")
+        return row if document else ReportRead.model_validate(row).model_dump(mode="json")

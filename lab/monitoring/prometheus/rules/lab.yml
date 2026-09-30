@@ -46,3 +46,36 @@ groups:
         expr: redis_up == 0
         for: 30s
         labels: {severity: warning}
+      - alert: RabbitMQNodeDown
+        expr: up{job="rabbitmq"} == 0
+        for: 30s
+        labels: {severity: critical}
+        annotations: {summary: 'RabbitMQ node {{ $labels.node }} is down; quorum queues keep serving with 2 of 3 members'}
+      - alert: RabbitMQPeerUnreachable
+        expr: max by(node)(rabbitmq_unreachable_cluster_peers_count) > 0
+        for: 30s
+        labels: {severity: warning}
+      - alert: RabbitMQResourceAlarm
+        expr: max by(node)(rabbitmq_alarms_memory_used_watermark + rabbitmq_alarms_free_disk_space_watermark) > 0
+        for: 30s
+        labels: {severity: critical}
+        annotations: {summary: 'Memory/disk alarm on {{ $labels.node }}: publishers are blocked'}
+      - alert: ReportQueueBacklogHigh
+        expr: sum(rabbitmq_detailed_queue_messages_ready{queue="inspection.report.generate"}) > 100
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: 'Report tasks arrive faster than workers finish them; scale report-worker'}
+      - alert: ReportTasksDeadLettered
+        expr: sum(rabbitmq_detailed_queue_messages{queue="inspection.report.dlq"}) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: 'Inspect with: docker compose exec inspection-service python -m app.reports.cli dlq'}
+      - alert: ReportWorkersDown
+        expr: (count(up{job="report-worker"} == 1) or vector(0)) == 0
+        for: 1m
+        labels: {severity: critical}
+      - alert: ReportDispatchBacklog
+        expr: max(inspection_reports_open{status="PENDING"}) > 50
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: 'Report rows are not reaching RabbitMQ; check broker connectivity from inspection-service'}

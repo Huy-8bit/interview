@@ -32,7 +32,7 @@ Group node bao gồm consumer và outbox task của service tương ứng. Inspe
 | vehicle-events | vehicle-service | inspection-service-v2 | vehicle.created, vehicle.updated |
 | warranty-cdc.public.warranties | Debezium | inspection-service-v2 | CDC c/u/d/r, tombstone |
 | warranty-events | warranty-service | Chưa có | Quan sát events |
-| inspection-events | inspection-service | repair-service-v1 | inspection.failed |
+| inspection-events | inspection-service (API và report-worker, cùng outbox `inspection_db`) | repair-service-v1 | inspection.failed, inspection.report.generated |
 | repair-events | repair-service | Chưa có | — |
 
 Cả bốn topic nguồn và bốn topic `-dlq` có ba partitions, RF=3, min ISR=2, retention bảy ngày trong lab. `repair-events-dlq` được tạo sẵn nhưng chưa có consumer nguồn viết vào. Consumer bỏ qua event type hợp lệ không có handler; vẫn commit offset. Version/envelope validation xảy ra trước bước bỏ qua type.
@@ -71,7 +71,7 @@ Envelope cấm extra top-level fields. `occurred_at` hiện dùng Pydantic datet
 
 Không có traceparent, tenant_id, aggregate_version hay schema registry ID. Correlation ID không phải khóa dedupe. Kafka key không nằm trong envelope.
 
-## 3. Catalog tám event types
+## 3. Catalog chín event types
 
 | Event | Trigger | Payload `data` | Handler hiện tại |
 |---|---|---|---|
@@ -82,6 +82,7 @@ Không có traceparent, tenant_id, aggregate_version hay schema registry ID. Cor
 | warranty.expired | Manual/expiry task chuyển EXPIRED | WarrantyRead snapshot | Không có |
 | inspection.passed | Complete PASS lần đầu | inspection_id, vehicle_id, warranty_id, failure_reason=null, occurred_at | Không có handler nghiệp vụ; Repair bỏ qua |
 | inspection.failed | Complete FAIL lần đầu | inspection_id, vehicle_id, warranty_id, failure_reason, occurred_at | Repair tạo repair + notification |
+| inspection.report.generated | Celery report-worker commit biên bản lần đầu ([Background Tasks](BACKGROUND_TASKS.md)) | report_id, inspection_id, vehicle_id, kind, result, report_number, sha256, size_bytes, generated_at | Repair gắn số biên bản + SHA-256 vào repair (chỉ FAIL) |
 | repair.created | Repair mới từ event hoặc REST | RepairRead snapshot | Không có |
 
 Không có events customer.created, inspection.created/updated, repair.updated/completed hoặc notification.sent. Không suy diễn event chỉ từ tên endpoint.
@@ -99,6 +100,10 @@ DEFAULT tạo thẳng ACTIVE chỉ phát warranty.created; không phát thêm wa
 ### Inspection payload
 
 Fields đúng như ví dụ envelope. `data.occurred_at` là completed_at của inspection; envelope occurred_at là thời điểm enqueue, có thể chênh nhẹ. Repair validate payload failed bằng model có UUIDs, reason 1–4000 và datetime. Handler dùng reason làm repair description; chưa dùng occurred_at để tính coverage quá khứ.
+
+### Inspection report payload
+
+Phát trong cùng transaction chuyển `inspection_reports` sang `GENERATED`, nên đúng một event cho mỗi inspection dù task RabbitMQ bị giao lại. Key là `vehicle_id` và outbox publish theo thứ tự aggregate, nên cùng partition và đứng sau `inspection.failed` của cùng inspection. `kind` là `DEFECT_REPORT` (FAIL) hoặc `CERTIFICATE` (PASS); `sha256` là hash của đúng file PDF lấy được ở `GET /inspections/{id}/report.pdf`. Repair bỏ qua `result=PASS` và bỏ qua khi chưa có repair cho inspection. Task RabbitMQ `inspection.generate_report` **không** phải Kafka event: nó chỉ chở `inspection_id`, `correlation_id`, không có consumer thứ hai và không được giữ lại sau khi xong.
 
 ### Repair payload
 

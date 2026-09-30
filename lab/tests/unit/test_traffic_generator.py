@@ -1,4 +1,7 @@
+import asyncio
 import json
+import os
+import time
 from uuid import uuid4
 
 import httpx
@@ -7,7 +10,7 @@ from pydantic import ValidationError
 
 from traffic_generator.config import Config
 from traffic_generator.metrics import Metrics
-from traffic_generator.worker import RequestFailed, Traffic
+from traffic_generator.worker import RequestFailed, Traffic, needed_virtual_users
 
 
 def flow():
@@ -110,6 +113,10 @@ def test_configuration_ranges_and_concurrency_alias(monkeypatch):
         Config(delete_rate=1.1)
     with pytest.raises(ValidationError):
         Config(replica_delays="500,0")
+    with pytest.raises(ValidationError):
+        Config(target_rps=-1)
+    monkeypatch.setenv("TRAFFIC_TARGET_RPS", "12.5")
+    assert Config().target_rps == 12.5
 
 
 async def test_controlled_load_cap_stops_new_requests_but_keeps_worker_alive():
@@ -128,4 +135,62 @@ async def test_controlled_load_cap_stops_new_requests_but_keeps_worker_alive():
         traffic.stop.set()
         await blocked
     finally:
+        await traffic.close()
+
+
+async def test_target_rps_paces_attempts_across_virtual_users():
+    traffic = Traffic(Config(target_rps=50, max_retries=0), transport=httpx.MockTransport(lambda request: httpx.Response(200, json=[])))
+    try:
+        started = time.monotonic()
+        await asyncio.gather(*(traffic.request(flow(), "test", "vehicle", "GET", "/vehicles") for _ in range(41)))
+        # A fresh pacer may reclaim `burst` seconds of slots, then spaces the rest 20ms apart.
+        assert time.monotonic() - started >= (40 - 50 * traffic.pacer.burst) / 50 * 0.9
+        assert traffic.pacer.wait_seconds > 0
+    finally:
+        await traffic.close()
+
+
+def test_pool_size_follows_unpaced_per_user_rate():
+    # 150 attempts in 50 busy user-seconds: each user sustains 3 rps without pacing.
+    assert needed_virtual_users(100, 150, 50, 30, 100) == 42
+    assert needed_virtual_users(100, 150, 50, 5, 100) == 10  # At most 2x per step.
+    assert needed_virtual_users(100, 150, 50, 30, 20) == 20  # TRAFFIC_MAX_VIRTUAL_USERS.
+    # Oversized pool: users were busy for only 20 of their user-seconds.
+    assert needed_virtual_users(10, 100, 20, 4, 100) == 3
+    assert needed_virtual_users(10, 100, 20, 50, 100) == 25  # At most half per step.
+    assert needed_virtual_users(10, 100, 0, 50, 100) == 25
+
+
+async def test_runtime_control_resizes_pool_and_rejects_invalid_values(tmp_path):
+    control = tmp_path / "control.json"
+    config = Config(virtual_users=3, interval_ms=0, control_file=str(control), status_file=str(tmp_path / "status.json"))
+    traffic = Traffic(config, transport=httpx.MockTransport(lambda request: httpx.Response(200)))
+    release = asyncio.Event()
+
+    async def lifecycle(number):
+        await release.wait()
+
+    def send(value, mtime_ns):
+        control.write_text(json.dumps(value))
+        os.utime(control, ns=(mtime_ns, mtime_ns))
+        traffic.apply_control()
+        traffic.adjust()
+
+    traffic.lifecycle = lifecycle
+    try:
+        traffic.adjust()
+        assert sorted(traffic.vus) == [1, 2, 3]
+        send({"version": "v1", "virtual_users": 1}, 1)
+        release.set()
+        await asyncio.sleep(0.05)
+        assert list(traffic.vus) == [1]  # Surplus users exit after their current flow.
+        assert traffic.write_status("running")["control_version"] == "v1"
+        for mtime_ns, value in enumerate([{"target_rps": -1}, {"virtual_users": 101}, ["not", "an", "object"]], start=2):
+            send(value, mtime_ns)
+            assert traffic.rate.model_dump() == dict(target_rps=0, virtual_users=1, interval_ms=0)
+        send({"version": "v2", "target_rps": 20}, 9)
+        assert traffic.pacer.rate == 20 and traffic.write_status("running")["target_rps"] == 20
+    finally:
+        traffic.stop.set()
+        await asyncio.gather(*traffic.vus.values())
         await traffic.close()

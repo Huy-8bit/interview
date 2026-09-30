@@ -1,0 +1,10 @@
+flowchart LR
+    %% diagram: kafka-vs-rabbitmq-roles
+    complete["POST /inspections/{id}/complete"] --> tx[("inspection_db transaction")]
+    tx -->|"fact: inspection.failed / passed (outbox)"| kafka["Kafka inspection-events"]
+    tx -->|"command intent: inspection_reports PENDING"| dispatcher["Report dispatcher"]
+    dispatcher -->|"command: render report for inspection X"| rabbit["RabbitMQ quorum queue"]
+    rabbit --> worker["Celery report-worker x N"]
+    worker -->|"fact: inspection.report.generated (outbox)"| kafka
+    kafka --> repair["Repair consumer group"]
+    kafka --> future["Future consumers: audit, notification, analytics"]

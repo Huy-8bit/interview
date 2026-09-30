@@ -1,14 +1,14 @@
 # Vehicle Service & Warranty Platform
 
-Bài lab backend Python dành cho Senior/Lead: **4 microservice nghiệp vụ và một traffic-generator độc lập**, PostgreSQL primary–replica với database riêng theo service và Debezium CDC, **Redis Cluster 6 node (3 master + 3 replica)**, **Kafka KRaft 3 broker (RF=3)**, REST bất đồng bộ bằng `httpx`, transactional outbox, Prometheus/Grafana với 10 dashboards, consumer idempotent và các bài thử lỗi có thể chạy lại.
+Bài lab backend Python dành cho Senior/Lead: **4 microservice nghiệp vụ và một traffic-generator độc lập**, PostgreSQL primary–replica với database riêng theo service và Debezium CDC, **Redis Cluster 6 node (3 master + 3 replica)**, **Kafka KRaft 3 broker (RF=3)**, **RabbitMQ 3 node + Celery worker phát hành biên bản kiểm định** (quorum queue, retry, DLQ), REST bất đồng bộ bằng `httpx`, transactional outbox, Prometheus/Grafana với 11 dashboards, consumer idempotent và các bài thử lỗi có thể chạy lại.
 
-**Tài liệu thiết kế:** [Observability & bài thử lag/scale](docs/OBSERVABILITY.md) · [Traffic Generator](docs/TRAFFIC_GENERATOR.md) · [PostgreSQL & CDC](docs/POSTGRESQL_CDC.md) · [Kafka & Redis Cluster](docs/CLUSTER_INFRASTRUCTURE.md) · [Mục lục docs](docs/README.md) · [System Design](docs/SYSTEM_DESIGN.md) · [ERD và state machines](docs/DATA_MODEL.md) · [Sequence diagrams](docs/REQUEST_FLOWS.md) · [API](docs/API_CONTRACTS.md) · [Events](docs/EVENT_CONTRACTS.md) · [Consistency](docs/CONSISTENCY_AND_FAILURES.md) · [Runbook](docs/OPERATIONS.md) · [Architecture decisions](docs/ARCHITECTURE_DECISIONS.md). Có cả source Mermaid và [bản SVG](docs/diagrams/README.md).
+**Tài liệu thiết kế:** [RabbitMQ + Celery background tasks](docs/BACKGROUND_TASKS.md) · [Observability & bài thử lag/scale](docs/OBSERVABILITY.md) · [Traffic Generator](docs/TRAFFIC_GENERATOR.md) · [PostgreSQL & CDC](docs/POSTGRESQL_CDC.md) · [Kafka & Redis Cluster](docs/CLUSTER_INFRASTRUCTURE.md) · [Mục lục docs](docs/README.md) · [System Design](docs/SYSTEM_DESIGN.md) · [ERD và state machines](docs/DATA_MODEL.md) · [Sequence diagrams](docs/REQUEST_FLOWS.md) · [API](docs/API_CONTRACTS.md) · [Events](docs/EVENT_CONTRACTS.md) · [Consistency](docs/CONSISTENCY_AND_FAILURES.md) · [Runbook](docs/OPERATIONS.md) · [Architecture decisions](docs/ARCHITECTURE_DECISIONS.md). Có cả source Mermaid và [bản SVG](docs/diagrams/README.md).
 
 Chỉ cần Docker và Docker Compose v2+ trên host. `make` là tiện ích tùy chọn; mọi lệnh có bản Docker tương đương. Cấu hình cluster đã được kiểm thử với 8 GB RAM và 8 CPU cấp cho Docker; mức sử dụng thay đổi theo workload. Các image được kiểm thử trên Linux ARM64 qua Docker; không ép kiến trúc CPU trong Compose.
 
 ```sh
 [ -f .env ] || cp .env.example .env
-make up                 # 12 bước RUNNING / WAIT / OK / FAILED
+make up                 # 13 bước RUNNING / WAIT / OK / FAILED
 make ps
 make traffic-status
 make traffic-logs       # Ctrl+C để thoát logs; containers vẫn chạy
@@ -553,7 +553,7 @@ docker compose logs -f --tail=100
 docker compose --profile tools down -v --remove-orphans
 ```
 
-Khởi động theo 12 bước có status log bằng `make up` hoặc `bash scripts/up.sh`; xem [thứ tự CLI](docs/GETTING_STARTED.md). Lệnh Compose trực tiếp vẫn dùng được, nhưng không có nhãn tổng thể của launcher.
+Khởi động theo 13 bước có status log bằng `make up` hoặc `bash scripts/up.sh`; xem [thứ tự CLI](docs/GETTING_STARTED.md). Lệnh Compose trực tiếp vẫn dùng được, nhưng không có nhãn tổng thể của launcher.
 
 Make targets: `make up`, `down`, `build`, `logs`, `ps`, `demo`, `seed`, `test`, `lint`, `chaos-up`, `test-chaos`, `clean`. `make clean` xóa cả named volumes. Port đang bận: sửa các biến `*_PORT` trong `.env`. Nếu init script thay đổi trên volume cũ, migration không tự tạo lại DB/role; dùng volume mới hoặc thực hiện migration vận hành rõ ràng.
 
@@ -1112,9 +1112,37 @@ Quan sát realtime khi traffic đang chạy:
 
 `make test` tự pause/resume generator. Dừng traffic trước những bài fault drill cũ cần global lag/outbox về 0; riêng `make traffic-drills` cần traffic đang chạy. Continuous mode giữ tạo dữ liệu cho đến khi stop; DELETE 1% không dọn lịch sử downstream/ledgers và không phải retention policy.
 
+## 35. RabbitMQ + Celery — Background Tasks
+
+Nghiệp vụ: khi inspection hoàn tất, Inspection phát hành **một biên bản PDF chính thức** — `DEFECT_REPORT` cho FAIL (xưởng sửa chữa cần), `CERTIFICATE` cho PASS. Render tốn CPU, cần retry, phải đúng một lần mỗi inspection và scale bằng số worker, nên không chạy trong HTTP request. Chi tiết đầy đủ: [docs/BACKGROUND_TASKS.md](docs/BACKGROUND_TASKS.md).
+
+```text
+POST /complete ─ 1 transaction ─> inspections COMPLETED + inspection_reports PENDING + outbox inspection.failed
+dispatcher (inspection-service) ─ send_task + publisher confirm ─> RabbitMQ quorum queue inspection.report.generate (3 replicas)
+report-worker x N (Celery prefork, acks_late, prefetch 1) ─> render PDF ─> GENERATED + outbox inspection.report.generated
+outbox ─> Kafka inspection-events ─> Repair gắn defect_report_number + sha256 vào repair ticket
+```
+
+**WHY KAFKA HERE?** `inspection.failed` và `inspection.report.generated` là sự thật: Repair đọc bằng consumer group riêng, service khác có thể đọc cùng topic bằng group mới mà Inspection không đổi gì, thứ tự theo `vehicle_id` bảo đảm Repair thấy repair được tạo trước khi gắn biên bản, và có thể replay offset.
+
+**WHY RABBITMQ HERE?** "Render biên bản cho inspection X" là việc cho **đúng một** worker, không cần lịch sử. Consumer Kafka của lab xử lý tuần tự một record mỗi partition, nên task render dài sẽ chặn các event phía sau và song song tối đa bằng số partition (3). RabbitMQ cho: competing consumers scale 1 → N, ACK từng message và giao lại khi worker chết, retry có delay và DLQ theo từng message, `delivery-limit` chống vòng lặp vô hạn, priority (biên bản lỗi trước chứng nhận PASS), queue depth = số việc tồn. Không message nào đi cả hai hệ thống: RabbitMQ chở lệnh, Kafka chở sự thật sinh ra sau khi lệnh xong.
+
+```sh
+make rabbitmq-status               # nodes, leader/members/online, ready/unacked/consumers
+make workers-scale N=4             # docker compose up -d --scale report-worker=4
+make report-drill FAULT=transient  # retry -> retry -> retry -> DLQ
+make report-dlq                    # task id, type, inspection_id, retries, reason, time, last_error
+make report-replay LIMIT=10
+make task-backlog-demo             # traffic > worker capacity -> queue depth tăng -> scale 4 -> giảm
+make rabbitmq-drills               # CASE 1-7: node down, leader down, worker kill, stop/start/scale workers, DLQ
+curl -s http://localhost:8003/inspections/<id>/report ; curl -o r.pdf http://localhost:8003/inspections/<id>/report.pdf
+```
+
+RabbitMQ Management UI: [rabbitmq-1 :15672](http://localhost:15672), [rabbitmq-2 :15673](http://localhost:15673), [rabbitmq-3 :15674](http://localhost:15674) — user `lab` / `lab_rabbitmq_password`. Grafana: dashboard **RabbitMQ / Background Tasks**; System Overview có RabbitMQ Queue Depth, Celery Active Tasks, Task Failure Rate, Background Task P95 Duration.
+
 ## OBSERVABILITY
 
-Mở [Grafana :3000](http://localhost:3000), đăng nhập `admin` / `lab_grafana_password` (đổi bằng `.env` trước lần tạo volume đầu). Datasource Prometheus và **10 dashboard** được provision sẵn. [Prometheus Targets :9090](http://localhost:9090/targets) phải UP; exporter còn phải trả metric thực, được kiểm bằng `make monitoring-check`.
+Mở [Grafana :3000](http://localhost:3000), đăng nhập `admin` / `lab_grafana_password` (đổi bằng `.env` trước lần tạo volume đầu). Datasource Prometheus và **11 dashboard** được provision sẵn. [Prometheus Targets :9090](http://localhost:9090/targets) phải UP; exporter còn phải trả metric thực, được kiểm bằng `make monitoring-check`.
 
 ```mermaid
 flowchart LR
@@ -1157,6 +1185,7 @@ flowchart LR
 | Per-container CPU/RAM/limit/network | Container Resources |
 | Business counters, A→B/D→B, CDC/domain events, outbox | Business Flow |
 | Workload requests/flows/errors/P95/retries | Synthetic Traffic / Load Generator |
+| RabbitMQ nodes/leader/queue depth/rates/resources, Celery workers/tasks/retries/DLQ/latency | RabbitMQ / Background Tasks |
 
 ```sh
 make monitoring-check

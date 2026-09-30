@@ -5,7 +5,8 @@ import time
 import urllib.parse
 import urllib.request
 
-EXPECTED = {'prometheus':1,'fastapi':4,'traffic':1,'kafka':1,'kafka-jmx':3,'debezium':1,'platform':1,'postgres':2,'redis':6,'cadvisor':1}
+EXPECTED = {'prometheus':1,'fastapi':4,'traffic':1,'kafka':1,'kafka-jmx':3,'debezium':1,'platform':1,'postgres':2,'redis':6,'cadvisor':1,
+            'rabbitmq':3,'rabbitmq-queues':3,'report-worker':1}
 if os.environ.get('ALLOW_STOPPED_TRAFFIC') == 'true':
     EXPECTED.pop('traffic')
 for attempt in range(60):
@@ -21,6 +22,8 @@ for attempt in range(60):
             checks = {
                 'postgres database connectivity': 'min(pg_up) == 1',
                 'redis connectivity': 'sum(redis_up) == 6',
+                'rabbitmq cluster': 'count(rabbitmq_identity_info{job="rabbitmq"}) == 3 and max(rabbitmq_unreachable_cluster_peers_count) == 0',
+                'report queue metrics': 'count(rabbitmq_detailed_queue_messages{queue=~"inspection.report.(generate|dlq)"}) == 2',
                 'connector tasks': 'sum(connect_task_running) == 4',
                 'metadata collection': 'sum(platform_collection_success) == 2',
                 'container CPU': 'count(count by(service)(container_cpu_usage_seconds_total{service=~"vehicle-service|warranty-service|inspection-service|repair-service|traffic-generator|postgres-primary|postgres-replica|kafka-[123]|redis-[1-6]|debezium-connect"})) >= 17',

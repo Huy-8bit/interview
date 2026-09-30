@@ -16,9 +16,9 @@ make cdc-projection-check
 make lag-demo
 ```
 
-`docker compose up --build` cũng tự bật traffic, exporters, Prometheus và Grafana. `make up` bổ sung 12 bước RUNNING/WAIT/OK/FAILED và lưu log tại `artifacts/startup/`. Bước cuối chờ các scrape target bắt buộc UP.
+`docker compose up --build` cũng tự bật traffic, exporters, Prometheus và Grafana. `make up` bổ sung 13 bước RUNNING/WAIT/OK/FAILED và lưu log tại `artifacts/startup/`. Bước cuối chờ các scrape target bắt buộc UP.
 
-- [Grafana](http://localhost:3000): `admin` / `lab_grafana_password`, đổi bằng `GRAFANA_USER`, `GRAFANA_PASSWORD` trước lần tạo volume đầu tiên. Datasource **Prometheus**, UID `lab-prometheus`, và 10 dashboard được provision tự động vào folder **Vehicle Platform Lab**.
+- [Grafana](http://localhost:3000): `admin` / `lab_grafana_password`, đổi bằng `GRAFANA_USER`, `GRAFANA_PASSWORD` trước lần tạo volume đầu tiên. Datasource **Prometheus**, UID `lab-prometheus`, và 11 dashboard được provision tự động vào folder **Vehicle Platform Lab**.
 - [Prometheus Targets](http://localhost:9090/targets): xem trạng thái UP/DOWN và lỗi scrape cụ thể.
 - [Prometheus Alerts](http://localhost:9090/alerts): example rules được load sẵn; chưa có kênh gửi thông báo.
 - [Kafka UI](http://localhost:8080): partitions, ISR, records, consumer groups.
@@ -104,7 +104,7 @@ Hai handler lấy transaction advisory lock theo vehicle ID trong inspection_db,
 
 | Dashboard | Nội dung chính |
 |---|---|
-| System Overview | Traffic: tổng RPS; latency: P95; errors: 5xx%; saturation: CPU/RAM/pool/lag; availability, PostgreSQL connections, Redis memory |
+| System Overview | Traffic: tổng RPS; latency: P95; errors: 5xx%; saturation: CPU/RAM/pool/lag; availability, PostgreSQL connections, Redis memory; RabbitMQ queue depth, Celery active tasks, task failure rate, task P95 |
 | FastAPI Services | RPS riêng Vehicle/Warranty/Inspection/Repair, endpoint/method/status, average/P50/P95/P99, active requests, pool/timeouts |
 | Kafka Cluster | Broker UP/count, topics, partition/leader/ISR, URP, offline, messages/bytes, request mean latency |
 | Kafka Consumer Groups — Consumer Lag | Group/topic/partition lag, current/end offset, top lagging, members, assignment, processed throughput, retry/DLQ |
@@ -114,6 +114,7 @@ Hai handler lấy transaction advisory lock theo vehicle ID trong inspection_db,
 | Container Resources | CPU, RAM working set/usage/limit, network RX/TX và start timestamp theo container |
 | Business Flow | Committed vehicles/warranties/inspections/PASS/FAIL/repairs, CDC/domain events, outbox, A→B/D→B REST |
 | Synthetic Traffic / Load Generator | Attempts/failures, flows hoàn tất/thất bại, latency histogram, retries, business objects quan sát được, controlled load |
+| RabbitMQ / Background Tasks | Ba node RabbitMQ, leader quorum queue, connections/channels/consumers, depth/ready/unacked, publish/deliver/ack/redelivery, dead-letter theo lý do, memory/disk/fd/ports/alarms; Celery workers, active, completed/failed/retries, P95 duration, queue wait theo priority, DLQ. Xem [Background Tasks](BACKGROUND_TASKS.md#10-quan-sát) |
 
 Variables service/instance, topic/consumer_group, database, Redis node đặt ở dashboard tương ứng. Consumer lag có threshold vàng 100, đỏ 1000. Chọn khoảng thời gian 15 phút và refresh 10 giây; rate dùng cửa sổ 2 phút nên cần vài scrape mới có mẫu.
 

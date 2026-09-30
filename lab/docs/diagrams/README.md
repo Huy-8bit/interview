@@ -6,6 +6,9 @@ Chạy `make docs-render` để cập nhật; file này được tạo tự đ�
 
 | Sơ đồ | Tài liệu | SVG | Mermaid source |
 |---|---|---|---|
+| 2. WHY KAFKA HERE? WHY RABBITMQ HERE? | [BACKGROUND_TASKS.md](../BACKGROUND_TASKS.md) | [Xem SVG](kafka-vs-rabbitmq-roles.svg) | [Source](sources/kafka-vs-rabbitmq-roles.mmd) |
+| 3. Luồng xử lý | [BACKGROUND_TASKS.md](../BACKGROUND_TASKS.md) | [Xem SVG](report-task-lifecycle.svg) | [Source](sources/report-task-lifecycle.mmd) |
+| 6. ACK, redelivery và timeout | [BACKGROUND_TASKS.md](../BACKGROUND_TASKS.md) | [Xem SVG](report-task-ack.svg) | [Source](sources/report-task-ack.mmd) |
 | 1. Topology đang triển khai | [CLUSTER_INFRASTRUCTURE.md](../CLUSTER_INFRASTRUCTURE.md) | [Xem SVG](clustered-infrastructure.svg) | [Source](sources/clustered-infrastructure.mmd) |
 | 2. Kafka KRaft, replication và quorum | [CLUSTER_INFRASTRUCTURE.md](../CLUSTER_INFRASTRUCTURE.md) | [Xem SVG](kafka-leader-failover.svg) | [Source](sources/kafka-leader-failover.mmd) |
 | Producer và consumer | [CLUSTER_INFRASTRUCTURE.md](../CLUSTER_INFRASTRUCTURE.md) | [Xem SVG](consumer-partition-rebalance.svg) | [Source](sources/consumer-partition-rebalance.mmd) |

@@ -169,3 +169,13 @@ A→B dùng REST cùng durable local provision command. C ghép vehicle domain e
 ## ADR-015 — Metrics tại nguồn, exporters theo runtime
 
 Prometheus scrape ASGI/business/worker metrics và exporters thật. Grafana provision file, DNS discovery theo replica. Broker JMX bổ sung throughput/ISR; kafka-exporter đo offsets/lag; status exporter chỉ bổ sung Connect REST và Kafka assignment. cAdvisor đo Linux cgroups; không dùng process CPU hoặc số giả để thay container CPU. Cấu hình/kiểm chứng tại [Observability](OBSERVABILITY.md).
+
+## ADR-016 — RabbitMQ + Celery cho biên bản kiểm định, Kafka giữ vai trò event stream
+
+**Trạng thái:** đã áp dụng.
+
+**Quyết định:** render biên bản kiểm định (PDF) là task Celery trên quorum queue `inspection.report.generate` của cụm RabbitMQ 3 node, không phải consumer Kafka và không chạy trong HTTP request. Dòng `inspection_reports` tạo trong transaction complete là ý định task; dispatcher publish với publisher confirm. Worker `acks_late`, prefetch 1, idempotent theo `inspection_id` tại commit point; retry qua Celery native delayed delivery, DLX/DLQ và `delivery-limit` là policy. Sự thật sau khi xong (`inspection.report.generated`) đi Kafka qua outbox; không message nào được gửi vào cả hai hệ thống.
+
+**Hệ quả:** worker scale độc lập với số partition, task chậm không chặn event Kafka, retry/DLQ/priority dùng tính năng broker. Đổi lại thêm một cụm stateful (Raft cho queue và Khepri cho metadata), 28 quorum queue `celery_delayed_*` do Celery tạo, và một đường giao hàng at-least-once thứ hai cần idempotency riêng. Chi tiết: [Background Tasks](BACKGROUND_TASKS.md).
+
+**Xem xét lại khi:** có nhiều loại task khác hồ sơ tài nguyên (tách queue/pool), cần workflow nhiều bước có trạng thái (orchestrator), hoặc tài liệu lớn cần object storage.

@@ -195,7 +195,7 @@ flowchart LR
 
 [Xem sơ đồ SVG](diagrams/startup-dependencies.svg)
 
-`make up` dùng [launcher 12 bước](../scripts/up.sh), in RUNNING/WAIT/OK/FAILED cùng elapsed time, giữ log mỗi phiên và dừng tại gate lỗi. [Getting Started](GETTING_STARTED.md) ghi thứ tự CLI và cách đọc status. Compose trực tiếp vẫn dùng dependency graph trên; launcher chủ động chia các nhóm container theo từng bước.
+`make up` dùng [launcher 13 bước](../scripts/up.sh), in RUNNING/WAIT/OK/FAILED cùng elapsed time, giữ log mỗi phiên và dừng tại gate lỗi. [Getting Started](GETTING_STARTED.md) ghi thứ tự CLI và cách đọc status. Compose trực tiếp vẫn dùng dependency graph trên; launcher chủ động chia các nhóm container theo từng bước.
 
 Startup chờ dependencies; resilience khi Kafka down áp dụng sau khi application đã chạy. Migration lỗi thì uvicorn chưa được mở. Lock migration thuộc từng DB nên các domain không cần khóa chung.
 

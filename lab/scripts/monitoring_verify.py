@@ -58,6 +58,11 @@ async def check(output=None):
             'broker_throughput':'kafka_broker_messagesinpersec_total',
             'outbox':'outbox_published_total',
             'assignments':'kafka_consumer_partition_assigned',
+            'rabbitmq_nodes':'rabbitmq_identity_info',
+            'report_queue_depth':'rabbitmq_detailed_queue_messages{queue="inspection.report.generate"}',
+            'report_tasks_submitted':'background_tasks_submitted_total',
+            'report_tasks_completed':'background_tasks_completed_total{outcome="generated"}',
+            'report_task_duration':'background_task_duration_seconds_count',
         }
         for key,expression in required.items():
             rows=await query(client,expression)
@@ -68,11 +73,12 @@ async def check(output=None):
                 present={r['metric'].get('service') for r in rows}
                 assert REQUIRED_SERVICES <= present, (key,sorted(REQUIRED_SERVICES-present))
             evidence['metrics'][key]={'query':expression,'series':len(rows),'samples':rows}
-        for expression,count in [('pg_up',2),('redis_up',6),('connect_connector_running',4),('connect_task_running',4),('platform_collection_success',2)]:
+        for expression,count in [('up{job="rabbitmq"}',3),('pg_up',2),('redis_up',6),('connect_connector_running',4),('connect_task_running',4),('platform_collection_success',2)]:
             rows=await query(client,expression)
             assert len(rows)==count and all(float(r['value'][1])==1 for r in rows), (expression,rows)
         labels=await query(client,'http_requests_total')
-        forbidden={'vehicle_id','event_id','request_id','correlation_id','VIN','vin','user_id','inspection_id'}
+        forbidden={'vehicle_id','event_id','request_id','correlation_id','VIN','vin','user_id','inspection_id','task_id'}
+        labels+=await query(client,'{__name__=~"background_.*"}')
         for row in labels:
             assert not forbidden.intersection(row['metric'])
             assert not re.search(r'[0-9a-f]{8}-[0-9a-f-]{27}',row['metric'].get('route',''))

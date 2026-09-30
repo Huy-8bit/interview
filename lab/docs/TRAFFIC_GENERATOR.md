@@ -92,6 +92,12 @@ Dữ liệu gồm VIN `TRF` + 14 ký tự random hợp lệ, manufacturer/model 
 
 `TRAFFIC_INTERVAL_MS` là thời gian nghỉ **sau mỗi flow**, không phải lịch phát request cố định. Throughput gần đúng trong trạng thái ổn định là `VIRTUAL_USERS / (thời gian flow + interval)`. Retry và chờ consumer làm giảm tốc độ tự nhiên; không tạo hàng đợi task vô hạn.
 
+### Điều khiển req/s
+
+`TRAFFIC_TARGET_RPS=0` (mặc định) giữ pool cố định `VIRTUAL_USERS` như trên. Đặt giá trị >0 thì mọi HTTP attempt, kể cả retry và polling, đi qua một pacer chung giãn đều các attempt theo target; slot bị bỏ trống được bù tối đa 0.5s nên tốc độ dài hạn không vượt target. Số virtual user tự điều chỉnh theo Little's law: mỗi ~5s, worker đo số attempt trên user-second **không tính thời gian chờ pacer**, rồi chọn `ceil(target × 1.25 / rate mỗi user)` (dư 25% vì flow có nhiều khoảng nghỉ). Pool tăng tối đa gấp đôi hoặc giảm tối đa một nửa mỗi bước và bị chặn bởi `TRAFFIC_MAX_VIRTUAL_USERS`. User thừa tự thoát sau flow đang chạy, không cancel giữa chừng. Workload vẫn là closed-loop có giới hạn. Nếu service chậm đến mức pool chạm max thì `current_rps` sẽ thấp hơn target, và đó là tín hiệu hệ thống đã bão hòa.
+
+"req/s" ở đây là HTTP attempts của generator, cùng định nghĩa với `rate(traffic_requests_total)`. Target rất thấp (<1 rps) làm mỗi flow dài hơn và có thể chạm `CONVERGENCE_TIMEOUT_SECONDS`/`FLOW_TIMEOUT_SECONDS`.
+
 ## 3. Retry, idempotency và timeout
 
 ```mermaid
@@ -130,6 +136,9 @@ Giá trị mặc định có trong [.env.example](../.env.example), validation �
 | VIRTUAL_USERS | 5 | 1–100 virtual users, chỉ áp dụng concurrency trong continuous |
 | TRAFFIC_CONCURRENCY | 5 khi không có VIRTUAL_USERS | Alias; VIRTUAL_USERS được ưu tiên, kể cả khi lấy từ `.env` |
 | TRAFFIC_INTERVAL_MS | 2000 | Nghỉ sau flow, 0–3600000ms |
+| TRAFFIC_TARGET_RPS | 0 | 0–10000 HTTP attempts/s; 0 = pool cố định, >0 = pacing + tự scale virtual users |
+| TRAFFIC_MAX_VIRTUAL_USERS | 100 | 1–500; trần cho auto-scale và `make traffic-rate USERS=...` |
+| TRAFFIC_CONTROL_FILE | /tmp/traffic-generator-control.json | File lệnh runtime; bị xóa khi process khởi động |
 | TRAFFIC_ERROR_RATE | 0.05 | Xác suất gửi thêm PATCH year=1800 để nhận 422; không sửa dữ liệu |
 | REQUEST_TIMEOUT_SECONDS | 5 | Deadline mỗi attempt, >0 và ≤60s |
 | MAX_RETRIES | 3 | 0–10; không tính attempt đầu |
@@ -170,13 +179,22 @@ make traffic-scenario
 docker compose run --rm --no-deps -e TRAFFIC_MODE=scenario \
   -e FAIL_INSPECTION_RATE=1 -e DUPLICATE_REQUEST_RATE=1 -e DELETE_RATE=1 traffic-generator
 
-# Đổi concurrency/interval của continuous đang chạy
+# Đổi req/s ngay khi đang chạy: không restart, giữ run_id và counters
+make traffic-rate RPS=50
+# Quay về pool cố định 10 users, nghỉ 500ms sau mỗi flow
+make traffic-rate RPS=0 USERS=10 INTERVAL_MS=500
+# Xem target_rps, current_rps (cửa sổ ~10s) và số virtual users
+make traffic-rate
+# Đổi concurrency/interval/target mặc định bằng cách recreate container (run_id mới)
 VIRTUAL_USERS=10 TRAFFIC_INTERVAL_MS=1000 docker compose up -d --no-deps traffic-generator
+TRAFFIC_TARGET_RPS=30 docker compose up -d --no-deps traffic-generator
 # Giữ container hoạt động nhưng không tạo traffic
 TRAFFIC_ENABLED=false docker compose up -d --no-deps traffic-generator
 # Khôi phục mặc định đã đặt trong .env/Compose
 docker compose up -d --no-deps traffic-generator
 ```
+
+Thay đổi qua `make traffic-rate` chỉ tồn tại trong run hiện tại; recreate/restart container sẽ quay về giá trị trong `.env`/Compose. Worker log `rate_changed` khi áp dụng, `rate_control_rejected` khi giá trị không hợp lệ. Prometheus có thêm gauge `traffic_target_rps` và `traffic_virtual_users` để so với `rate(traffic_requests_total[1m])`.
 
 `--no-deps` chỉ dùng sau khi stack đã khởi động. Khi `TRAFFIC_MODE=scenario` đặt cho toàn Compose, container sẽ thoát sau một flow; dùng `compose run` để kiểm exit code, tránh `up --wait` vốn dành cho service chạy dài. [Compose startup order](https://docs.docker.com/compose/how-tos/startup-order/) chỉ bảo đảm thứ tự khởi động, không tự dừng generator khi dependency mất readiness về sau.
 

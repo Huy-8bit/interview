@@ -24,37 +24,38 @@ make up
 
 | Bước | Nội dung | Điều kiện báo OK |
 |---|---|---|
-| 01/12 | Docker Engine, Compose, cấu hình | Engine truy cập được, Compose hỗ trợ wait-timeout, config hợp lệ |
-| 02/12 | Build APIs, generator, Kafka/Connect có JMX và platform exporter | Docker build exit 0 |
-| 03/12 | PostgreSQL primary, sáu Redis nodes, ba Kafka brokers | Healthchecks của các container thành công |
-| 04/12 | DB roles/physical slot, Redis cluster, Kafka topics | postgres-init, redis-cluster-init, kafka-init đều exit 0 |
-| 05/12 | PostgreSQL replica | Healthcheck xác nhận hot standby đang recovery |
-| 06/12 | Migration và bốn API | Alembic thành công và `/ready` của cả bốn API trả 200 |
-| 07/12 | CDC publications/grants/replica identity | cdc-db-init exit 0 |
-| 08/12 | Debezium Connect | Connect REST healthcheck thành công |
-| 09/12 | Bốn connectors | debezium-init xác nhận connector và task RUNNING rồi exit 0 |
-| 10/12 | Prometheus và exporters | Scrape endpoints chạy; PostgreSQL monitor role đã được init |
-| 11/12 | Kafka UI và Traffic Generator | UI container running; generator heartbeat healthy hoặc scenario đã exit 0 |
-| 12/12 | Grafana và Prometheus targets | Grafana health, target UP, DB/Redis connectivity, Connect tasks và container CPU/RAM có mẫu |
+| 01/13 | Docker Engine, Compose, cấu hình | Engine truy cập được, Compose hỗ trợ wait-timeout, config hợp lệ |
+| 02/13 | Build APIs, report worker, generator, Kafka/Connect có JMX và platform exporter | Docker build exit 0 |
+| 03/13 | PostgreSQL primary, sáu Redis nodes, ba Kafka brokers, ba RabbitMQ nodes | Healthchecks của các container thành công |
+| 04/13 | DB roles/physical slot, Redis cluster, Kafka topics, RabbitMQ cluster/quorum queues/policies | postgres-init, redis-cluster-init, kafka-init, rabbitmq-init đều exit 0; rabbitmq-init chỉ exit 0 khi đủ 3 node và queue có 3 member |
+| 05/13 | PostgreSQL replica | Healthcheck xác nhận hot standby đang recovery |
+| 06/13 | Migration và bốn API | Alembic thành công và `/ready` của cả bốn API trả 200 |
+| 07/13 | Celery report workers | Mỗi `report-worker` đã bắt đầu consume `inspection.report.generate` ([Background Tasks](BACKGROUND_TASKS.md)) |
+| 08/13 | CDC publications/grants/replica identity | cdc-db-init exit 0 |
+| 09/13 | Debezium Connect | Connect REST healthcheck thành công |
+| 10/13 | Bốn connectors | debezium-init xác nhận connector và task RUNNING rồi exit 0 |
+| 11/13 | Prometheus và exporters | Scrape endpoints chạy; PostgreSQL monitor role đã được init |
+| 12/13 | Kafka UI và Traffic Generator | UI container running; generator heartbeat healthy hoặc scenario đã exit 0 |
+| 13/13 | Grafana và Prometheus targets | Grafana health, target UP (gồm 3 RabbitMQ nodes, report workers), DB/Redis/RabbitMQ cluster, Connect tasks và container CPU/RAM có mẫu |
 
 Ví dụ hình thức log; thời gian thực tế phụ thuộc máy và image cache:
 
 ```text
-[14:00:00] [01/12] RUNNING Docker Engine, Compose and configuration
-[14:00:01] [01/12] OK      Docker Engine, Compose and configuration (1s)
+[14:00:00] [01/13] RUNNING Docker Engine, Compose and configuration
+[14:00:01] [01/13] OK      Docker Engine, Compose and configuration (1s)
 ...
-[14:00:30] [04/12] RUNNING DB roles/slot, Redis Cluster, Kafka topics
+[14:00:30] [04/13] RUNNING DB roles/slot, Redis Cluster, Kafka topics
 WAIT kafka-init: state=running, health=none, elapsed=10s
 WAIT kafka-init: state=running, health=none, elapsed=20s
 ...
-[14:02:10] [04/12] OK      DB roles/slot, Redis Cluster, Kafka topics (100s)
+[14:02:10] [04/13] OK      DB roles/slot, Redis Cluster, Kafka topics (100s)
 ...
-[14:03:00] [12/12] READY   Startup completed in 180s. Log: .../startup.log
+[14:03:00] [13/13] READY   Startup completed in 180s. Log: .../startup.log
 ```
 
 `RUNNING` là đang thực hiện; `WAIT` là còn chờ init/health; `OK` là bước đã đạt điều kiện thật; `FAILED` dừng tại bước lỗi. Script không dùng sleep cố định để kết luận thành công. Các init jobs hoàn tất đúng sẽ ở trạng thái `Exited (0)` trong `docker compose ps --all`; đây là kết quả bình thường.
 
-Mỗi lần chạy lưu toàn bộ output vào **`artifacts/startup/<timestamp>-<pid>/startup.log`** và snapshot generator vào `traffic-status.json` cùng thư mục. Cuối lệnh in URL thực tế cho Swagger, Kafka UI và Connect, kể cả Repair được cấp cổng động.
+Mỗi lần chạy lưu toàn bộ output vào **`artifacts/startup/<timestamp>-<pid>/startup.log`** và snapshot generator vào `traffic-status.json` cùng thư mục. Cuối lệnh in URL thực tế cho Swagger, Kafka UI, Connect và RabbitMQ Management UI của 3 node, kể cả Repair được cấp cổng động.
 
 `OK` của bước replica chỉ xác nhận healthcheck hot standby; chưa đo catch-up/byte lag. UI hiện chưa có HTTP healthcheck. Generator healthy có thể đang enabled=false; đọc snapshot `enabled`, `mode`, counters. `READY` là hoàn tất startup checks, chưa phải kiểm chứng toàn bộ business flow; dùng `make traffic-test` khi cần.
 
@@ -74,7 +75,7 @@ make traffic-status
 make traffic-logs
 ```
 
-Mở [Grafana](http://localhost:3000), đăng nhập mặc định `admin` / `lab_grafana_password`. Datasource và 10 dashboards đã có trong folder **Vehicle Platform Lab**. [Observability guide](OBSERVABILITY.md) giải thích từng dashboard, metric và PromQL; [Prometheus Targets](http://localhost:9090/targets) cho biết lỗi scrape cụ thể nếu có.
+Mở [Grafana](http://localhost:3000), đăng nhập mặc định `admin` / `lab_grafana_password`. Datasource và 11 dashboards đã có trong folder **Vehicle Platform Lab**. [Observability guide](OBSERVABILITY.md) giải thích từng dashboard, metric và PromQL; [Prometheus Targets](http://localhost:9090/targets) cho biết lỗi scrape cụ thể nếu có.
 
 `traffic-logs` theo dõi liên tục; **Ctrl+C chỉ thoát màn hình logs**, container tiếp tục chạy. Mở [Kafka UI](http://localhost:8080), hoặc URL cuối lệnh startup nếu đã đổi port. Nhìn domain/CDC topics và consumer lag; [live guide](TRAFFIC_GENERATOR.md#7-quan-sát-realtime) có SQL/Redis/Connect commands.
 

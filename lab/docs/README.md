@@ -9,8 +9,9 @@ Bộ tài liệu này giải thích **hệ thống đang chạy trong repository
 | Tài liệu | Nội dung | Khi nào cần đọc |
 |---|---|---|
 | [Observability Validation](OBSERVABILITY_VALIDATION.md) | 59 tests, CDC end-to-end, 21 targets, 134 panel queries và consumer scale thật | Xem bằng chứng phiên bản REST + CDC + monitoring |
-| [Observability](OBSERVABILITY.md) | Metrics pipeline, 10 dashboards, PromQL, failures và lag/scale demo | Quan sát và thực hành |
-| [Getting Started](GETTING_STARTED.md) | Thứ tự CLI, startup 12 bước, log tiến độ, xem traffic và dừng/chạy lại | Bắt đầu chạy lab |
+| [RabbitMQ + Celery Background Tasks](BACKGROUND_TASKS.md) | Biên bản kiểm định qua RabbitMQ quorum queue: why Kafka vs why RabbitMQ, ACK, idempotency, retry/DLQ/timeout/priority, metrics, 7 failure cases và backlog demo | Học work queue, task processing và vận hành RabbitMQ |
+| [Observability](OBSERVABILITY.md) | Metrics pipeline, 11 dashboards, PromQL, failures và lag/scale demo | Quan sát và thực hành |
+| [Getting Started](GETTING_STARTED.md) | Thứ tự CLI, startup 13 bước, log tiến độ, xem traffic và dừng/chạy lại | Bắt đầu chạy lab |
 | [System Design](SYSTEM_DESIGN.md) | Yêu cầu, ranh giới service, high-level/low-level design, deployment, capacity, security và hướng production | Muốn hiểu thiết kế tổng thể và lý do lựa chọn |
 | [Cluster Infrastructure](CLUSTER_INFRASTRUCTURE.md) | Kafka 3 brokers, Redis 3M+3R, quorum/slots, failover, consumer scale và command thực hành | Học replication/HA và test node failure |
 | [PostgreSQL & CDC](POSTGRESQL_CDC.md) | Primary/replica, WAL, read routing, Debezium, CDC vs domain events và 8 bài thử lỗi | Học database replication và CDC thật |
@@ -19,7 +20,7 @@ Bộ tài liệu này giải thích **hệ thống đang chạy trong repository
 | [Traffic Validation](TRAFFIC_VALIDATION.md) | PASS/FAIL scenarios, CDC bằng REST và năm dependency outage | Xem bằng chứng của generator |
 | [Data Model](DATA_MODEL.md) | ERD, dictionary dữ liệu, constraint/index, state machine, migration và retention | Thiết kế/chỉnh schema hoặc tìm invariant nghiệp vụ |
 | [API Contracts](API_CONTRACTS.md) | Toàn bộ endpoint nghiệp vụ, input/output, validation, error và retry contract | Viết client hoặc sửa API |
-| [Event Contracts](EVENT_CONTRACTS.md) | 8 event types, envelope, topics/groups, payload, ordering và versioning | Viết consumer hoặc điều tra event |
+| [Event Contracts](EVENT_CONTRACTS.md) | 9 event types, envelope, topics/groups, payload, ordering và versioning | Viết consumer hoặc điều tra event |
 | [Request & Event Flows](REQUEST_FLOWS.md) | Sequence diagrams cho tạo xe, FAIL → repair, API retry, consumer concurrency, cache và expiry | Theo dõi một thao tác đi qua những thành phần nào |
 | [Consistency & Failure Design](CONSISTENCY_AND_FAILURES.md) | Outbox, crash windows, at-least-once, deduplication, locks, timeout budget và recovery | Đánh giá correctness và failure behavior |
 | [Operations Runbook](OPERATIONS.md) | Chạy hệ thống, health/log/SQL/Kafka, xử lý 12 failure scenarios, DLQ replay và phục hồi | Thực hành vận hành, quan sát và debug |

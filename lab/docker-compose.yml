@@ -31,6 +31,18 @@ x-app-env: &app-env
   SIMULATE_CONSUMER_DELAY_MS: ${SIMULATE_CONSUMER_DELAY_MS:-0}
   LAB_MODE: ${LAB_MODE:-false}
 
+x-report-env: &report-env
+  RABBITMQ_URLS: amqp://${RABBITMQ_USER:-lab}:${RABBITMQ_PASSWORD:-lab_rabbitmq_password}@rabbitmq-1:5672//;amqp://${RABBITMQ_USER:-lab}:${RABBITMQ_PASSWORD:-lab_rabbitmq_password}@rabbitmq-2:5672//;amqp://${RABBITMQ_USER:-lab}:${RABBITMQ_PASSWORD:-lab_rabbitmq_password}@rabbitmq-3:5672//
+  RABBITMQ_HEARTBEAT: ${RABBITMQ_HEARTBEAT:-10}
+  REPORT_MAX_RETRIES: ${REPORT_MAX_RETRIES:-3}
+  REPORT_RETRY_BASE_SECONDS: ${REPORT_RETRY_BASE_SECONDS:-2}
+  REPORT_RETRY_MAX_SECONDS: ${REPORT_RETRY_MAX_SECONDS:-60}
+  REPORT_SOFT_TIME_LIMIT: ${REPORT_SOFT_TIME_LIMIT:-20}
+  REPORT_TIME_LIMIT: ${REPORT_TIME_LIMIT:-30}
+  REPORT_RENDER_COST_MS: ${REPORT_RENDER_COST_MS:-300}
+  REPORT_DISPATCH_INTERVAL: ${REPORT_DISPATCH_INTERVAL:-0.5}
+  REPORT_DISPATCH_BATCH: ${REPORT_DISPATCH_BATCH:-20}
+
 x-app: &app
   restart: unless-stopped
   init: true
@@ -66,6 +78,23 @@ x-kafka-env: &kafka-env
   KAFKA_LOG_DIRS: /var/lib/kafka/data
   CLUSTER_ID: ${KAFKA_CLUSTER_ID:-q1Sh-9_ISia_zwGINzRvyQ}
   KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xmx384M -Xms256M}
+
+x-rabbitmq: &rabbitmq
+  image: rabbitmq:4.3.6-management-alpine
+  restart: unless-stopped
+  stop_grace_period: 30s
+  entrypoint: ["sh", "/usr/local/bin/start-rabbitmq-node.sh"]
+  environment:
+    RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-lab}
+    RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-lab_rabbitmq_password}
+    RABBITMQ_CLUSTER_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-vehicle-lab-rabbitmq-cookie}
+  healthcheck:
+    # Node process and local alarms only; rabbitmq-init verifies cluster membership.
+    test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms"]
+    interval: 10s
+    timeout: 10s
+    retries: 30
+    start_period: 30s
 
 x-kafka: &kafka
   build: {context: ., dockerfile: monitoring/exporters/Dockerfile.kafka}
@@ -340,6 +369,47 @@ services:
       kafka-2: {condition: service_healthy}
       kafka-3: {condition: service_healthy}
 
+  rabbitmq-1:
+    <<: *rabbitmq
+    hostname: rabbitmq-1
+    ports: ["127.0.0.1:${RABBITMQ_UI_PORT:-15672}:15672"]
+    volumes:
+      - rabbitmq-1-data:/var/lib/rabbitmq
+      - ./infrastructure/rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-lab.conf:ro
+      - ./infrastructure/rabbitmq/start-node.sh:/usr/local/bin/start-rabbitmq-node.sh:ro
+
+  rabbitmq-2:
+    <<: *rabbitmq
+    hostname: rabbitmq-2
+    # One UI port per node keeps the Management UI reachable while any node is down.
+    ports: ["127.0.0.1:${RABBITMQ_UI_PORT_2:-15673}:15672"]
+    volumes:
+      - rabbitmq-2-data:/var/lib/rabbitmq
+      - ./infrastructure/rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-lab.conf:ro
+      - ./infrastructure/rabbitmq/start-node.sh:/usr/local/bin/start-rabbitmq-node.sh:ro
+
+  rabbitmq-3:
+    <<: *rabbitmq
+    hostname: rabbitmq-3
+    ports: ["127.0.0.1:${RABBITMQ_UI_PORT_3:-15674}:15672"]
+    volumes:
+      - rabbitmq-3-data:/var/lib/rabbitmq
+      - ./infrastructure/rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-lab.conf:ro
+      - ./infrastructure/rabbitmq/start-node.sh:/usr/local/bin/start-rabbitmq-node.sh:ro
+
+  rabbitmq-init:
+    image: python:3.12-slim
+    entrypoint: ["python", "/init-topology.py"]
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USER:-lab}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-lab_rabbitmq_password}
+      REPORT_DELIVERY_LIMIT: ${REPORT_DELIVERY_LIMIT:-5}
+    volumes: ["./infrastructure/rabbitmq/init-topology.py:/init-topology.py:ro"]
+    depends_on:
+      rabbitmq-1: {condition: service_healthy}
+      rabbitmq-2: {condition: service_healthy}
+      rabbitmq-3: {condition: service_healthy}
+
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
     ports: ["127.0.0.1:${KAFKA_UI_PORT:-8080}:8080"]
@@ -380,8 +450,13 @@ services:
   inspection-service:
     <<: *app
     build: {context: ., dockerfile: services/inspection-service/Dockerfile}
+    depends_on:
+      postgres-init: {condition: service_completed_successfully}
+      redis-cluster-init: {condition: service_completed_successfully}
+      kafka-init: {condition: service_completed_successfully}
+      rabbitmq-init: {condition: service_completed_successfully}
     environment:
-      <<: *app-env
+      <<: [*app-env, *report-env]
       SERVICE_NAME: inspection-service
       WRITE_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres-primary:5432/inspection_db
       READ_DATABASE_URL: postgresql+asyncpg://inspection_reader:${INSPECTION_READ_PASSWORD:-inspection_read_password}@postgres-replica:5432/inspection_db
@@ -398,6 +473,33 @@ services:
       READ_DATABASE_URL: postgresql+asyncpg://repair_reader:${REPAIR_READ_PASSWORD:-repair_read_password}@postgres-replica:5432/repair_db
       KAFKA_CONSUMER_GROUP: repair-service-v1
       WARRANTY_SERVICE_URL: http://warranty-service:8000
+
+  # Same image and codebase as inspection-service (Inspection owns inspection_db and
+  # its reports); a different process: Celery prefork workers, no HTTP API.
+  report-worker:
+    build: {context: ., dockerfile: services/inspection-service/Dockerfile}
+    command: ["sh", "/opt/scripts/start-worker.sh"]
+    init: true
+    restart: unless-stopped
+    # Warm shutdown finishes running tasks; anything still unacked is redelivered.
+    stop_grace_period: 40s
+    deploy: {replicas: 2}
+    environment:
+      <<: [*app-env, *report-env]
+      SERVICE_NAME: inspection-report-worker
+      WRITE_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres-primary:5432/inspection_db
+      REPORT_QUEUE: inspection.report.generate
+      REPORT_WORKER_CONCURRENCY: ${REPORT_WORKER_CONCURRENCY:-1}
+      PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus-multiproc
+    depends_on:
+      inspection-service: {condition: service_healthy}
+      rabbitmq-init: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.reports.health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
 
   inspection-api:
     image: nginx:1.28.0-alpine
@@ -425,6 +527,8 @@ services:
       TRAFFIC_MODE: ${TRAFFIC_MODE:-continuous}
       VIRTUAL_USERS: ${VIRTUAL_USERS:-${TRAFFIC_CONCURRENCY:-5}}
       TRAFFIC_INTERVAL_MS: ${TRAFFIC_INTERVAL_MS:-2000}
+      TRAFFIC_TARGET_RPS: ${TRAFFIC_TARGET_RPS:-0}
+      TRAFFIC_MAX_VIRTUAL_USERS: ${TRAFFIC_MAX_VIRTUAL_USERS:-100}
       TRAFFIC_ERROR_RATE: ${TRAFFIC_ERROR_RATE:-0.05}
       REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-5}
       MAX_RETRIES: ${MAX_RETRIES:-3}
@@ -561,6 +665,8 @@ services:
       REPAIR_URL: http://repair-service:8000
       KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
       REDIS_CLUSTER_NODES: redis-1:6379,redis-2:6379,redis-3:6379,redis-4:6379,redis-5:6379,redis-6:6379
+      RABBITMQ_USER: ${RABBITMQ_USER:-lab}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-lab_rabbitmq_password}
       VEHICLE_DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres-primary:5432/vehicle_db
       WARRANTY_DATABASE_URL: postgresql+asyncpg://warranty_app:${WARRANTY_DB_PASSWORD:-warranty_password}@postgres-primary:5432/warranty_db
       INSPECTION_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres-primary:5432/inspection_db
@@ -585,6 +691,9 @@ volumes:
   kafka-1-data:
   kafka-2-data:
   kafka-3-data:
+  rabbitmq-1-data:
+  rabbitmq-2-data:
+  rabbitmq-3-data:
 
 networks:
   default:

@@ -12,7 +12,7 @@ step=0
 started_at=$SECONDS
 current_services=()
 
-log() { printf '[%s] [%02d/12] %-7s %s\n' "$(date +%H:%M:%S)" "$step" "$1" "$2" | tee -a "$startup_log"; }
+log() { printf '[%s] [%02d/13] %-7s %s\n' "$(date +%H:%M:%S)" "$step" "$1" "$2" | tee -a "$startup_log"; }
 interrupted() {
   log STOP 'Startup interrupted; inspect running containers with docker compose ps --all.'
   exit 130
@@ -49,7 +49,7 @@ preflight() {
 }
 
 healthy_services() {
-  docker compose up -d --no-deps --wait --wait-timeout "$startup_timeout" "$@"
+  docker compose up -d --build --no-deps --wait --wait-timeout "$startup_timeout" "$@"
 }
 
 # Init jobs must EXIT 0; running long-lived services must pass their healthcheck.
@@ -102,13 +102,13 @@ await_containers() {
 init_jobs() {
   local since
   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  docker compose up -d --no-deps "$@" || return
+  docker compose up -d --build --no-deps "$@" || return
   await_containers job "$@" || return
   docker compose logs --no-color --since "$since" "$@"
 }
 
 start_clients() {
-  docker compose up -d --no-deps kafka-ui traffic-generator || return
+  docker compose up -d --build --no-deps kafka-ui traffic-generator || return
   await_containers service kafka-ui traffic-generator || return
   echo 'Traffic status (enabled/mode/state/counters):'
   # docker cp also works after a successful one-shot scenario has exited.
@@ -121,14 +121,16 @@ start_clients() {
 
 run_step 'Docker Engine, Compose and configuration' preflight
 run_step 'Build application and traffic images' docker compose --progress plain build
-current_services=(postgres-primary redis-1 redis-2 redis-3 redis-4 redis-5 redis-6 kafka-1 kafka-2 kafka-3)
-run_step 'PostgreSQL primary, 6 Redis nodes, 3 Kafka brokers' healthy_services "${current_services[@]}"
-current_services=(postgres-init redis-cluster-init kafka-init)
-run_step 'DB roles/slot, Redis Cluster, Kafka topics' init_jobs "${current_services[@]}"
+current_services=(postgres-primary redis-1 redis-2 redis-3 redis-4 redis-5 redis-6 kafka-1 kafka-2 kafka-3 rabbitmq-1 rabbitmq-2 rabbitmq-3)
+run_step 'PostgreSQL primary, 6 Redis nodes, 3 Kafka brokers, 3 RabbitMQ nodes' healthy_services "${current_services[@]}"
+current_services=(postgres-init redis-cluster-init kafka-init rabbitmq-init)
+run_step 'DB roles/slot, Redis Cluster, Kafka topics, RabbitMQ cluster and quorum queues' init_jobs "${current_services[@]}"
 current_services=(postgres-replica)
 run_step 'PostgreSQL replica healthcheck' healthy_services "${current_services[@]}"
 current_services=(vehicle-service warranty-service inspection-service repair-service inspection-api)
 run_step 'Migrations and readiness of 4 APIs' healthy_services "${current_services[@]}"
+current_services=(report-worker)
+run_step 'Celery report workers consuming the RabbitMQ quorum queue' healthy_services "${current_services[@]}"
 current_services=(cdc-db-init)
 run_step 'CDC grants, publications and replica identity' init_jobs "${current_services[@]}"
 current_services=(debezium-connect)
@@ -150,12 +152,12 @@ monitoring_ready() {
 }
 run_step 'Grafana provisioning and Prometheus targets UP' monitoring_ready
 log READY "Startup completed in $((SECONDS - started_at))s. Log: $startup_log"
-for service in vehicle-service warranty-service inspection-api repair-service kafka-ui debezium-connect prometheus grafana; do
+for service in vehicle-service warranty-service inspection-api repair-service kafka-ui debezium-connect rabbitmq-1 rabbitmq-2 rabbitmq-3 prometheus grafana; do
   port=8000
   path=/docs
-  case "$service" in kafka-ui) port=8080; path=;; debezium-connect) port=8083; path=/connectors;; prometheus) port=9090; path=/targets;; grafana) port=3000; path=;; esac
+  case "$service" in kafka-ui) port=8080; path=;; debezium-connect) port=8083; path=/connectors;; rabbitmq-*) port=15672; path=;; prometheus) port=9090; path=/targets;; grafana) port=3000; path=;; esac
   if address=$(docker compose port --index 1 "$service" "$port" 2>/dev/null); then
     printf '%-20s http://%s%s\n' "$service" "$address" "$path" | tee -a "$startup_log"
   fi
 done
-printf '\nNext: make traffic-logs | make traffic-status | make ps\n' | tee -a "$startup_log"
+printf '\nNext: make traffic-logs | make traffic-status | make rabbitmq-status | make ps\n' | tee -a "$startup_log"

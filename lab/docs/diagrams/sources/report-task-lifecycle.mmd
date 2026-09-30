@@ -1,0 +1,25 @@
+sequenceDiagram
+    %% diagram: report-task-lifecycle
+    participant C as Client
+    participant I as Inspection API
+    participant DB as inspection_db
+    participant D as Dispatcher loop
+    participant Q as RabbitMQ quorum queue
+    participant W as report-worker
+    participant K as Kafka
+    participant R as Repair
+    C->>I: POST /inspections/{id}/complete (FAIL)
+    I->>DB: 1 transaction: inspection COMPLETED + report PENDING + outbox inspection.failed
+    I-->>C: 200 (does not wait for RabbitMQ)
+    D->>DB: SELECT PENDING FOR UPDATE SKIP LOCKED
+    D->>Q: send_task(task_id, priority 9) with publisher confirm
+    Q-->>D: confirm after majority (2/3) stored it
+    D->>DB: status QUEUED
+    Q->>W: deliver (prefetch 1, unacked)
+    W->>DB: claim: row lock, PROCESSING, attempts+1
+    W->>W: render PDF (no DB lock held)
+    W->>DB: commit point: GENERATED + document + outbox inspection.report.generated
+    W->>Q: ACK
+    DB-->>K: outbox loop publishes both facts in aggregate order
+    K->>R: inspection.failed then inspection.report.generated
+    R->>R: repair ticket gets defect_report_number + sha256

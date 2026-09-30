@@ -45,7 +45,7 @@ cdc-demo:
 db-test:
 	sh scripts/postgres_cdc_drills.sh
 
-.PHONY: traffic-start traffic-stop traffic-logs traffic-status traffic-scenario
+.PHONY: traffic-start traffic-stop traffic-logs traffic-status traffic-rate traffic-scenario
 traffic-start:
 	$(COMPOSE) up -d --build --no-deps traffic-generator
 traffic-stop:
@@ -54,6 +54,9 @@ traffic-logs:
 	$(COMPOSE) logs -f --tail=30 traffic-generator
 traffic-status:
 	$(COMPOSE) exec -T traffic-generator cat /tmp/traffic-generator-status.json
+# make traffic-rate RPS=50 | RPS=0 USERS=10 | INTERVAL_MS=500; no variables prints the current rate
+traffic-rate:
+	$(COMPOSE) exec -T traffic-generator python -m traffic_generator.control $(if $(RPS),--rps $(RPS)) $(if $(USERS),--virtual-users $(USERS)) $(if $(INTERVAL_MS),--interval-ms $(INTERVAL_MS))
 traffic-scenario:
 	$(COMPOSE) run --build --rm --no-deps -e TRAFFIC_MODE=scenario traffic-generator
 
@@ -74,3 +77,23 @@ lag-demo:
 cdc-projection-check:
 	mkdir -p artifacts/observability
 	$(COMPOSE) run --build --rm --no-deps --user "$$(id -u):$$(id -g)" -v "$(CURDIR)/artifacts/observability:/evidence" toolbox python scripts/cdc_projection_verify.py --output /evidence/cdc-projection.json
+
+.PHONY: rabbitmq-status report-dlq report-replay report-drill workers-scale task-backlog-demo rabbitmq-drills
+# Cluster nodes, quorum queue leader/members/online, ready/unacked/consumers
+rabbitmq-status:
+	$(COMPOSE) exec -T inspection-service python -m app.reports.cli status
+# Dead-lettered report tasks with the failure recorded in inspection_db
+report-dlq:
+	$(COMPOSE) exec -T inspection-service python -m app.reports.cli dlq
+report-replay:
+	$(COMPOSE) exec -T inspection-service python -m app.reports.cli replay --limit $(or $(LIMIT),10)
+# make report-drill FAULT=transient|hang|stuck ; no FAULT = invalid input (permanent)
+report-drill:
+	$(COMPOSE) exec -T inspection-service python -m app.reports.cli submit $(if $(FAULT),--fault $(FAULT))
+# make workers-scale N=4
+workers-scale:
+	$(COMPOSE) up -d --no-deps --wait --scale report-worker=$(or $(N),2) report-worker
+task-backlog-demo:
+	bash scripts/task_backlog_demo.sh
+rabbitmq-drills:
+	bash scripts/rabbitmq_drills.sh

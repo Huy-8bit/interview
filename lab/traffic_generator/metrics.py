@@ -5,7 +5,7 @@ from collections import Counter, deque
 from datetime import UTC, datetime
 
 from prometheus_client import CollectorRegistry, Histogram, start_http_server
-from prometheus_client.core import CounterMetricFamily
+from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily
 
 
 class TrafficCounters:
@@ -26,6 +26,20 @@ class TrafficCounters:
             yield metric
 
 
+class TrafficGauges:
+    descriptions = {
+        "traffic_target_rps": "Target HTTP attempts per second, 0 means unpaced",
+        "traffic_virtual_users": "Running virtual users",
+    }
+    def __init__(self, values):
+        self.values = values
+
+    def collect(self):
+        for name, description in self.descriptions.items():
+            metric = GaugeMetricFamily(name, description, labels=["service"])
+            metric.add_metric(["traffic-generator"], self.values.get(name, 0))
+            yield metric
+
 
 def emit(action, *, flow=None, **fields):
     record = dict(timestamp=datetime.now(UTC).isoformat(), service="traffic-generator", action=action)
@@ -39,8 +53,10 @@ class Metrics:
     def __init__(self):
         self.started = time.monotonic()
         self.counts = Counter()
+        self.gauges = {}
         self.registry = CollectorRegistry()
         self.registry.register(TrafficCounters(self.counts))
+        self.registry.register(TrafficGauges(self.gauges))
         self.duration = Histogram("traffic_request_duration_seconds", "All REST attempt latencies", ["service"],
                                   buckets=(.005,.01,.025,.05,.1,.25,.5,1,2.5,5,10,30), registry=self.registry).labels("traffic-generator")
         self.server = None

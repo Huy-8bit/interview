@@ -53,7 +53,11 @@ dashboard('lab-overview','System Overview',[
  ('Container CPU','sum by(service) (rate(container_cpu_usage_seconds_total[2m]))','cores'),
  ('Container RAM','sum by(service) (container_memory_working_set_bytes)','bytes'),
  ('DB Pool Saturation','100 * sum by(service) (db_pool_checked_out{role="primary"}) / sum by(service)(db_pool_capacity{role="primary"})','percent'),
- ('Outbox Backlog','max by(service)(outbox_pending_events)','short')])
+ ('Outbox Backlog','max by(service)(outbox_pending_events)','short'),
+ ('RabbitMQ Queue Depth','sum by(queue)(rabbitmq_detailed_queue_messages{queue=~"inspection.report.(generate|dlq)"})','short','Ready + unacked per quorum queue, reported by each queue leader. A rising generate line is a report backlog.'),
+ ('Celery Active Tasks','sum(background_tasks_active)','short'),
+ ('Task Failure Rate','100 * sum(rate(background_tasks_failed_total[5m])) / clamp_min(sum(rate(background_tasks_started_total[5m])),0.001)','percent','Executions that ended in the DLQ (permanent or retries exhausted) over executions started.'),
+ ('Background Task P95 Duration','histogram_quantile(0.95,sum by(le)(rate(background_task_duration_seconds_bucket[2m])))','s')])
 
 api=[('Requests/sec by Service',f'sum by(service)(rate(http_requests_total{http}[2m]))','reqps'),
      ('RPS by Endpoint / Method',f'sum by(service,route,method)(rate(http_requests_total{http}[2m]))','reqps'),
@@ -164,4 +168,40 @@ dashboard('lab-traffic','Synthetic Traffic / Load Generator',[
  ('Controlled Load Creates/sec','rate(traffic_load_creates_total[2m])','ops'),
  ('Generator CPU','rate(container_cpu_usage_seconds_total{service="traffic-generator"}[2m])','cores'),
  ('Generator RAM','container_memory_working_set_bytes{service="traffic-generator"}','bytes')])
+REPORT_QUEUES='queue=~"inspection.report.(generate|dlq)"'
+dashboard('lab-rabbitmq','RabbitMQ / Background Tasks',[
+ ('RabbitMQ Node Up','up{job="rabbitmq"}','short','One series per node from the RabbitMQ Prometheus plugin scrape.'),
+ ('Cluster Nodes Running','count(up{job="rabbitmq"} == 1)','short'),
+ ('Unreachable Cluster Peers','max by(node)(rabbitmq_unreachable_cluster_peers_count)','short','Non-zero on the surviving nodes while a peer is stopped or partitioned.'),
+ ('Queue Leader Node','rabbitmq_detailed_queue_info{membership="leader",'+REPORT_QUEUES+'}','short','The node label shows the current Raft leader; it moves after the leader node stops.'),
+ ('Connections by Node','sum by(node)(rabbitmq_connections)','short'),
+ ('Channels by Node','sum by(node)(rabbitmq_channels)','short'),
+ ('Consumers by Queue','sum by(queue)(rabbitmq_detailed_queue_consumers{'+REPORT_QUEUES+'})','short','Work queue consumers = worker processes (containers x concurrency).'),
+ ('Queue Depth','sum by(queue)(rabbitmq_detailed_queue_messages{'+REPORT_QUEUES+'})','short','Ready + unacked. Only the leader reports a queue, so sum across nodes does not double count.'),
+ ('Ready Messages','sum by(queue)(rabbitmq_detailed_queue_messages_ready{'+REPORT_QUEUES+'})','short'),
+ ('Unacked Messages','sum by(queue)(rabbitmq_detailed_queue_messages_unacked{'+REPORT_QUEUES+'})','short','Delivered to a worker, not yet ACKed: tasks in progress with acks_late.'),
+ ('Retries Waiting in Delay Queues','sum(rabbitmq_detailed_queue_messages{queue=~"celery_delayed_.*"})','short','Celery native delayed delivery: retry countdowns wait in these TTL quorum queues, not in worker RAM.'),
+ ('Publish Rate','sum by(node)(rate(rabbitmq_global_messages_received_total[2m]))','ops','Node-level: RabbitMQ 4.3 does not export per-queue publish counters. Includes delay-queue hops.'),
+ ('Deliver Rate','sum by(node)(rate(rabbitmq_global_messages_delivered_total[2m]))','ops'),
+ ('Ack Rate','sum by(node)(rate(rabbitmq_global_messages_acknowledged_total[2m]))','ops'),
+ ('Redelivery Rate','sum by(node)(rate(rabbitmq_global_messages_redelivered_total[2m]))','ops','Messages delivered again after a consumer died or its connection dropped before ACK.'),
+ ('Dead-letter Hops by Reason',' or '.join(f'label_replace(sum(rate(rabbitmq_global_messages_dead_lettered_{r}_total[2m])),"reason","{r}","","")' for r in ('rejected','delivery_limit','expired')),'ops','expired = a retry countdown hop through celery_delayed_*; rejected = worker gave up -> DLQ; delivery_limit = crash loop -> DLQ.'),
+ ('Memory Used / High Watermark','100 * rabbitmq_process_resident_memory_bytes / rabbitmq_resident_memory_limit_bytes','percent','At 100% the memory alarm blocks publishers cluster-wide.'),
+ ('Disk Free','rabbitmq_disk_space_available_bytes','bytes','Below rabbitmq_disk_space_available_limit_bytes the disk alarm blocks publishers.'),
+ ('File Descriptors Used','100 * rabbitmq_process_open_fds / rabbitmq_process_max_fds','percent'),
+ ('Erlang Ports Used (sockets + files)','100 * erlang_vm_ports / erlang_vm_port_limit','percent','RabbitMQ 4.3 has no dedicated socket gauge; every TCP socket is an Erlang port.'),
+ ('Resource Alarms','rabbitmq_alarms_memory_used_watermark + rabbitmq_alarms_free_disk_space_watermark','short'),
+ ('Report Workers Online','count(up{job="report-worker"} == 1)','short','One Prometheus target per report-worker container.'),
+ ('Active Tasks','sum(background_tasks_active)','short'),
+ ('Submitted vs Started/sec',' or '.join(f'label_replace(sum(rate(background_tasks_{s}_total[2m])),"stage","{s}","","")' for s in ('submitted','started')),'ops','submitted = confirmed publishes by inspection-service; started = executions incl. retries and redeliveries.'),
+ ('Completed Tasks/sec','sum by(outcome)(rate(background_tasks_completed_total[2m]))','ops','generated = new report; duplicate = redelivery absorbed by idempotency.'),
+ ('Failed Tasks → DLQ/sec','sum by(reason)(rate(background_tasks_failed_total[2m]))','ops'),
+ ('Retries Scheduled/sec','sum by(reason)(rate(background_tasks_retried_total[2m]))','ops'),
+ ('Redelivered Tasks/sec','sum(rate(background_tasks_redelivered_total[2m]))','ops'),
+ ('Task Duration P95','histogram_quantile(0.95,sum by(le)(rate(background_task_duration_seconds_bucket{outcome="generated"}[2m])))','s'),
+ ('Queue Wait P95 by Priority','histogram_quantile(0.95,sum by(le,priority)(rate(background_task_queue_wait_seconds_bucket[2m])))','s','Dispatch-to-start of first attempts. Under backlog, high (defect reports) stays lower than normal (certificates).'),
+ ('DLQ Depth','sum(rabbitmq_detailed_queue_messages{queue="inspection.report.dlq"})','short'),
+ ('Report Rows Not Generated','max by(status)(inspection_reports_open)','short','From inspection_db. PENDING grows while RabbitMQ is unreachable; FAILED = parked in the DLQ.'),
+ ('Worker / RabbitMQ CPU','sum by(service)(rate(container_cpu_usage_seconds_total{service=~"report-worker|rabbitmq-[123]"}[2m]))','cores')])
+
 print(f'Generated {len(list(ROOT.glob("*.json")))} dashboards')

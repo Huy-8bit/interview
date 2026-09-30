@@ -89,6 +89,8 @@ Activate/expire gọi lại cùng trạng thái thành công, không phát lại
 | GET | `/inspections/{inspection_id}` | UUID | 200 InspectionRead | 404 inspection_not_found |
 | PATCH | `/inspections/{inspection_id}` | notes/status | 200 InspectionRead | 409 inspection_completed |
 | POST | `/inspections/{inspection_id}/complete` | result/reason/notes | 200 InspectionRead | 409 completion_conflict; 422 result/reason sai |
+| GET | `/inspections/{inspection_id}/report` | UUID | 200 ReportRead | 404 inspection_not_found / report_not_found |
+| GET | `/inspections/{inspection_id}/report.pdf` | UUID | 200 `application/pdf`, `ETag` = SHA-256 | 404 như trên; 409 report_not_ready khi chưa GENERATED |
 
 InspectionCreate gồm `vehicle_id`, `inspection_type` DELIVERY/PERIODIC/DIAGNOSTIC (default PERIODIC), `notes` nullable tối đa 4000 ký tự. Header Idempotency-Key dài 1–128. Response fields: id, vehicle_id, warranty_id, inspection_type, status, result, failure_reason, notes, created_at, updated_at, completed_at.
 
@@ -106,6 +108,8 @@ Complete FAIL:
 
 Complete PASS: `{"result":"PASS"}`. FAIL bắt buộc reason không rỗng; PASS không được kèm reason khác null. Nếu không gửi notes khi complete, giữ notes cũ; gửi null sẽ xóa notes. Completed result/reason khác lần đầu, hoặc notes được gửi khác giá trị đã lưu, trả 409. Complete giống lần đầu không phát event trùng.
 
+Complete lần đầu tạo thêm một yêu cầu biên bản (`inspection_reports`, `PENDING`) trong cùng transaction; worker Celery render bất đồng bộ nên response không chờ biên bản. ReportRead: id, inspection_id, kind (CERTIFICATE/DEFECT_REPORT), status (PENDING/QUEUED/PROCESSING/RETRY_SCHEDULED/GENERATED/FAILED), priority (HIGH/NORMAL), task_id, attempts, dispatch_attempts, report_number, sha256, size_bytes, worker, last_error, created_at, queued_at, started_at, generated_at, failed_at. Inspection hoàn tất trước khi có tính năng này không có biên bản. Xem [Background Tasks](BACKGROUND_TASKS.md).
+
 201 tạo inspection **không** phát inspection.created. Event chỉ phát khi complete PASS/FAIL.
 
 ## 5. Repair endpoints
@@ -117,6 +121,8 @@ Complete PASS: `{"result":"PASS"}`. FAIL bắt buộc reason không rỗng; PASS
 | GET | `/repairs/{repair_id}` | UUID | 200 RepairRead | 404 repair_not_found |
 | PATCH | `/repairs/{repair_id}` | status | 200 RepairRead | 409 invalid_transition |
 | GET | `/repairs/{repair_id}/notifications` | UUID | 200 array NotificationRead | 404 nếu repair không tồn tại |
+
+RepairRead có thêm `defect_report_number`, `defect_report_sha256`, `defect_report_generated_at` (nullable) — được điền khi Repair nhận `inspection.report.generated`.
 
 RepairCreate: `vehicle_id`, `inspection_id`, `description` 1–4000 ký tự sau trim. RepairRead thêm `id`, `warranty_id` nullable, `warranty_covered`, `status`, `created_at`, `updated_at`. POST cùng inspection_id đã có repair sẽ trả resource có sẵn nếu vehicle_id khớp, kể cả caller dùng idempotency key mới; response vẫn là 201 theo route hiện tại.
 

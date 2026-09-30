@@ -23,6 +23,9 @@ class RepairRead(RepairCreate):
     warranty_id: UUID | None = None
     warranty_covered: bool
     status: str
+    defect_report_number: str | None = None
+    defect_report_sha256: str | None = None
+    defect_report_generated_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -44,3 +47,11 @@ class FailedInspection(BaseModel):
     vehicle_id: UUID
     failure_reason: str = Field(min_length=1, max_length=4000)
     occurred_at: datetime
+
+
+class ReportGenerated(BaseModel):
+    inspection_id: UUID
+    result: Literal["PASS", "FAIL"]
+    report_number: str = Field(min_length=1, max_length=40)
+    sha256: str = Field(min_length=64, max_length=64)
+    generated_at: datetime

@@ -1,6 +1,7 @@
+from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import CheckConstraint, ForeignKey, Index, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from platform_common.db import Base, Timestamps
@@ -22,6 +23,10 @@ class RepairRequest(Timestamps, Base):
     warranty_covered: Mapped[bool]
     status: Mapped[str] = mapped_column(String(20), default="OPEN")
     description: Mapped[str] = mapped_column(Text)
+    # Reference to the exact defect report version from inspection.report.generated.
+    defect_report_number: Mapped[str | None] = mapped_column(String(40))
+    defect_report_sha256: Mapped[str | None] = mapped_column(String(64))
+    defect_report_generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class Notification(Timestamps, Base):

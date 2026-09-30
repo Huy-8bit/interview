@@ -192,6 +192,10 @@ stateDiagram-v2
 
 PASSED/FAILED không phải giá trị status lưu DB; sơ đồ dùng hai trạng thái kết hợp `status + result` để thể hiện hai kết quả terminal. Complete cùng result/reason và notes tương thích trả kết quả đã có; đổi kết quả sau complete trả 409.
 
+### inspection_reports
+
+Một dòng cho mỗi inspection hoàn tất (UNIQUE `inspection_id`, FK tới `inspections` trong cùng database), tạo trong transaction complete và cũng là ý định task bền vững cho dispatcher RabbitMQ. Cột: `kind` (CERTIFICATE/DEFECT_REPORT), `priority` (AMQP 9/0), `status` (PENDING → QUEUED → PROCESSING → GENERATED, hoặc RETRY_SCHEDULED/FAILED), `task_id` (UNIQUE, ổn định qua mọi lần giao), `correlation_id`, `attempts`, `dispatch_attempts`, `next_dispatch_at`, các mốc `queued_at/started_at/generated_at/failed_at`, `worker`, `last_error`, `report_number`, `sha256`, `size_bytes`, `document` (BYTEA, deferred). CHECK bảo đảm `GENERATED` khi và chỉ khi có document + sha256 + generated_at. Partial index cho dòng PENDING (dispatcher) và dòng chưa GENERATED (metrics). Migration `0003` không backfill inspection cũ. Chi tiết luồng: [Background Tasks](BACKGROUND_TASKS.md).
+
 Source: [model](../services/inspection-service/app/models/inspection.py), [projection handler](../services/inspection-service/app/messaging/handlers.py), [service](../services/inspection-service/app/services/inspections.py).
 
 ## 5. Repair database

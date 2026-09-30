@@ -1,0 +1,13 @@
+flowchart TD
+    %% diagram: report-task-ack
+    receive["Worker receives task (unacked)"] --> run["Claim, render, commit"]
+    run --> outcome{"Outcome"}
+    outcome -->|"generated or duplicate"| ack["ACK: message removed"]
+    outcome -->|"transient, retries left"| retry["Publish copy with retries+1 via celery_delayed_*, then ACK"]
+    retry --> receive
+    outcome -->|"permanent, or retries exhausted"| reject["basic.reject requeue=false"]
+    reject --> dlq["DLX -> inspection.report.dlq"]
+    outcome -->|"worker process or container dies"| lost["No ACK: RabbitMQ returns message, redelivered=true"]
+    lost --> limit{"delivery count > 5?"}
+    limit -->|"no"| receive
+    limit -->|"yes"| dlq

@@ -1,16 +1,18 @@
 import asyncio
 import json
+import math
 import random
 import secrets
 import signal
 import time
+from collections import deque
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
 import httpx
 
-from traffic_generator.config import Config
+from traffic_generator.config import Config, RateControl
 from traffic_generator.metrics import Metrics, emit
 
 MODELS = {"VinFast": ["VF 6", "VF 8"], "Toyota": ["Corolla", "Camry"], "Honda": ["Civic", "CR-V"], "Ford": ["Ranger", "Everest"], "Hyundai": ["Accent", "Tucson"]}
@@ -23,6 +25,45 @@ class RequestFailed(Exception):
     pass
 
 
+class Pacer:
+    """Evenly spaces HTTP attempts across all virtual users; rate 0 disables pacing.
+
+    Slots left unused while every user was busy elsewhere can be reclaimed for up to
+    `burst` seconds, so the long-run rate reaches the target without exceeding it.
+    """
+
+    def __init__(self, rate, burst=0.5):
+        self.rate = rate
+        self.burst = burst
+        self.next_slot = 0.0
+        self.wait_seconds = 0.0
+
+    def set_rate(self, rate):
+        self.rate = rate
+        # New attempts must not queue behind slots reserved at a slower rate.
+        self.next_slot = min(self.next_slot, time.monotonic() + (1 / rate if rate else 0))
+
+    async def acquire(self):
+        if self.rate <= 0:
+            return
+        now = time.monotonic()
+        slot = max(self.next_slot, now - self.burst)
+        self.next_slot = slot + 1 / self.rate  # No await between reading and reserving the slot.
+        if slot > now:
+            await asyncio.sleep(slot - now)
+            self.wait_seconds += slot - now
+
+
+def needed_virtual_users(target_rps, requests, busy_seconds, active, maximum):
+    """Little's law on the unpaced per-user rate. Flows are bursty, so the pool keeps 25%
+    headroom and the pacer, not idle users, stays the bottleneck."""
+    if busy_seconds <= 0:
+        return max(1, active // 2)  # Every user spent the whole window waiting on the pacer.
+    needed = math.ceil(target_rps * 1.25 * busy_seconds / requests)
+    # Move at most 2x per step either way; windows spanning a target change are noisy.
+    return max(1, min(needed, max(active * 2, active + 1), maximum), active // 2)
+
+
 class Traffic:
     def __init__(self, config=None, *, transport=None):
         self.config = config or Config()
@@ -32,9 +73,21 @@ class Traffic:
         self.load_started = time.monotonic()
         self.load_claimed = 0
         self.tasks = []
+        self.rate = RateControl(target_rps=self.config.target_rps, interval_ms=self.config.interval_ms,
+                                virtual_users=min(self.config.virtual_users, self.config.max_virtual_users))
+        self.pacer = Pacer(self.rate.target_rps)
+        self.vus = {}
+        self.desired_vus = self.rate.virtual_users
+        self.current_rps = 0.0
+        self.vu_seconds = 0.0
+        self.sampled_at = time.monotonic()
+        self.samples = deque(maxlen=11)  # One per reporter tick: a ~10s window.
+        self.next_scale = 0.0
+        self.control_mtime = None
+        self.control_version = None
         self.http = httpx.AsyncClient(
             timeout=self.config.timeout, transport=transport,
-            limits=httpx.Limits(max_connections=self.config.virtual_users * 4, max_keepalive_connections=self.config.virtual_users * 2),
+            limits=httpx.Limits(max_connections=self.config.max_virtual_users * 4, max_keepalive_connections=self.config.max_virtual_users * 2),
         )
 
     async def close(self):
@@ -43,6 +96,7 @@ class Traffic:
     async def request(self, flow, action, service, method, endpoint, *, allowed=(), **kwargs):
         headers = kwargs.pop("headers", {})
         for attempt in range(self.config.max_retries + 1):
+            await self.pacer.acquire()
             request_id, started = str(uuid4()), time.monotonic()
             response, status, error = None, None, None
             try:
@@ -246,16 +300,67 @@ class Traffic:
 
     def write_status(self, state):
         value = dict(run_id=self.run_id, heartbeat_unix=time.time(), state=state, mode=self.config.mode,
-                     enabled=self.config.enabled, virtual_users=self.config.virtual_users, **self.metrics.snapshot())
+                     enabled=self.config.enabled, virtual_users=self.desired_vus, active_virtual_users=len(self.vus),
+                     target_rps=self.rate.target_rps, current_rps=round(self.current_rps, 2), interval_ms=self.rate.interval_ms,
+                     control_version=self.control_version, **self.metrics.snapshot())
         path = Path(self.config.status_file)
         temp = path.with_suffix(".tmp")
         temp.write_text(json.dumps(value))
         temp.replace(path)
         return value
 
+    def apply_control(self):
+        path = Path(self.config.control_file)
+        try:
+            mtime = path.stat().st_mtime_ns
+        except FileNotFoundError:
+            return
+        if mtime == self.control_mtime:
+            return
+        self.control_mtime = mtime
+        try:
+            data = json.loads(path.read_text())
+            rate = RateControl.model_validate({**self.rate.model_dump(), **data})
+            if rate.virtual_users > self.config.max_virtual_users:
+                raise ValueError(f"virtual_users exceeds TRAFFIC_MAX_VIRTUAL_USERS={self.config.max_virtual_users}")
+        except (OSError, TypeError, ValueError) as exc:
+            emit("rate_control_rejected", error=str(exc)[:500])
+            return
+        self.rate, self.control_version, self.next_scale = rate, data.get("version"), 0.0
+        self.pacer.set_rate(rate.target_rps)
+        emit("rate_changed", control_version=self.control_version, **rate.model_dump())
+
+    def adjust(self):
+        now = time.monotonic()
+        self.vu_seconds += len(self.vus) * (now - self.sampled_at)
+        self.sampled_at = now
+        total = self.metrics.counts["total_requests"]
+        self.samples.append((now, total, self.pacer.wait_seconds, self.vu_seconds))
+        started, first_total, first_wait, first_vu_seconds = self.samples[0]
+        elapsed, requests = now - started, total - first_total
+        self.current_rps = requests / elapsed if elapsed else 0.0
+        if self.rate.target_rps <= 0:
+            self.desired_vus = self.rate.virtual_users
+        elif now >= self.next_scale and elapsed >= 5 and requests:
+            busy = (self.vu_seconds - first_vu_seconds) - (self.pacer.wait_seconds - first_wait)
+            self.desired_vus = needed_virtual_users(self.rate.target_rps, requests, busy, len(self.vus), self.config.max_virtual_users)
+            self.next_scale = now + 5
+        self.scale()
+        self.metrics.gauges.update(traffic_target_rps=self.rate.target_rps, traffic_virtual_users=len(self.vus))
+
+    def scale(self):
+        # Spawns missing users; surplus users exit on their own after the current flow.
+        if self.config.mode != "continuous" or not self.config.enabled or self.stop.is_set():
+            return
+        for number in range(1, self.desired_vus + 1):
+            if number not in self.vus:
+                self.vus[number] = asyncio.create_task(self.virtual_user(number))
+
     async def reporter(self):
         next_summary = 0
         while not self.stop.is_set():
+            self.apply_control()
+            self.adjust()
             value = self.write_status("running" if self.config.enabled else "disabled")
             if time.monotonic() >= next_summary:
                 emit("summary", **value)
@@ -281,12 +386,18 @@ class Traffic:
             emit("load_create_failed", flow=flow, error=type(exc).__name__)
 
     async def virtual_user(self, number):
-        while not self.stop.is_set():
-            await (self.load_create(number) if self.config.load_test_mode else self.lifecycle(number))
-            try:
-                await asyncio.wait_for(self.stop.wait(), timeout=max(self.config.interval_ms / 1000, 0.001))
-            except TimeoutError:
-                pass
+        try:
+            while not self.stop.is_set() and number <= self.desired_vus:
+                await (self.load_create(number) if self.config.load_test_mode else self.lifecycle(number))
+                if number > self.desired_vus:
+                    break
+                try:
+                    await asyncio.wait_for(self.stop.wait(), timeout=max(self.rate.interval_ms / 1000, 0.001))
+                except TimeoutError:
+                    pass
+        finally:
+            if self.vus.get(number) is asyncio.current_task():
+                del self.vus[number]
 
     async def run(self):
         self.metrics.start_server(self.config.metrics_port)
@@ -294,8 +405,11 @@ class Traffic:
         loop = asyncio.get_running_loop()
         for signum in (signal.SIGTERM, signal.SIGINT):
             loop.add_signal_handler(signum, self.stop.set)
+        # Runtime rate overrides last for one run, like counters and run_id.
+        Path(self.config.control_file).unlink(missing_ok=True)
         emit("started", run_id=self.run_id, mode=self.config.mode, enabled=self.config.enabled,
-             virtual_users=self.config.virtual_users, interval_ms=self.config.interval_ms)
+             virtual_users=self.rate.virtual_users, interval_ms=self.rate.interval_ms,
+             target_rps=self.rate.target_rps, max_virtual_users=self.config.max_virtual_users)
         reporter = asyncio.create_task(self.reporter())
         success = True
         try:
@@ -309,13 +423,14 @@ class Traffic:
                 await asyncio.wait(self.tasks, return_when=asyncio.FIRST_COMPLETED)
                 success = lifecycle.done() and not lifecycle.cancelled() and lifecycle.result() is not None
             else:
-                self.tasks = [asyncio.create_task(self.virtual_user(i + 1)) for i in range(self.config.virtual_users)]
+                self.scale()
                 await self.stop.wait()
         finally:
             self.stop.set()
-            for task in self.tasks:
+            tasks = [*self.tasks, *self.vus.values()]
+            for task in tasks:
                 task.cancel()
-            await asyncio.gather(*self.tasks, return_exceptions=True)
+            await asyncio.gather(*tasks, return_exceptions=True)
             await reporter
             emit("summary_final", **self.write_status("stopped"))
             await self.close()

@@ -1,7 +1,16 @@
 from typing import Literal
 
-from pydantic import AliasChoices, Field, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class RateControl(BaseModel):
+    """Runtime-adjustable load knobs; the control file may carry any subset."""
+    model_config = ConfigDict(extra="ignore")
+
+    target_rps: float = Field(0, ge=0, le=10000)
+    virtual_users: int = Field(5, ge=1, le=500)
+    interval_ms: int = Field(2000, ge=0, le=3600000)
 
 
 class Config(BaseSettings):
@@ -15,6 +24,9 @@ class Config(BaseSettings):
     mode: Literal["continuous", "scenario"] = Field("continuous", validation_alias="TRAFFIC_MODE")
     virtual_users: int = Field(5, ge=1, le=100, validation_alias=AliasChoices("VIRTUAL_USERS", "TRAFFIC_CONCURRENCY"))
     interval_ms: int = Field(2000, ge=0, le=3600000, validation_alias="TRAFFIC_INTERVAL_MS")
+    # 0 keeps the fixed closed-loop pool; >0 paces HTTP attempts and auto-sizes the pool.
+    target_rps: float = Field(0, ge=0, le=10000, validation_alias="TRAFFIC_TARGET_RPS")
+    max_virtual_users: int = Field(100, ge=1, le=500, validation_alias="TRAFFIC_MAX_VIRTUAL_USERS")
     timeout: float = Field(5, gt=0, le=60, validation_alias="REQUEST_TIMEOUT_SECONDS")
     max_retries: int = Field(3, ge=0, le=10, validation_alias="MAX_RETRIES")
     backoff_ms: int = Field(200, ge=0, le=10000, validation_alias="RETRY_BACKOFF_MS")
@@ -27,6 +39,7 @@ class Config(BaseSettings):
     summary_interval: float = Field(30, ge=1, le=300, validation_alias="SUMMARY_INTERVAL_SECONDS")
     replica_delays: str = Field("0,100,500,1000", validation_alias="REPLICA_READ_DELAYS_MS")
     status_file: str = Field("/tmp/traffic-generator-status.json", validation_alias="TRAFFIC_STATUS_FILE")
+    control_file: str = Field("/tmp/traffic-generator-control.json", validation_alias="TRAFFIC_CONTROL_FILE")
     vehicle_url: str = Field("http://vehicle-service:8000", validation_alias="VEHICLE_SERVICE_URL")
     warranty_url: str = Field("http://warranty-service:8000", validation_alias="WARRANTY_SERVICE_URL")
     inspection_url: str = Field("http://inspection-service:8000", validation_alias="INSPECTION_SERVICE_URL")

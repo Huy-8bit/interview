@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class InspectionCreate(BaseModel):
@@ -37,6 +37,33 @@ class InspectionComplete(BaseModel):
         if self.result == "PASS" and self.failure_reason is not None:
             raise ValueError("PASS cannot have failure_reason")
         return self
+
+
+class ReportRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: UUID
+    inspection_id: UUID
+    kind: str
+    status: str
+    priority: Literal["HIGH", "NORMAL"]
+    task_id: UUID
+    attempts: int
+    dispatch_attempts: int
+    report_number: str | None
+    sha256: str | None
+    size_bytes: int | None
+    worker: str | None
+    last_error: str | None
+    created_at: datetime
+    queued_at: datetime | None
+    started_at: datetime | None
+    generated_at: datetime | None
+    failed_at: datetime | None
+
+    @field_validator("priority", mode="before")
+    @classmethod
+    def priority_level(cls, value):
+        return value if isinstance(value, str) else "HIGH" if value > 4 else "NORMAL"
 
 
 class InspectionRead(BaseModel):

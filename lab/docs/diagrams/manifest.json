@@ -1,5 +1,26 @@
 [
   {
+    "id": "kafka-vs-rabbitmq-roles",
+    "document": "BACKGROUND_TASKS.md",
+    "heading": "2. WHY KAFKA HERE? WHY RABBITMQ HERE?",
+    "source_sha256": "f4de2b07eba63698d57705ec8cddae125faf9f99d816795d14359ac933190c43",
+    "svg_sha256": "ec9d96ef6019339bce787b6f29d04cc4c1fd38805c123f328ae86bae483e9dc7"
+  },
+  {
+    "id": "report-task-lifecycle",
+    "document": "BACKGROUND_TASKS.md",
+    "heading": "3. Luồng xử lý",
+    "source_sha256": "c7b40c8d6e584150828296818de80158579a5d9a8656f6d62a712227192e34d4",
+    "svg_sha256": "3d6904da1608b0d0032787f6d262fe4611464879c2b3addf4252580549bd5fab"
+  },
+  {
+    "id": "report-task-ack",
+    "document": "BACKGROUND_TASKS.md",
+    "heading": "6. ACK, redelivery và timeout",
+    "source_sha256": "24f83a96aecae8e0cfa4aa913ba90005b6d58eda970755be06c6cf8a0b156761",
+    "svg_sha256": "1ae0a3eafe5a5ff33d72b32a00d01c258607d81a9de929d4547f57c8ddbafe87"
+  },
+  {
     "id": "clustered-infrastructure",
     "document": "CLUSTER_INFRASTRUCTURE.md",
     "heading": "1. Topology đang triển khai",

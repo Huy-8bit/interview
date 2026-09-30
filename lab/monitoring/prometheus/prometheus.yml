@@ -44,6 +44,29 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: redis-exporter:9121
+  # RabbitMQ Prometheus plugin (port 15692): /metrics is the per-node aggregate;
+  # /metrics/detailed adds per-queue depth, reported by the node leading each queue.
+  - job_name: rabbitmq
+    static_configs: [{targets: ['rabbitmq-1:15692', 'rabbitmq-2:15692', 'rabbitmq-3:15692']}]
+    relabel_configs: &rabbitmq-node
+      - source_labels: [__address__]
+        regex: '([^:]+):.*'
+        target_label: node
+  - job_name: rabbitmq-queues
+    metrics_path: /metrics/detailed
+    params:
+      family: [queue_coarse_metrics, queue_consumer_count]
+      vhost: ['/']
+    static_configs: [{targets: ['rabbitmq-1:15692', 'rabbitmq-2:15692', 'rabbitmq-3:15692']}]
+    relabel_configs: *rabbitmq-node
+  # One target per Celery worker container; `up` is worker online/offline.
+  - job_name: report-worker
+    dns_sd_configs:
+      - names: [report-worker]
+        type: A
+        port: 9808
+        refresh_interval: 5s
+    honor_labels: true
   - job_name: cadvisor
     static_configs: [{targets: ['cadvisor:8080']}]
     metric_relabel_configs:
