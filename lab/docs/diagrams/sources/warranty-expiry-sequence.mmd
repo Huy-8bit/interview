@@ -1,0 +1,17 @@
+sequenceDiagram
+    %% diagram: warranty-expiry-sequence
+    participant ExpiryTask
+    participant WarrantyDB
+    participant OutboxTask
+    participant Kafka
+    participant CoverageAPI
+    ExpiryTask->>WarrantyDB: BEGIN, lock up to 100 due rows SKIP LOCKED
+    ExpiryTask->>WarrantyDB: Set EXPIRED and insert warranty.expired outbox
+    ExpiryTask->>WarrantyDB: COMMIT
+    OutboxTask->>WarrantyDB: Lock pending expiry event
+    OutboxTask->>Kafka: warranty.expired
+    Kafka-->>OutboxTask: ACK
+    OutboxTask->>WarrantyDB: Mark PUBLISHED, COMMIT
+    CoverageAPI->>WarrantyDB: Read warranty history
+    WarrantyDB-->>CoverageAPI: Stored statuses and dates
+    CoverageAPI-->>CoverageAPI: Check ACTIVE and inclusive UTC date range

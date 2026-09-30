@@ -1,0 +1,21 @@
+sequenceDiagram
+    %% diagram: api-idempotency-sequence
+    participant ClientA
+    participant ClientB
+    participant API
+    participant Redis
+    participant DB
+    ClientA->>API: POST create with key K and payload P
+    API->>Redis: Read completed result - MISS
+    API->>Redis: Acquire optional lock, set processing
+    API->>DB: TX A - insert reservation for scope and hash K
+    ClientB->>API: Same key K and payload P
+    API->>Redis: No completed result yet
+    API->>DB: TX B - insert same reservation waits on unique key
+    API->>DB: TX A - business write, outbox if applicable, response
+    API->>DB: TX A COMMIT
+    DB-->>API: TX B conflict - existing committed reservation
+    API->>DB: TX B read hash and stored response, COMMIT
+    API->>Redis: Cache completed result
+    API-->>ClientA: 201 with resource ID X
+    API-->>ClientB: 201 with resource ID X

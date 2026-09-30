@@ -1,0 +1,13 @@
+flowchart TD
+    %% diagram: incident-triage
+    missing["FAIL inspection has no repair"] --> source["Find inspection.failed in inspection outbox"]
+    source --> pending{"Still PENDING?"}
+    pending -->|"Yes"| publisher["Check attempts, Kafka and outbox task"]
+    pending -->|"No"| lag["Check repair group offset and lag"]
+    lag --> dead{"Record in inspection DLQ?"}
+    dead -->|"Yes"| dlq["Read failure reason and fix dependency or payload"]
+    dlq --> replay["Replay one original event"]
+    dead -->|"No"| processing["Check consumer logs, DB waits and Warranty HTTP"]
+    processing --> verify["Compare event ID, processed ledger and repair row"]
+    replay --> verify
+    publisher --> verify

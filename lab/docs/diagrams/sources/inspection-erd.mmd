@@ -1,0 +1,21 @@
+erDiagram
+    %% diagram: inspection-erd
+    vehicle_references {
+        uuid vehicle_id PK "No cross-database FK"
+        boolean vehicle_seen
+        boolean warranty_seen
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    inspections {
+        uuid id PK
+        uuid vehicle_id "Logical reference only"
+        varchar inspection_type
+        varchar status
+        varchar result "Nullable until complete"
+        text failure_reason "Required for FAIL"
+        text notes "Nullable"
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz completed_at "Nullable until complete"
+    }

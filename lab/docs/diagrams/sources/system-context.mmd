@@ -1,0 +1,10 @@
+flowchart LR
+    %% diagram: system-context
+    registrar["Đăng ký xe"] -->|"Vehicle REST"| platform["Vehicle Service and Warranty Platform"]
+    warrantyStaff["Bộ phận bảo hành"] -->|"Warranty REST"| platform
+    technician["Kỹ thuật viên"] -->|"Inspection REST"| platform
+    workshop["Workshop"] -->|"Repair REST"| platform
+    operator["Người vận hành"] -->|"Health và logs"| platform
+    operator -->|"Topic và lag"| kafkaUi["Kafka UI"]
+    kafkaUi -->|"Đọc broker metadata"| broker["Kafka của platform"]
+    platform -.->|"Publish và consume"| broker

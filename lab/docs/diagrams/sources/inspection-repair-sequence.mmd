@@ -1,0 +1,26 @@
+sequenceDiagram
+    %% diagram: inspection-repair-sequence
+    participant Client
+    participant InspectionAPI
+    participant InspectionDB
+    participant Kafka
+    participant RepairConsumer
+    participant RepairDB
+    participant Redis
+    participant WarrantyAPI
+    Client->>InspectionAPI: Complete FAIL with reason
+    InspectionAPI->>InspectionDB: BEGIN, lock inspection, complete and enqueue failed event
+    InspectionAPI->>InspectionDB: COMMIT
+    InspectionAPI-->>Client: 200 COMPLETED and FAIL
+    InspectionAPI->>Kafka: Outbox publishes inspection.failed
+    Kafka->>RepairConsumer: Deliver failed event
+    RepairConsumer->>RepairDB: BEGIN, reserve processed marker
+    RepairConsumer->>RepairDB: Find repair by inspection ID
+    RepairConsumer->>Redis: Acquire token lock with TTL
+    RepairConsumer->>WarrantyAPI: GET active warranty with correlation ID
+    WarrantyAPI-->>RepairConsumer: 200 covered boolean
+    RepairConsumer->>RepairDB: Insert repair, notification and repair.created outbox
+    RepairConsumer->>Redis: Release lock if token matches
+    RepairConsumer->>RepairDB: COMMIT
+    RepairConsumer->>Kafka: Commit offset plus one
+    RepairConsumer->>Kafka: Repair outbox later publishes repair.created

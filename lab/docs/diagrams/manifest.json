@@ -1,0 +1,177 @@
+[
+  {
+    "id": "outbox-reliability",
+    "document": "CONSISTENCY_AND_FAILURES.md",
+    "heading": "2. Transactional outbox và các cửa sổ crash",
+    "source_sha256": "1f3ac268b2cfb31641a08155cc06d0c82f97702fe0c66557330e9b558ce65ab4",
+    "svg_sha256": "295e3269e13c3052e59538408ac5edb06dc40bf3ed449d223a1d64e71536a9c8"
+  },
+  {
+    "id": "consumer-processing",
+    "document": "CONSISTENCY_AND_FAILURES.md",
+    "heading": "3. Idempotent consumer và offset discipline",
+    "source_sha256": "f050168f301c3ae83f0ce4a051f3187ca02267194789c2b9b218c0ee63b43059",
+    "svg_sha256": "130e6418cd2b26b74abf2f9e5ebe81c3dcc3b9f690edf4bbbf01e4c76233e952"
+  },
+  {
+    "id": "recovery-strategy",
+    "document": "CONSISTENCY_AND_FAILURES.md",
+    "heading": "9. Recovery khác compensation",
+    "source_sha256": "f03234b5a394f05d9ebe189c92bdb1d94575fe09cd7d4989e46e2854a2567a21",
+    "svg_sha256": "4fc5f8a685f6563a0a00b1493a630f60a514ddf1ca3edd3edf385dc03aa6403a"
+  },
+  {
+    "id": "domain-ownership",
+    "document": "DATA_MODEL.md",
+    "heading": "1. Quyền sở hữu và quan hệ giữa domain",
+    "source_sha256": "7cfc68ce94f3a28af33a79754ed416bf496ca3cf055ca985d9403e90d324cd30",
+    "svg_sha256": "08a95c5070817d6ca74097a59212106ee6e1bee66d5a1f032c2c66a5c88370d3"
+  },
+  {
+    "id": "vehicle-erd",
+    "document": "DATA_MODEL.md",
+    "heading": "2. Vehicle database",
+    "source_sha256": "1406700c934237d59abbb2b0a7f5d911d70859027ec9c83f2e7ffd88473c66a9",
+    "svg_sha256": "f026f39dedb141bb4184eeb583a2573a4068eab6f56d540d59292d9c7c4bc39c"
+  },
+  {
+    "id": "warranty-erd",
+    "document": "DATA_MODEL.md",
+    "heading": "3. Warranty database",
+    "source_sha256": "62c27ad90e62df4f1d1a654b7afc02ea802408088f689e8f0e041933fa2cc4a8",
+    "svg_sha256": "c0f5124a95161b057eee3344c7c5f3f84ecd31121d02848ed38db31be4d2629b"
+  },
+  {
+    "id": "warranty-states",
+    "document": "DATA_MODEL.md",
+    "heading": "3. Warranty database",
+    "source_sha256": "c4087c1e9e00151bedcc2a0b57f0ecf64b7a0cf1134e3c6205fc8a539b2303a9",
+    "svg_sha256": "ec2e968fc5bfcdab346f673a96c041c25792e1150724ac8fd7a20632d49117b5"
+  },
+  {
+    "id": "inspection-erd",
+    "document": "DATA_MODEL.md",
+    "heading": "4. Inspection database",
+    "source_sha256": "4d40846b4f456e81f4ede4d57c5b5663b389cca3494b6a7696cb00b24c9b1f7a",
+    "svg_sha256": "d104ae51a58798f317dcc178b0f7eba1348679da1df0243bb3f28c9c0c7663a1"
+  },
+  {
+    "id": "inspection-states",
+    "document": "DATA_MODEL.md",
+    "heading": "4. Inspection database",
+    "source_sha256": "34f5c5432a51611101703b49945ca4c0525e0271beb7588a95b54e9986694d8c",
+    "svg_sha256": "de185d6fb18d381d0194a2da6617ec43d33e7c39f7dd8584a434f98028c5dbbe"
+  },
+  {
+    "id": "repair-erd",
+    "document": "DATA_MODEL.md",
+    "heading": "5. Repair database",
+    "source_sha256": "fb241fa27a8a0cf68624e48d4ec037fac9ceba64bd2c08f523d8d0a2ffda6874",
+    "svg_sha256": "00c89c8d4a02d042280de097721fc8ed91b5cdaba87004c85ae6f1d3b66c0974"
+  },
+  {
+    "id": "repair-states",
+    "document": "DATA_MODEL.md",
+    "heading": "5. Repair database",
+    "source_sha256": "b326686f6f55f8aaa053ba2d47750e8c6ca58c10e4cda76c5d0971659a0b8ac9",
+    "svg_sha256": "aa8a42ec1bf2d19e170384097342f793595245bd6db2fdc0a1091f37490593e5"
+  },
+  {
+    "id": "messaging-tables-erd",
+    "document": "DATA_MODEL.md",
+    "heading": "6. Infrastructure tables trong từng database",
+    "source_sha256": "f0efbe9eec0272db95312d1d4c84b4429cf7adde5103cbf003a98f501af22f2a",
+    "svg_sha256": "4e04d283bd2e04210b46caef606b1c5b7d9af07f1fa4b69358bcaa5cffe1c5ee"
+  },
+  {
+    "id": "event-topology",
+    "document": "EVENT_CONTRACTS.md",
+    "heading": "1. Topology và subscriptions",
+    "source_sha256": "223b05e3592edeabfd9e8dec39068ff9b251fcc750290a512680e0baf3fdb01b",
+    "svg_sha256": "abb4c5ad6e8618ee85df084ab32d682f250b5f16b67de19560d8bc2fcce74fe2"
+  },
+  {
+    "id": "incident-triage",
+    "document": "OPERATIONS.md",
+    "heading": "4. Quy trình điều tra một inspection FAIL chưa có repair",
+    "source_sha256": "cacc63669091ab1ea72016115df9e14ca8158288e5a75d51cfc196e423ae123c",
+    "svg_sha256": "257536128b6b7695678be8e18a4dc34ac16f185c867917661524e40d744e228a"
+  },
+  {
+    "id": "vehicle-creation-sequence",
+    "document": "REQUEST_FLOWS.md",
+    "heading": "1. Tạo vehicle → default warranty → projection",
+    "source_sha256": "230920bdc76fa8a5039a17059d1f32aa56f159a2ede868899ba2c15bf7e746ac",
+    "svg_sha256": "d7df40a876cd91ea3bc28a75e4bd9ac891ca6186e0163e6116ddbbd64ca7ba51"
+  },
+  {
+    "id": "inspection-repair-sequence",
+    "document": "REQUEST_FLOWS.md",
+    "heading": "2. Complete FAIL → coverage REST → repair và notification",
+    "source_sha256": "df41faf455569cec66cadd90a163c309453762fe8e5babe9620d7d8956aa3a6c",
+    "svg_sha256": "eab2d3fe4881d4f388a48d2c56ab5b2e8aae1179b805ad68e890c958dcfb7b37"
+  },
+  {
+    "id": "api-idempotency-sequence",
+    "document": "REQUEST_FLOWS.md",
+    "heading": "3. Hai API create request cùng Idempotency-Key",
+    "source_sha256": "9444c976a49b61b2d8f6a56a8cfe8f0bc42202fa7cf52c77236f85793d225766",
+    "svg_sha256": "e1eb9aa6fa58b4f85d2559bac32fa21332acd474b33da5865d781b8b386ca18b"
+  },
+  {
+    "id": "consumer-concurrency-sequence",
+    "document": "REQUEST_FLOWS.md",
+    "heading": "4. Hai consumer task cùng event ID",
+    "source_sha256": "6a3c94a91656d5f275b6647d5b7e9765bf383e17c7bb9685333126e76a1cb67a",
+    "svg_sha256": "3732cdd22c8fa4d5d5f5e631ade24c1b970d18754b4db86924ff51cde73acffa"
+  },
+  {
+    "id": "cache-generation-sequence",
+    "document": "REQUEST_FLOWS.md",
+    "heading": "5. Cache fill chạy đua với PATCH",
+    "source_sha256": "58b15a7c0eca0465215bbe7df18810556af5452241f58c9c54a9ac92e9415b7c",
+    "svg_sha256": "a9e88880cda8fff60c32109e1048a3402a357c8471506bace82adb72e243a797"
+  },
+  {
+    "id": "warranty-expiry-sequence",
+    "document": "REQUEST_FLOWS.md",
+    "heading": "6. Warranty expiry tự động",
+    "source_sha256": "10f92b3f88bcf957a7b781c1550387d0fe0ae430f60394afb3ba50b3abe10539",
+    "svg_sha256": "33dcfd2d3630218e4c8adc2793481c1535b9522299e1f5f48e0a5b27a4378f47"
+  },
+  {
+    "id": "system-context",
+    "document": "SYSTEM_DESIGN.md",
+    "heading": "1. Bài toán và phạm vi",
+    "source_sha256": "bafe4bf986895c7a8698ae50d6cb772b3039d4f11dd308e3d4519948634ada91",
+    "svg_sha256": "3f3f620aa16f898fcf92d7c6fd5fd4d13ce901299ce1b25b840471f9c48f3627"
+  },
+  {
+    "id": "system-containers",
+    "document": "SYSTEM_DESIGN.md",
+    "heading": "3. High-level design",
+    "source_sha256": "e557f9c76dbe43c2e9170dc23dfe9f6bb5eb673f2a31720d51df69d4351f1eab",
+    "svg_sha256": "0cd13dbed49d503928f40cb9782c2eba6f2cc350333ca3515fc8e16af860e335"
+  },
+  {
+    "id": "service-components",
+    "document": "SYSTEM_DESIGN.md",
+    "heading": "4. Low-level design trong một application",
+    "source_sha256": "99c71736a83397724b5a335449a3836b64354189adfcf99afb4974b72c6ab457",
+    "svg_sha256": "3e6ef13b0113a90679fb1ec22be60105a3e758f9d1fb910918cbafeb7addf8d1"
+  },
+  {
+    "id": "startup-dependencies",
+    "document": "SYSTEM_DESIGN.md",
+    "heading": "6. Deployment và lifecycle",
+    "source_sha256": "4fa27e0e71db1f7a992a4bee772fbbbd52005289f2f36a542d6724d3b7e5c376",
+    "svg_sha256": "7654893ffa78e7614fc3dcd47bb4b565cad8100841a2ab830f4edd6d162080e6"
+  },
+  {
+    "id": "production-target",
+    "document": "SYSTEM_DESIGN.md",
+    "heading": "9. Hướng production — chưa triển khai",
+    "source_sha256": "1cbc42b8706ff713dbc8a4b63982a277cdb48592179472dfb7a1d65ef3c9b3a5",
+    "svg_sha256": "88cc10ceb57e6d388ebaa461d57465e17246dda5c7d5ab26ca6ee91f681e878e"
+  }
+]

@@ -1,0 +1,17 @@
+flowchart TD
+    %% diagram: consumer-processing
+    receive["Receive record"] --> envelope{"Envelope valid?"}
+    envelope -->|"No"| dlq["Publish original data to DLQ"]
+    envelope -->|"Yes"| handler{"Handler subscribed?"}
+    handler -->|"No"| offset["Commit source offset plus one"]
+    handler -->|"Yes"| transaction["DB transaction: reserve marker, handle if new, COMMIT"]
+    transaction --> success{"process_event returned?"}
+    success -->|"Yes - new or duplicate"| offset
+    success -->|"Exception"| cleanup["Rollback if possible - outcome may be unknown"]
+    cleanup --> budget{"Retries remaining?"}
+    budget -->|"Yes"| backoff["Wait 1 / 2 / 4 / 8 seconds"]
+    backoff --> transaction
+    budget -->|"No"| dlq
+    dlq --> ack{"DLQ ACK?"}
+    ack -->|"Yes"| offset
+    ack -->|"No"| restart["Restart from committed offsets"]

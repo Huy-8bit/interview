@@ -1,0 +1,18 @@
+flowchart TD
+    %% diagram: service-components
+    request["HTTP request"] --> middleware["Request / correlation middleware"]
+    middleware --> router["API router and Pydantic schemas"]
+    router --> business["Domain service - transaction owner"]
+    consumer["Kafka consumer"] --> handler["Event handler and processed ledger"]
+    handler --> business
+    business --> repository["Repository / SQLAlchemy session"]
+    business --> enqueue["Enqueue outbox in same session"]
+    repository --> db[("Service PostgreSQL")]
+    enqueue --> db
+    business --> redis["RedisSupport"]
+    db --> publisher["Outbox task - pending row lock"]
+    publisher -.-> kafka["Kafka"]
+    kafka -.-> consumer
+    runtime["FastAPI lifespan Runtime"] --> business
+    runtime --> publisher
+    runtime --> consumer

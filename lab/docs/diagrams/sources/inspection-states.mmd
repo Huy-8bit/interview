@@ -1,0 +1,15 @@
+stateDiagram-v2
+    %% diagram: inspection-states
+    direction LR
+    [*] --> Pending
+    Pending: PENDING
+    InProgress: IN_PROGRESS
+    Passed: COMPLETED / PASS
+    Failed: COMPLETED / FAIL
+    Pending --> InProgress: start
+    Pending --> Passed: complete PASS
+    Pending --> Failed: complete FAIL
+    InProgress --> Passed: complete PASS
+    InProgress --> Failed: complete FAIL
+    Passed --> [*]
+    Failed --> [*]

@@ -1,0 +1,13 @@
+flowchart LR
+    %% diagram: startup-dependencies
+    postgres["PostgreSQL starts"] --> dbInit["Create 4 DBs and roles on empty volume"]
+    dbInit --> pgReady["PostgreSQL healthy"]
+    redis["Redis starts"] --> redisReady["Redis healthy"]
+    kafka["Kafka KRaft starts"] --> brokerReady["Broker healthy"]
+    brokerReady --> topicInit["kafka-init creates 8 topics"]
+    pgReady --> appStart["Start each application"]
+    redisReady --> appStart
+    topicInit --> appStart
+    appStart --> migration["Alembic under DB advisory lock"]
+    migration --> api["Uvicorn and lifespan workers"]
+    api --> readiness["Ready checks DB / Redis / Kafka / tasks"]

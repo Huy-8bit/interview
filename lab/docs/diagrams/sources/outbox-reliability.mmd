@@ -1,0 +1,14 @@
+flowchart TD
+    %% diagram: outbox-reliability
+    request["Business mutation"] --> tx["BEGIN - business rows and outbox"]
+    tx --> commit{"Transaction outcome"}
+    commit -->|"Confirmed rollback"| rollback["No committed business or publish intent"]
+    commit -->|"Confirmed commit"| pending["Durable PENDING row"]
+    commit -->|"Connection lost - unknown"| reconcile["Reconcile or retry with same identity"]
+    pending --> claim["Lock due row SKIP LOCKED"]
+    claim --> send["Send envelope with stable event ID"]
+    send --> ack{"Kafka ACK observed?"}
+    ack -->|"No or timeout"| retry["Keep PENDING - persist backoff"]
+    retry --> pending
+    ack -->|"Yes"| mark["Set PUBLISHED and commit"]
+    mark --> stored["Retained published record"]

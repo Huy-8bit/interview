@@ -1,0 +1,10 @@
+flowchart LR
+    %% diagram: recovery-strategy
+    incident["Workflow incomplete"] --> location{"Where is durable intent?"}
+    location -->|"Pending outbox"| dependency["Restore DB or Kafka"]
+    dependency --> automatic["Outbox retry resumes"]
+    location -->|"Uncommitted source offset"| consumer["Restore consumer dependency"]
+    consumer --> redelivery["Kafka redelivery and dedupe"]
+    location -->|"DLQ record"| investigate["Inspect and fix root cause"]
+    investigate --> replay["Replay same event ID"]
+    location -->|"No recorded intent"| reconcile["Investigate client outcome and source data"]

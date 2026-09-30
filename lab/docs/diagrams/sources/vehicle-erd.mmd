@@ -1,0 +1,13 @@
+erDiagram
+    %% diagram: vehicle-erd
+    vehicles {
+        uuid id PK
+        varchar vin UK "17 characters"
+        varchar model
+        varchar manufacturer
+        integer production_year
+        varchar owner_name
+        varchar status "ACTIVE or INACTIVE"
+        timestamptz created_at
+        timestamptz updated_at
+    }

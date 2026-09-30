@@ -1,0 +1,7 @@
+flowchart LR
+    %% diagram: domain-ownership
+    vehicle["Vehicle in vehicle_db"] -.->|"logical reference: vehicle_id"| warranty["Warranty in warranty_db"]
+    vehicle -.->|"logical reference: vehicle_id"| inspection["Inspection in inspection_db"]
+    inspection -.->|"logical reference: inspection_id"| repair["Repair in repair_db"]
+    vehicle -.->|"logical reference: vehicle_id"| repair
+    repair -->|"Local foreign key"| notification["Notification in repair_db"]

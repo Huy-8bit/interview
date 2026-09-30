@@ -1,0 +1,16 @@
+sequenceDiagram
+    %% diagram: consumer-concurrency-sequence
+    participant WorkerA
+    participant WorkerB
+    participant PostgreSQL
+    participant Kafka
+    Kafka->>WorkerA: Event E
+    Kafka->>WorkerB: Redelivered or duplicated E
+    WorkerA->>PostgreSQL: TX A - INSERT processed E and consumer name
+    WorkerB->>PostgreSQL: TX B - same INSERT waits on unique key
+    WorkerA->>PostgreSQL: TX A - business rows and outbox
+    WorkerA->>PostgreSQL: COMMIT
+    PostgreSQL-->>WorkerB: Conflict - no new marker returned
+    WorkerB->>PostgreSQL: COMMIT without business handler
+    WorkerA->>Kafka: Commit source offset
+    WorkerB->>Kafka: Commit source offset for its delivery

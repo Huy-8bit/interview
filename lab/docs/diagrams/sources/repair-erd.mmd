@@ -1,0 +1,23 @@
+erDiagram
+    %% diagram: repair-erd
+    repair_requests ||..o{ notifications : has
+    repair_requests {
+        uuid id PK
+        uuid vehicle_id "Logical reference only"
+        uuid inspection_id UK "One repair per inspection"
+        boolean warranty_covered
+        varchar status
+        text description
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    notifications {
+        uuid id PK
+        uuid vehicle_id "Logical reference only"
+        uuid repair_id FK
+        varchar channel
+        text message
+        varchar status
+        timestamptz created_at
+        timestamptz updated_at
+    }

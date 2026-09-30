@@ -1,0 +1,14 @@
+flowchart LR
+    %% diagram: event-topology
+    vehicle["Vehicle outbox"] -.-> vehicleTopic["vehicle-events"]
+    vehicleTopic -.->|"vehicle.created"| warranty["Warranty group"]
+    vehicleTopic -.->|"vehicle.created"| inspection["Inspection group"]
+    warranty -.-> warrantyTopic["warranty-events"]
+    warrantyTopic -.->|"warranty.created"| inspection
+    inspection -.-> inspectionTopic["inspection-events"]
+    inspectionTopic -.->|"inspection.failed"| repair["Repair group"]
+    repair -.-> repairTopic["repair-events"]
+    warranty -.->|"Source failure"| vehicleDlq["vehicle-events-dlq"]
+    inspection -.->|"Vehicle source failure"| vehicleDlq
+    inspection -.->|"Warranty source failure"| warrantyDlq["warranty-events-dlq"]
+    repair -.->|"Source failure"| inspectionDlq["inspection-events-dlq"]

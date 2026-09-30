@@ -1,0 +1,12 @@
+flowchart LR
+    %% diagram: production-target
+    client["Client"] --> gateway["Gateway / OIDC / rate limiting"]
+    gateway --> apis["4 domain API deployments"]
+    apis --> databases[("4 owned DBs on HA PostgreSQL")]
+    apis --> redis["Managed Redis"]
+    workers["Workers of the same 4 domains"] --> databases
+    workers -.-> kafka["Kafka cluster and Schema Registry"]
+    kafka -.-> workers
+    apis --> telemetry["OpenTelemetry / metrics / logs"]
+    workers --> telemetry
+    databases --> backup["Backups and restore drills"]

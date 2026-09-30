@@ -1,0 +1,29 @@
+erDiagram
+    %% diagram: messaging-tables-erd
+    outbox_events {
+        bigint id PK "Identity sequence"
+        varchar aggregate_id
+        uuid event_id UK
+        varchar event_type
+        varchar topic
+        jsonb payload
+        varchar status
+        integer attempts
+        text last_error "Nullable"
+        timestamptz created_at
+        timestamptz next_attempt_at
+        timestamptz published_at "Nullable"
+    }
+    processed_events {
+        uuid event_id PK "Composite PK"
+        varchar consumer_name PK "Composite PK"
+        timestamptz processed_at
+    }
+    idempotency_records {
+        varchar scope PK "Composite PK"
+        varchar key_hash PK "Composite PK"
+        varchar request_hash
+        jsonb response "Filled before successful commit"
+        integer status_code
+        timestamptz created_at
+    }

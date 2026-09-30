@@ -1,0 +1,12 @@
+erDiagram
+    %% diagram: warranty-erd
+    warranties {
+        uuid id PK
+        uuid vehicle_id "Logical reference only"
+        varchar warranty_type "Part of composite unique key"
+        date start_date
+        date end_date
+        varchar status "PENDING ACTIVE EXPIRED"
+        timestamptz created_at
+        timestamptz updated_at
+    }

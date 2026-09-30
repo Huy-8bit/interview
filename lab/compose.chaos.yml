@@ -1,0 +1,10 @@
+# Opt-in fault endpoints; bind ports to loopback only.
+services:
+  vehicle-service:
+    environment: {LAB_MODE: "true"}
+  warranty-service:
+    environment: {LAB_MODE: "true"}
+  inspection-service:
+    environment: {LAB_MODE: "true"}
+  repair-service:
+    environment: {LAB_MODE: "true"}

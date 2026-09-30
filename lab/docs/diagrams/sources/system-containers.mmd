@@ -1,0 +1,19 @@
+flowchart TB
+    %% diagram: system-containers
+    client["Client / CLI"]
+    subgraph apps["4 FastAPI services"]
+        vehicle["Vehicle :8001"]
+        warranty["Warranty :8002"]
+        inspection["Inspection :8003"]
+        repair["Repair :8004"]
+    end
+    client --> vehicle
+    client --> warranty
+    client --> inspection
+    client --> repair
+    vehicle --> vehicleDb[("vehicle_db")]
+    warranty --> warrantyDb[("warranty_db")]
+    inspection --> inspectionDb[("inspection_db")]
+    repair --> repairDb[("repair_db")]
+    apps <-->|"Cache / idempotency / locks"| redis[("Redis")]
+    apps <-->|"Outbox / consumers"| kafka["Kafka KRaft"]

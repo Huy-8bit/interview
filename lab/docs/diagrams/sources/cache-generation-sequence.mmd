@@ -1,0 +1,15 @@
+sequenceDiagram
+    %% diagram: cache-generation-sequence
+    participant Reader
+    participant Writer
+    participant Redis
+    participant PostgreSQL
+    Reader->>Redis: Atomic read cache and generation G
+    Redis-->>Reader: MISS with generation G
+    Reader->>PostgreSQL: Read old vehicle snapshot
+    Writer->>PostgreSQL: Update vehicle and outbox, COMMIT
+    Writer->>Redis: Atomic increment generation and DEL cache
+    Redis-->>Writer: Generation is now G plus one
+    Reader->>Redis: Fill old snapshot only if generation equals G
+    Redis-->>Reader: Reject stale fill
+    Reader-->>Reader: Return already-read DB snapshot to this request

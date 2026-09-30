@@ -1,0 +1,18 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+cache_dir = "/tmp/vehicle-lab-pytest-cache"
+testpaths = ["tests"]
+markers = ["integration: requires the real Docker stack", "unit: no external infrastructure"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+cache-dir = "/tmp/vehicle-lab-ruff-cache"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "platform_common", "scripts", "lab_client"]

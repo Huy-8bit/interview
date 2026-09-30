@@ -1,0 +1,187 @@
+name: ${COMPOSE_PROJECT_NAME:-vehicle-platform-lab}
+
+x-app-env: &app-env
+  REDIS_URL: redis://redis:6379/0
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  CACHE_TTL: ${CACHE_TTL:-60}
+  IDEMPOTENCY_TTL: ${IDEMPOTENCY_TTL:-86400}
+  LOCK_TIMEOUT: ${LOCK_TIMEOUT:-30}
+  DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+  DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-5}
+  DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT:-3}
+  DB_STATEMENT_TIMEOUT_MS: ${DB_STATEMENT_TIMEOUT_MS:-10000}
+  REDIS_TIMEOUT: ${REDIS_TIMEOUT:-0.5}
+  HTTP_CONNECT_TIMEOUT: ${HTTP_CONNECT_TIMEOUT:-1}
+  HTTP_TIMEOUT: ${HTTP_TIMEOUT:-2}
+  HTTP_MAX_CONNECTIONS: ${HTTP_MAX_CONNECTIONS:-20}
+  HTTP_RETRIES: ${HTTP_RETRIES:-2}
+  OUTBOX_INTERVAL: ${OUTBOX_INTERVAL:-0.5}
+  OUTBOX_RETRY_MAX_SECONDS: ${OUTBOX_RETRY_MAX_SECONDS:-60}
+  KAFKA_SEND_TIMEOUT: ${KAFKA_SEND_TIMEOUT:-5}
+  CONSUMER_MAX_RETRIES: ${CONSUMER_MAX_RETRIES:-4}
+  RETRY_BASE_SECONDS: ${RETRY_BASE_SECONDS:-1}
+  CONSUMER_MAX_POLL_INTERVAL_MS: ${CONSUMER_MAX_POLL_INTERVAL_MS:-300000}
+  LAB_MODE: ${LAB_MODE:-false}
+
+x-app: &app
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 20s
+  depends_on:
+    postgres: {condition: service_healthy}
+    redis: {condition: service_healthy}
+    kafka-init: {condition: service_completed_successfully}
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=5)"]
+    interval: 15s
+    timeout: 6s
+    retries: 5
+    start_period: 20s
+
+services:
+  postgres:
+    image: postgres:16.9-alpine
+    environment:
+      POSTGRES_USER: platform_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lab_admin_password}
+      VEHICLE_DB_PASSWORD: ${VEHICLE_DB_PASSWORD:-vehicle_password}
+      WARRANTY_DB_PASSWORD: ${WARRANTY_DB_PASSWORD:-warranty_password}
+      INSPECTION_DB_PASSWORD: ${INSPECTION_DB_PASSWORD:-inspection_password}
+      REPAIR_DB_PASSWORD: ${REPAIR_DB_PASSWORD:-repair_password}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init-databases.sh:/docker-entrypoint-initdb.d/01-databases.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U platform_admin -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["127.0.0.1:${REDIS_PORT:-6379}:6379"]
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  kafka:
+    image: apache/kafka:3.9.1
+    hostname: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_HEAP_OPTS: -Xmx512M -Xms256M
+    volumes: ["kafka-data:/var/lib/kafka/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
+    restart: unless-stopped
+
+  kafka-init:
+    image: apache/kafka:3.9.1
+    entrypoint: ["/bin/bash", "/init-topics.sh"]
+    environment:
+      KAFKA_TOPIC_PARTITIONS: ${KAFKA_TOPIC_PARTITIONS:-3}
+    volumes: ["./infrastructure/kafka/init-topics.sh:/init-topics.sh:ro"]
+    depends_on:
+      kafka: {condition: service_healthy}
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    ports: ["127.0.0.1:${KAFKA_UI_PORT:-8080}:8080"]
+    environment:
+      KAFKA_CLUSTERS_0_NAME: vehicle-lab
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      kafka: {condition: service_healthy}
+    restart: unless-stopped
+
+  vehicle-service:
+    <<: *app
+    build: {context: ., dockerfile: services/vehicle-service/Dockerfile}
+    ports: ["127.0.0.1:${VEHICLE_PORT:-8001}:8000"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: vehicle-service
+      DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres:5432/vehicle_db
+
+  warranty-service:
+    <<: *app
+    build: {context: ., dockerfile: services/warranty-service/Dockerfile}
+    ports: ["127.0.0.1:${WARRANTY_PORT:-8002}:8000"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: warranty-service
+      DATABASE_URL: postgresql+asyncpg://warranty_app:${WARRANTY_DB_PASSWORD:-warranty_password}@postgres:5432/warranty_db
+      KAFKA_CONSUMER_GROUP: warranty-service-v1
+      DEFAULT_WARRANTY_DAYS: ${DEFAULT_WARRANTY_DAYS:-1095}
+      WARRANTY_EXPIRY_INTERVAL: ${WARRANTY_EXPIRY_INTERVAL:-30}
+
+  inspection-service:
+    <<: *app
+    build: {context: ., dockerfile: services/inspection-service/Dockerfile}
+    ports: ["127.0.0.1:${INSPECTION_PORT:-8003}:8000"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: inspection-service
+      DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres:5432/inspection_db
+      KAFKA_CONSUMER_GROUP: inspection-service-v1
+
+  repair-service:
+    <<: *app
+    build: {context: ., dockerfile: services/repair-service/Dockerfile}
+    ports: ["127.0.0.1:${REPAIR_PORT:-8004}:8000"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: repair-service
+      DATABASE_URL: postgresql+asyncpg://repair_app:${REPAIR_DB_PASSWORD:-repair_password}@postgres:5432/repair_db
+      KAFKA_CONSUMER_GROUP: repair-service-v1
+      WARRANTY_SERVICE_URL: http://warranty-service:8000
+
+  toolbox:
+    profiles: [tools]
+    build: {context: ., dockerfile: Dockerfile.tools}
+    environment:
+      VEHICLE_URL: http://vehicle-service:8000
+      WARRANTY_URL: http://warranty-service:8000
+      INSPECTION_URL: http://inspection-service:8000
+      REPAIR_URL: http://repair-service:8000
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      REDIS_URL: redis://redis:6379/0
+      VEHICLE_DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres:5432/vehicle_db
+      WARRANTY_DATABASE_URL: postgresql+asyncpg://warranty_app:${WARRANTY_DB_PASSWORD:-warranty_password}@postgres:5432/warranty_db
+      INSPECTION_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres:5432/inspection_db
+      REPAIR_DATABASE_URL: postgresql+asyncpg://repair_app:${REPAIR_DB_PASSWORD:-repair_password}@postgres:5432/repair_db
+    depends_on:
+      vehicle-service: {condition: service_healthy}
+      warranty-service: {condition: service_healthy}
+      inspection-service: {condition: service_healthy}
+      repair-service: {condition: service_healthy}
+
+volumes:
+  postgres-data:
+  redis-data:
+  kafka-data:
