@@ -33,6 +33,7 @@ erDiagram
         integer production_year
         varchar owner_name
         varchar status "ACTIVE or INACTIVE"
+        uuid simulation_run_id "Nullable, immutable API marker"
         timestamptz created_at
         timestamptz updated_at
     }
@@ -47,8 +48,11 @@ erDiagram
 | production_year | API và DB 1886–2100 | Năm sản xuất |
 | owner_name | API 1–200 ký tự, trim; DB NOT NULL | Customer cơ bản của lab |
 | status | Default ACTIVE; DB check ACTIVE/INACTIVE | Trạng thái record xe |
+| simulation_run_id | Nullable UUID; API create có marker yêu cầu VIN TRF; PATCH không nhận field | Phạm vi xóa xe của traffic run |
 
 `vehicles_vin_key` là unique constraint chống race giữa hai create request. `ix_vehicles_created(created_at,id)` hỗ trợ list ổn định. PATCH khóa row bằng FOR UPDATE, đổi dữ liệu và thêm vehicle.updated trong cùng transaction.
+
+[Migration 0002](../services/vehicle-service/migrations/versions/0002_simulation_marker.py) thêm marker nullable, giữ dữ liệu hiện hữu. DELETE mô phỏng cần marker bằng run header, khóa row rồi xóa; references ở DB khác vẫn giữ lịch sử, không cascade. Unique VIN index cũng phục vụ exact-match lookup để reconcile create timeout.
 
 **Giới hạn:** INACTIVE hiện không tự expire warranty hay chặn inspection/repair. Những policy này chưa được implement. API không kiểm VIN check digit theo quy định từng thị trường.
 
@@ -283,7 +287,7 @@ Mỗi service chạy `alembic upgrade head` ở startup dưới PostgreSQL advis
 ```sh
 docker compose exec vehicle-service alembic current
 docker compose exec vehicle-service alembic check
-docker compose exec postgres psql -U platform_admin -d warranty_db \
+docker compose exec postgres-primary psql -U platform_admin -d warranty_db \
   -c "SELECT status,count(*) FROM warranties GROUP BY status;"
 ```
 

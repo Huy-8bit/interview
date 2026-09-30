@@ -1,0 +1,21 @@
+ pg_is_in_recovery | wal_level | max_slots | max_senders 
+-------------------+-----------+-----------+-------------
+ f                 | logical   | 16        | 16
+(1 row)
+
+  application_name  |   state   | sync_state 
+--------------------+-----------+------------
+ postgres-replica   | streaming | async
+ Debezium Streaming | streaming | async
+ Debezium Streaming | streaming | async
+ Debezium Streaming | streaming | async
+ Debezium Streaming | streaming | async
+(5 rows)
+
+    rolname     | rolsuper | rolreplication 
+----------------+----------+----------------
+ replicator     | f        | t
+ debezium       | f        | t
+ vehicle_reader | f        | f
+(3 rows)
+

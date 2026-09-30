@@ -1,0 +1,181 @@
+{
+  "changes": {
+    "vehicle": {
+      "vin": "LABE9E89CEF4EF34A",
+      "model": "EV-Lab",
+      "manufacturer": "Learning Motors",
+      "production_year": 2026,
+      "owner_name": "Nguyen Van An",
+      "id": "607d1570-3a39-4f7a-ba23-edb8720e7258",
+      "status": "ACTIVE",
+      "created_at": "2026-09-30T05:53:18.316646Z",
+      "updated_at": "2026-09-30T05:53:18.316650Z"
+    },
+    "updated": {
+      "vin": "LABE9E89CEF4EF34A",
+      "model": "EV-Lab",
+      "manufacturer": "Learning Motors",
+      "production_year": 2026,
+      "owner_name": "CDC updated owner",
+      "id": "607d1570-3a39-4f7a-ba23-edb8720e7258",
+      "status": "ACTIVE",
+      "created_at": "2026-09-30T05:53:18.316646Z",
+      "updated_at": "2026-09-30T05:53:18.417455Z"
+    },
+    "deleted": [
+      {
+        "id": "607d1570-3a39-4f7a-ba23-edb8720e7258"
+      }
+    ]
+  },
+  "records": [
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 0,
+      "offset": 0,
+      "key": {
+        "id": "607d1570-3a39-4f7a-ba23-edb8720e7258"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "607d1570-3a39-4f7a-ba23-edb8720e7258",
+          "vin": "LABE9E89CEF4EF34A",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "Nguyen Van An",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:18.316646Z",
+          "updated_at": "2026-09-30T05:53:18.316650Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790747598323,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"68808864\",\"68811336\"]",
+          "ts_us": 1790747598323443,
+          "ts_ns": 1790747598323443000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 841,
+          "lsn": 68811336,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790747598343,
+        "ts_us": 1790747598343964,
+        "ts_ns": 1790747598343964651
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 0,
+      "offset": 1,
+      "key": {
+        "id": "607d1570-3a39-4f7a-ba23-edb8720e7258"
+      },
+      "value": {
+        "before": {
+          "id": "607d1570-3a39-4f7a-ba23-edb8720e7258",
+          "vin": "LABE9E89CEF4EF34A",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "Nguyen Van An",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:18.316646Z",
+          "updated_at": "2026-09-30T05:53:18.316650Z"
+        },
+        "after": {
+          "id": "607d1570-3a39-4f7a-ba23-edb8720e7258",
+          "vin": "LABE9E89CEF4EF34A",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "CDC updated owner",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:18.316646Z",
+          "updated_at": "2026-09-30T05:53:18.417455Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790747598419,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"68812864\",\"68812920\"]",
+          "ts_us": 1790747598419237,
+          "ts_ns": 1790747598419237000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 842,
+          "lsn": 68812920,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790747598866,
+        "ts_us": 1790747598866669,
+        "ts_ns": 1790747598866669690
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 0,
+      "offset": 2,
+      "key": {
+        "id": "607d1570-3a39-4f7a-ba23-edb8720e7258"
+      },
+      "value": {
+        "before": {
+          "id": "607d1570-3a39-4f7a-ba23-edb8720e7258",
+          "vin": "LABE9E89CEF4EF34A",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "CDC updated owner",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:18.316646Z",
+          "updated_at": "2026-09-30T05:53:18.417455Z"
+        },
+        "after": null,
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790747598482,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"68814328\",\"68814328\"]",
+          "ts_us": 1790747598482804,
+          "ts_ns": 1790747598482804000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 843,
+          "lsn": 68814328,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "d",
+        "ts_ms": 1790747598871,
+        "ts_us": 1790747598871597,
+        "ts_ns": 1790747598871597915
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 0,
+      "offset": 3,
+      "key": {
+        "id": "607d1570-3a39-4f7a-ba23-edb8720e7258"
+      },
+      "value": null
+    }
+  ]
+}

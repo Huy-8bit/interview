@@ -1,0 +1,24 @@
+ Container vehicle-platform-lab-toolbox-run-fdcd3e9fb7c9 Creating 
+ Container vehicle-platform-lab-toolbox-run-fdcd3e9fb7c9 Created 
+ Container vehicle-platform-lab-kafka-2-1 Stopping 
+ Container vehicle-platform-lab-kafka-2-1 Stopped 
+PASS: traffic remained alive during kafka-leader and completed flows after recovery
+ Container vehicle-platform-lab-toolbox-run-eb3950324655 Creating 
+ Container vehicle-platform-lab-toolbox-run-eb3950324655 Created 
+ Container vehicle-platform-lab-redis-4-1 Stopping 
+ Container vehicle-platform-lab-redis-4-1 Stopped 
+PASS: traffic remained alive during redis-master and completed flows after recovery
+ Container vehicle-platform-lab-postgres-replica-1 Stopping 
+ Container vehicle-platform-lab-postgres-replica-1 Stopped 
+PASS: traffic remained alive during postgres-replica and completed flows after recovery
+ Container vehicle-platform-lab-debezium-connect-1 Stopping 
+ Container vehicle-platform-lab-debezium-connect-1 Stopped 
+PASS: traffic remained alive during debezium-connect and completed flows after recovery
+ Container vehicle-platform-lab-warranty-service-1 Stopping 
+ Container vehicle-platform-lab-warranty-service-1 Stopped 
+PASS: traffic remained alive during warranty-service and completed flows after recovery
+ Container vehicle-platform-lab-toolbox-run-64d1b1d3b102 Creating 
+ Container vehicle-platform-lab-toolbox-run-64d1b1d3b102 Created 
+ Container vehicle-platform-lab-toolbox-run-118e8c5a5dc5 Creating 
+ Container vehicle-platform-lab-toolbox-run-118e8c5a5dc5 Created 
+PASS: traffic outages; evidence: /Users/huynguyen/Desktop/poc/lab/lab/artifacts/traffic/outages-20260930-132641

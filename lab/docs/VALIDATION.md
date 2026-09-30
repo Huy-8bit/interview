@@ -1,4 +1,6 @@
-# Kết quả kiểm chứng bài lab
+# Kết quả kiểm chứng bài lab — giai đoạn ban đầu
+
+Báo cáo này giữ kết quả trước khi chuyển infrastructure sang cluster. Kết quả phiên bản hiện tại ở [Cluster Validation](CLUSTER_VALIDATION.md).
 
 Ngày thực hiện: **2026-09-30**. Môi trường: Docker Engine 29.4.0, Docker Compose 5.1.2, Linux ARM64 trong Docker trên macOS. Ứng dụng chạy Python 3.12 trong image, PostgreSQL 16.9, Redis 7.4.4, Apache Kafka 3.9.1 KRaft.
 

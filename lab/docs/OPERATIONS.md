@@ -1,8 +1,12 @@
 # Operations Runbook
 
-[Mục lục](README.md) · [Failure design](CONSISTENCY_AND_FAILURES.md) · [Kết quả đã chạy](VALIDATION.md)
+[Mục lục](README.md) · [Failure design](CONSISTENCY_AND_FAILURES.md) · [Kết quả đã chạy](CLUSTER_VALIDATION.md)
 
 Các lệnh dưới đây chạy từ root repository. Chỉ áp dụng fault drill cho stack lab; không chạy đồng thời với bộ test thường hoặc seed lớn. Scripts outage dừng đúng dependency được chỉ định và có trap để start lại.
+
+Với topology hiện tại, `outage_drills.sh kafka` dừng cả ba broker và `... redis` dừng cả sáu Redis nodes. Để học **mất một node, leader election, replica promotion và consumer scale**, chạy `make cluster-test`; hướng dẫn chi tiết ở [Cluster Infrastructure](CLUSTER_INFRASTRUCTURE.md).
+
+Database layer hiện có primary–replica và Debezium; xem [runbook PostgreSQL/CDC](POSTGRESQL_CDC.md) và chạy `make db-test` cho replica outage, CDC recovery, primary outage và lag. `outage_drills.sh postgres` dừng primary, không promote replica. Readiness vẫn cần primary; eventual Vehicle GET có thể chạy dù readiness đang 503.
 
 ## 1. Khởi động, xem trạng thái và dừng
 
@@ -13,7 +17,7 @@ docker compose logs --tail=100 vehicle-service warranty-service inspection-servi
 docker compose run --build --rm toolbox python scripts/demo.py
 ```
 
-Swagger ở ports 8001–8004, Kafka UI ở [localhost:8080](http://localhost:8080). PostgreSQL và Kafka chỉ mở trong network Compose; Redis có thêm host binding `127.0.0.1:6379`. HTTP ports cũng bind loopback. Khi port bận, đổi `*_PORT` trong `.env` rồi dùng URL tương ứng.
+Swagger của Vehicle/Warranty/Inspection ở ports 8001/8002/8003. Repair được cấp một cổng trong dải 8004–8006: lấy bằng `docker compose port --index 1 repair-service 8000` rồi mở `/docs`. Kafka UI ở [localhost:8080](http://localhost:8080). PostgreSQL, Kafka và sáu Redis node chỉ mở trong Docker networks; Redis dùng thêm subnet riêng để giữ địa chỉ node ổn định. HTTP ports bind loopback. Khi port bận, đổi `*_PORT` trong `.env` rồi dùng URL tương ứng.
 
 ```sh
 # Dừng và giữ dữ liệu
@@ -31,10 +35,11 @@ curl -fsS http://localhost:8001/health
 curl -i http://localhost:8001/ready
 curl -i http://localhost:8002/ready
 curl -i http://localhost:8003/ready
-curl -i http://localhost:8004/ready
+REPAIR_URL="http://$(docker compose port --index 1 repair-service 8000)"
+curl -i "$REPAIR_URL/ready"
 ```
 
-Liveness 200 chỉ cho biết process còn phục vụ HTTP. Readiness kiểm PostgreSQL SELECT 1, Redis ping, Kafka Admin describe cluster và task chưa done. Nó chưa đo tiến triển worker hoặc coverage dependency của Repair; Warranty HTTP down không nhất thiết làm `/ready` Repair trả 503.
+Liveness 200 chỉ cho biết process còn phục vụ HTTP. Readiness kiểm PostgreSQL SELECT 1, Redis Cluster state/slots, Kafka Admin describe cluster và task chưa done. Nó chưa đo tiến triển worker hoặc coverage dependency của Repair; Warranty HTTP down không nhất thiết làm `/ready` Repair trả 503.
 
 | Tín hiệu | Hiện có | Cách diễn giải |
 |---|---|---|
@@ -53,22 +58,22 @@ Chưa có `/metrics`, Prometheus, Grafana hoặc exporter được cấu hình. 
 Outbox pending và tuổi event, chạy trên DB của service nguồn đang điều tra:
 
 ```sh
-docker compose exec postgres psql -U platform_admin -d inspection_db -c \
+docker compose exec postgres-primary psql -U platform_admin -d inspection_db -c \
   "SELECT event_id,event_type,status,attempts,now()-created_at AS age,next_attempt_at,last_error FROM outbox_events WHERE status='PENDING' ORDER BY id LIMIT 20;"
 
-docker compose exec postgres psql -U platform_admin -d repair_db -c \
+docker compose exec postgres-primary psql -U platform_admin -d repair_db -c \
   "SELECT event_id,consumer_name,processed_at FROM processed_events ORDER BY processed_at DESC LIMIT 20;"
 
-docker compose exec postgres psql -U platform_admin -d repair_db -c \
+docker compose exec postgres-primary psql -U platform_admin -d repair_db -c \
   "SELECT id,vehicle_id,inspection_id,warranty_covered,status FROM repair_requests ORDER BY created_at DESC LIMIT 20;"
 
-docker compose exec postgres psql -U platform_admin -d postgres -c \
+docker compose exec postgres-primary psql -U platform_admin -d postgres -c \
   "SELECT datname,state,wait_event_type,wait_event,count(*) FROM pg_stat_activity WHERE usename <> 'platform_admin' GROUP BY datname,state,wait_event_type,wait_event;"
 
-docker compose exec kafka /opt/kafka/bin/kafka-consumer-groups.sh \
-  --bootstrap-server kafka:9092 --all-groups --describe
-docker compose exec kafka /opt/kafka/bin/kafka-topics.sh \
-  --bootstrap-server kafka:9092 --list
+docker compose exec kafka-1 /opt/kafka/bin/kafka-consumer-groups.sh \
+  --bootstrap-server kafka-1:9092,kafka-2:9092,kafka-3:9092 --all-groups --describe
+docker compose exec kafka-1 /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server kafka-1:9092,kafka-2:9092,kafka-3:9092 --list
 ```
 
 Admin ở đây là quyền operator của lab, không phải cách các application truy vấn dữ liệu. Không sửa marker, offset hoặc business rows trong lúc chỉ đang tìm nguyên nhân.
@@ -104,7 +109,8 @@ docker compose run --build --rm --no-deps toolbox python scripts/chaos_verify.py
 
 # Tạo lại application theo compose thường; .env phải để LAB_MODE=false
 docker compose up -d --wait
-curl -i -X POST http://localhost:8004/lab/crash-next-consumer
+REPAIR_URL="http://$(docker compose port --index 1 repair-service 8000)"
+curl -i -X POST "$REPAIR_URL/lab/crash-next-consumer"
 # Mong đợi 404 khi đã tắt
 ```
 
@@ -185,14 +191,15 @@ Mong đợi 503 sau khoảng acquire timeout, rồi 200 khi A kết thúc. Dùng
 ### 6.9. Consumer lag tăng
 
 ```sh
-curl -fsS http://localhost:8004/lab/consumer-delay -H 'Content-Type: application/json' -d '{"seconds":5}'
+REPAIR_URL="http://$(docker compose port --index 1 repair-service 8000)"
+curl -fsS "$REPAIR_URL/lab/consumer-delay" -H 'Content-Type: application/json' -d '{"seconds":5}'
 # Terminal khác
 docker compose run --rm --no-deps toolbox python scripts/seed.py --count 30
 # Theo dõi trong lúc seed còn chạy
-docker compose exec kafka /opt/kafka/bin/kafka-consumer-groups.sh \
-  --bootstrap-server kafka:9092 --group repair-service-v1 --describe
+docker compose exec kafka-1 /opt/kafka/bin/kafka-consumer-groups.sh \
+  --bootstrap-server kafka-1:9092,kafka-2:9092,kafka-3:9092 --group repair-service-v1 --describe
 # Kết thúc drill
-curl -fsS http://localhost:8004/lab/consumer-delay -H 'Content-Type: application/json' -d '{"seconds":0}'
+curl -fsS "$REPAIR_URL/lab/consumer-delay" -H 'Content-Type: application/json' -d '{"seconds":0}'
 ```
 
 Seed chờ repair và chỉ có năm workflow đồng thời nên workload bị giới hạn; đây là minh họa lag, không phải load generator benchmark. So sánh per-partition lag trước/trong/sau, không chỉ tổng số message trong topic.
@@ -233,8 +240,8 @@ Chaos script ghi bản cũ có chủ đích vào key của vehicle vừa tạo v
 5. Theo dõi source offset, marker, resource và outbox downstream. Giữ DLQ gốc để audit.
 
 ```sh
-docker compose exec kafka /opt/kafka/bin/kafka-console-consumer.sh \
-  --bootstrap-server kafka:9092 --topic inspection-events-dlq --from-beginning \
+docker compose exec kafka-1 /opt/kafka/bin/kafka-console-consumer.sh \
+  --bootstrap-server kafka-1:9092,kafka-2:9092,kafka-3:9092 --topic inspection-events-dlq --from-beginning \
   --property print.partition=true --property print.offset=true
 
 # Thay partition=0, offset=12 bằng record đã điều tra
@@ -254,3 +261,11 @@ docker compose exec -T postgres pg_dump -U platform_admin -Fc vehicle_db > /tmp/
 Cần làm tương tự cho các DB khác và kiểm restore vào môi trường riêng. Bốn dump độc lập không tự tạo một global consistent snapshot cho workflow; cần kế hoạch quiesce/replay/reconcile khi restore. Chưa có PITR/automated backup hoặc RPO/RTO đã kiểm chứng.
 
 Đề xuất alert: oldest pending outbox age, lag không giảm, DLQ tăng, pool timeout rate, repair coverage lookup failures và background task exit. Threshold phải dựa trên workload/SLO được đo; không lấy số của demo làm production threshold.
+
+## 13. Traffic Generator đang chạy
+
+Compose mặc định tự bật `traffic-generator` với năm virtual users. Xem [live guide](TRAFFIC_GENERATOR.md#7-quan-sát-realtime) để theo cùng flow qua API/domain events/CDC/Redis/replica, và [traffic fault drills](TRAFFIC_GENERATOR.md#8-thử-lỗi-và-kiểm-chứng) để kiểm worker tiếp tục chạy khi dependency lỗi.
+
+`make traffic-status` đọc heartbeat/metrics; healthcheck chỉ kiểm process sống, cần kiểm `flows_completed` tiếp tục tăng. `make traffic-stop`/`make traffic-start` điều khiển riêng workload. `make test` tự dừng và khởi động lại đúng container generator nếu trước đó đang chạy. Các drill cũ (`cluster-test`, `db-test`, `outage_drills.sh`, chaos) giả định có lúc global outbox/lag về 0: dừng traffic trước và bật lại sau. Không chạy hai orchestrator fault drill cùng lúc.
+
+`make traffic-drills` cần traffic đang chạy và tự restore từng node đã dừng. Nó chỉ chứng minh flow mới tiếp tục/sau recovery; flow cũ thất bại không được resume, DLQ cần operator xem xét/replay. DELETE của generator chỉ xóa xe có matching run marker, không dọn history/ledger. Không dùng truncate/flushall để dọn traffic cùng dữ liệu khác.

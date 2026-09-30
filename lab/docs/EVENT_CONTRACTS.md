@@ -33,7 +33,7 @@ Group node bao gồm consumer và outbox task của service tương ứng. Inspe
 | inspection-events | inspection-service | repair-service-v1 | inspection.failed |
 | repair-events | repair-service | Chưa có | — |
 
-Cả bốn topic nguồn và bốn topic `-dlq` có ba partitions, RF=1, retention bảy ngày trong lab. `repair-events-dlq` được tạo sẵn nhưng chưa có consumer nguồn viết vào. Consumer bỏ qua event type hợp lệ không có handler; vẫn commit offset. Version/envelope validation xảy ra trước bước bỏ qua type.
+Cả bốn topic nguồn và bốn topic `-dlq` có ba partitions, RF=3, min ISR=2, retention bảy ngày trong lab. `repair-events-dlq` được tạo sẵn nhưng chưa có consumer nguồn viết vào. Consumer bỏ qua event type hợp lệ không có handler; vẫn commit offset. Version/envelope validation xảy ra trước bước bỏ qua type.
 
 ## 2. Common envelope
 
@@ -85,7 +85,7 @@ Không có events customer.created, inspection.created/updated, repair.updated/c
 
 ### Vehicle payload
 
-`id` là vehicle ID, không có field `vehicle_id` trong snapshot này. Fields đầy đủ: id, vin, model, manufacturer, production_year, owner_name, status, created_at, updated_at. Warranty và Inspection handler đọc `data.id` rồi parse UUID; không validate toàn bộ snapshot bằng VehicleRead ở bên nhận.
+`id` là vehicle ID, không có field `vehicle_id` trong snapshot này. Fields đầy đủ: id, vin, model, manufacturer, production_year, owner_name, status, simulation_run_id (nullable UUID), created_at, updated_at. Marker mới là additive field; event cũ có thể thiếu field này, consumer hiện tại bỏ qua field không dùng. DELETE mô phỏng chỉ sinh CDC d/tombstone, không có domain event vehicle.deleted. Warranty và Inspection handler đọc `data.id` rồi parse UUID; không validate toàn bộ snapshot bằng VehicleRead ở bên nhận.
 
 ### Warranty payload
 
@@ -144,3 +144,7 @@ Replay script giữ event ID, phục hồi key từ data.vehicle_id/data.id và 
 **Quy trình đề xuất khi thay contract:** mô tả field/semantic mới → viết compatibility tests → consumer hỗ trợ cả hai version → deploy consumer → producer phát version mới → quan sát lag/DLQ → giữ khả năng replay version cũ theo retention horizon. Với dữ liệu lớn cân nhắc Schema Registry và Avro/Protobuf; chưa có trong lab.
 
 Source: [envelope](../common/platform_common/events.py), [publisher](../common/platform_common/kafka.py), [consumer](../common/platform_common/consumer.py), [topic init](../infrastructure/kafka/init-topics.sh), [DLQ replay](../scripts/replay_dlq.py).
+
+## CDC streams riêng biệt
+
+Bốn topic `<service>-cdc.public.<table>` do Debezium đọc WAL và phát row changes. Chúng không dùng domain envelope/event IDs, không đi vào domain consumers và không thay custom outbox publisher. Xem [CDC format và topology](POSTGRESQL_CDC.md).

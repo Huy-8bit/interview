@@ -1,0 +1,559 @@
+{
+  "flow": {
+    "timestamp": "2026-09-30T06:23:12.716122+00:00",
+    "service": "traffic-generator",
+    "action": "flow_completed",
+    "run_id": "759f148c-31aa-4305-9794-68618b17c166",
+    "flow_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+    "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+    "virtual_user": 1,
+    "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+    "inspection_id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27",
+    "repair_id": "19af4d6e-cfb2-4f69-8180-e39fcadf3e8c",
+    "inspection_result": "FAIL",
+    "duplicated": true,
+    "deleted": true,
+    "result": "ok"
+  },
+  "summary": {
+    "timestamp": "2026-09-30T06:23:12.716639+00:00",
+    "service": "traffic-generator",
+    "action": "summary_final",
+    "run_id": "759f148c-31aa-4305-9794-68618b17c166",
+    "heartbeat_unix": 1790749392.7162862,
+    "state": "stopped",
+    "mode": "scenario",
+    "enabled": true,
+    "virtual_users": 5,
+    "counts": {
+      "flows_started": 1,
+      "total_requests": 20,
+      "successful_requests": 18,
+      "created_vehicles": 1,
+      "failed_requests": 2,
+      "expected_error_responses": 2,
+      "replica_stale_reads": 1,
+      "replica_visible_reads": 3,
+      "cache_miss": 2,
+      "cache_hit": 1,
+      "injected_errors": 1,
+      "duplicate_requests_verified": 1,
+      "created_inspections": 1,
+      "failed_inspections": 1,
+      "convergence_polls": 2,
+      "created_repairs": 1,
+      "deleted_vehicles": 1,
+      "flows_completed": 1
+    },
+    "elapsed_seconds": 1.77,
+    "avg_latency_ms": 13.49,
+    "p95_latency_ms": 34.2,
+    "latency_window_samples": 20,
+    "latency_window_limit": 10000
+  },
+  "request_count": 20,
+  "cache": [
+    {
+      "timestamp": "2026-09-30T06:23:12.019845+00:00",
+      "service": "traffic-generator",
+      "action": "cache_observation",
+      "run_id": "759f148c-31aa-4305-9794-68618b17c166",
+      "flow_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+      "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+      "virtual_user": 1,
+      "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "expected": "MISS",
+      "observed": "MISS",
+      "matched": true,
+      "observation": "cache_first_get"
+    },
+    {
+      "timestamp": "2026-09-30T06:23:12.023131+00:00",
+      "service": "traffic-generator",
+      "action": "cache_observation",
+      "run_id": "759f148c-31aa-4305-9794-68618b17c166",
+      "flow_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+      "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+      "virtual_user": 1,
+      "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "expected": "HIT",
+      "observed": "HIT",
+      "matched": true,
+      "observation": "cache_second_get"
+    },
+    {
+      "timestamp": "2026-09-30T06:23:12.045252+00:00",
+      "service": "traffic-generator",
+      "action": "cache_observation",
+      "run_id": "759f148c-31aa-4305-9794-68618b17c166",
+      "flow_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+      "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44",
+      "virtual_user": 1,
+      "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "expected": "MISS",
+      "observed": "MISS",
+      "matched": true,
+      "observation": "cache_after_invalidation"
+    }
+  ],
+  "domain_records": [
+    {
+      "topic": "repair-events",
+      "partition": 1,
+      "offset": 44,
+      "key": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "value": {
+        "data": {
+          "id": "19af4d6e-cfb2-4f69-8180-e39fcadf3e8c",
+          "status": "OPEN",
+          "created_at": "2026-09-30T06:23:12.536827Z",
+          "updated_at": "2026-09-30T06:23:12.536829Z",
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "description": "battery issue",
+          "inspection_id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27",
+          "warranty_covered": true
+        },
+        "event_id": "f13a2a07-43a3-4df7-9e59-1fccf6fa46bc",
+        "producer": "repair-service",
+        "event_type": "repair.created",
+        "occurred_at": "2026-09-30T06:23:12.538577Z",
+        "event_version": "1.0",
+        "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44"
+      }
+    },
+    {
+      "topic": "warranty-events",
+      "partition": 1,
+      "offset": 108,
+      "key": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "value": {
+        "data": {
+          "id": "670a6a1c-0b8e-485a-b030-450ea585123a",
+          "status": "ACTIVE",
+          "end_date": "2029-09-29",
+          "created_at": "2026-09-30T06:23:11.214694Z",
+          "start_date": "2026-09-30",
+          "updated_at": "2026-09-30T06:23:11.214698Z",
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "warranty_type": "DEFAULT"
+        },
+        "event_id": "e7b4fc89-71fe-40fb-9c17-9f603fe349a5",
+        "producer": "warranty-service",
+        "event_type": "warranty.created",
+        "occurred_at": "2026-09-30T06:23:11.215260Z",
+        "event_version": "1.0",
+        "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44"
+      }
+    },
+    {
+      "topic": "vehicle-events",
+      "partition": 1,
+      "offset": 174,
+      "key": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "value": {
+        "data": {
+          "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "vin": "TRF9NU3K7NV1UWGMC",
+          "model": "Accent",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:10.995946Z",
+          "owner_name": "Hoang Ha",
+          "updated_at": "2026-09-30T06:23:10.995948Z",
+          "manufacturer": "Hyundai",
+          "production_year": 2025,
+          "simulation_run_id": "759f148c-31aa-4305-9794-68618b17c166"
+        },
+        "event_id": "0f8c1d36-8145-4e0f-96eb-336098036cce",
+        "producer": "vehicle-service",
+        "event_type": "vehicle.created",
+        "occurred_at": "2026-09-30T06:23:10.996374Z",
+        "event_version": "1.0",
+        "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44"
+      }
+    },
+    {
+      "topic": "vehicle-events",
+      "partition": 1,
+      "offset": 175,
+      "key": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "value": {
+        "data": {
+          "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "vin": "TRF9NU3K7NV1UWGMC",
+          "model": "Accent",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:10.995946Z",
+          "owner_name": "Nguyen An updated 7bc92ed3",
+          "updated_at": "2026-09-30T06:23:12.028481Z",
+          "manufacturer": "Hyundai",
+          "production_year": 2025,
+          "simulation_run_id": "759f148c-31aa-4305-9794-68618b17c166"
+        },
+        "event_id": "f00f86f5-3f77-4641-a53f-1384bb6bd69f",
+        "producer": "vehicle-service",
+        "event_type": "vehicle.updated",
+        "occurred_at": "2026-09-30T06:23:12.028995Z",
+        "event_version": "1.0",
+        "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44"
+      }
+    },
+    {
+      "topic": "inspection-events",
+      "partition": 1,
+      "offset": 101,
+      "key": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+      "value": {
+        "data": {
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "occurred_at": "2026-09-30T06:23:12.111352+00:00",
+          "inspection_id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27",
+          "failure_reason": "battery issue"
+        },
+        "event_id": "d74893d4-6f7b-4307-825d-cb4dec4699dd",
+        "producer": "inspection-service",
+        "event_type": "inspection.failed",
+        "occurred_at": "2026-09-30T06:23:12.113256Z",
+        "event_version": "1.0",
+        "correlation_id": "7bc92ed3-e969-4799-8c8f-b0258e791a44"
+      }
+    }
+  ],
+  "cdc_records": [
+    {
+      "topic": "warranty-cdc.public.warranties",
+      "partition": 0,
+      "offset": 98,
+      "key": {
+        "id": "670a6a1c-0b8e-485a-b030-450ea585123a"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "670a6a1c-0b8e-485a-b030-450ea585123a",
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "warranty_type": "DEFAULT",
+          "start_date": 20726,
+          "end_date": 21821,
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:11.214694Z",
+          "updated_at": "2026-09-30T06:23:11.214698Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "warranty-cdc",
+          "ts_ms": 1790749391217,
+          "snapshot": "false",
+          "db": "warranty_db",
+          "sequence": "[\"114377472\",\"114417024\"]",
+          "ts_us": 1790749391217673,
+          "ts_ns": 1790749391217673000,
+          "schema": "public",
+          "table": "warranties",
+          "txId": 7060,
+          "lsn": 114417024,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790749391326,
+        "ts_us": 1790749391326758,
+        "ts_ns": 1790749391326758910
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 150,
+      "key": {
+        "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "vin": "TRF9NU3K7NV1UWGMC",
+          "model": "Accent",
+          "manufacturer": "Hyundai",
+          "production_year": 2025,
+          "owner_name": "Hoang Ha",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:10.995946Z",
+          "updated_at": "2026-09-30T06:23:10.995948Z",
+          "simulation_run_id": "759f148c-31aa-4305-9794-68618b17c166"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790749390996,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"114393792\",\"114401152\"]",
+          "ts_us": 1790749390996823,
+          "ts_ns": 1790749390996823000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 7048,
+          "lsn": 114401152,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790749391248,
+        "ts_us": 1790749391248725,
+        "ts_ns": 1790749391248725579
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 151,
+      "key": {
+        "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98"
+      },
+      "value": {
+        "before": {
+          "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "vin": "TRF9NU3K7NV1UWGMC",
+          "model": "Accent",
+          "manufacturer": "Hyundai",
+          "production_year": 2025,
+          "owner_name": "Hoang Ha",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:10.995946Z",
+          "updated_at": "2026-09-30T06:23:10.995948Z",
+          "simulation_run_id": "759f148c-31aa-4305-9794-68618b17c166"
+        },
+        "after": {
+          "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "vin": "TRF9NU3K7NV1UWGMC",
+          "model": "Accent",
+          "manufacturer": "Hyundai",
+          "production_year": 2025,
+          "owner_name": "Nguyen An updated 7bc92ed3",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:10.995946Z",
+          "updated_at": "2026-09-30T06:23:12.028481Z",
+          "simulation_run_id": "759f148c-31aa-4305-9794-68618b17c166"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790749392029,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"114402792\",\"114433168\"]",
+          "ts_us": 1790749392029958,
+          "ts_ns": 1790749392029958000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 7071,
+          "lsn": 114433168,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790749392279,
+        "ts_us": 1790749392279789,
+        "ts_ns": 1790749392279789450
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 152,
+      "key": {
+        "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98"
+      },
+      "value": {
+        "before": {
+          "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "vin": "TRF9NU3K7NV1UWGMC",
+          "model": "Accent",
+          "manufacturer": "Hyundai",
+          "production_year": 2025,
+          "owner_name": "Nguyen An updated 7bc92ed3",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:10.995946Z",
+          "updated_at": "2026-09-30T06:23:12.028481Z",
+          "simulation_run_id": "759f148c-31aa-4305-9794-68618b17c166"
+        },
+        "after": null,
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790749392671,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"114434680\",\"114442072\"]",
+          "ts_us": 1790749392671683,
+          "ts_ns": 1790749392671683000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 7077,
+          "lsn": 114442072,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "d",
+        "ts_ms": 1790749392797,
+        "ts_us": 1790749392797167,
+        "ts_ns": 1790749392797167160
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 153,
+      "key": {
+        "id": "733c4711-04a7-4d3c-b681-fc558ac3bf98"
+      },
+      "value": null
+    },
+    {
+      "topic": "inspection-cdc.public.inspections",
+      "partition": 1,
+      "offset": 164,
+      "key": {
+        "id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27",
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "inspection_type": "DIAGNOSTIC",
+          "status": "PENDING",
+          "result": null,
+          "failure_reason": null,
+          "notes": "Traffic flow 7bc92ed3-e969-4799-8c8f-b0258e791a44",
+          "created_at": "2026-09-30T06:23:12.070483Z",
+          "updated_at": "2026-09-30T06:23:12.070488Z",
+          "completed_at": null
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "inspection-cdc",
+          "ts_ms": 1790749392073,
+          "snapshot": "false",
+          "db": "inspection_db",
+          "sequence": "[\"114409904\",\"114435160\"]",
+          "ts_us": 1790749392073061,
+          "ts_ns": 1790749392073061000,
+          "schema": "public",
+          "table": "inspections",
+          "txId": 7072,
+          "lsn": 114435160,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790749392374,
+        "ts_us": 1790749392374790,
+        "ts_ns": 1790749392374790516
+      }
+    },
+    {
+      "topic": "inspection-cdc.public.inspections",
+      "partition": 1,
+      "offset": 165,
+      "key": {
+        "id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27"
+      },
+      "value": {
+        "before": {
+          "id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27",
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "inspection_type": "DIAGNOSTIC",
+          "status": "PENDING",
+          "result": null,
+          "failure_reason": null,
+          "notes": "Traffic flow 7bc92ed3-e969-4799-8c8f-b0258e791a44",
+          "created_at": "2026-09-30T06:23:12.070483Z",
+          "updated_at": "2026-09-30T06:23:12.070488Z",
+          "completed_at": null
+        },
+        "after": {
+          "id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27",
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "inspection_type": "DIAGNOSTIC",
+          "status": "COMPLETED",
+          "result": "FAIL",
+          "failure_reason": "battery issue",
+          "notes": "Traffic flow 7bc92ed3-e969-4799-8c8f-b0258e791a44",
+          "created_at": "2026-09-30T06:23:12.070483Z",
+          "updated_at": "2026-09-30T06:23:12.111724Z",
+          "completed_at": "2026-09-30T06:23:12.111352Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "inspection-cdc",
+          "ts_ms": 1790749392115,
+          "snapshot": "false",
+          "db": "inspection_db",
+          "sequence": "[\"114436152\",\"114436272\"]",
+          "ts_us": 1790749392115861,
+          "ts_ns": 1790749392115861000,
+          "schema": "public",
+          "table": "inspections",
+          "txId": 7073,
+          "lsn": 114436272,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790749392374,
+        "ts_us": 1790749392374974,
+        "ts_ns": 1790749392374974685
+      }
+    },
+    {
+      "topic": "repair-cdc.public.repair_requests",
+      "partition": 2,
+      "offset": 48,
+      "key": {
+        "id": "19af4d6e-cfb2-4f69-8180-e39fcadf3e8c"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "19af4d6e-cfb2-4f69-8180-e39fcadf3e8c",
+          "vehicle_id": "733c4711-04a7-4d3c-b681-fc558ac3bf98",
+          "inspection_id": "5ba3522c-0cba-40b8-9b52-2993b0e50b27",
+          "warranty_covered": true,
+          "status": "OPEN",
+          "description": "battery issue",
+          "created_at": "2026-09-30T06:23:12.536827Z",
+          "updated_at": "2026-09-30T06:23:12.536829Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "repair-cdc",
+          "ts_ms": 1790749392539,
+          "snapshot": "false",
+          "db": "repair_db",
+          "sequence": "[\"114432008\",\"114440040\"]",
+          "ts_us": 1790749392539996,
+          "ts_ns": 1790749392539996000,
+          "schema": "public",
+          "table": "repair_requests",
+          "txId": 7076,
+          "lsn": 114440040,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790749392698,
+        "ts_us": 1790749392698873,
+        "ts_ns": 1790749392698873590
+      }
+    }
+  ],
+  "correlation_propagated": true
+}

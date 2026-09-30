@@ -1,0 +1,65 @@
+{
+  "vehicle": {
+    "vin": "LAB847BABEC015647",
+    "model": "EV-Lab",
+    "manufacturer": "Learning Motors",
+    "production_year": 2026,
+    "owner_name": "Nguyen Van An",
+    "id": "be4e7ac3-acea-4a67-b575-73ca9ba4daa1",
+    "status": "ACTIVE",
+    "created_at": "2026-09-30T05:44:57.647907Z",
+    "updated_at": "2026-09-30T05:44:57.647911Z"
+  },
+  "primary_get": 200,
+  "stale_replica_get": 404,
+  "lag": [
+    {
+      "bytes": "11152"
+    }
+  ],
+  "records": [
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 1,
+      "offset": 71,
+      "key": {
+        "id": "be4e7ac3-acea-4a67-b575-73ca9ba4daa1"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "be4e7ac3-acea-4a67-b575-73ca9ba4daa1",
+          "vin": "LAB847BABEC015647",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "Nguyen Van An",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:44:57.647907Z",
+          "updated_at": "2026-09-30T05:44:57.647911Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790747097649,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"101771248\",\"101776048\"]",
+          "ts_us": 1790747097649743,
+          "ts_ns": 1790747097649743000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 3457,
+          "lsn": 101776048,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790747097995,
+        "ts_us": 1790747097995808,
+        "ts_ns": 1790747097995808892
+      }
+    }
+  ]
+}

@@ -82,7 +82,9 @@ Nếu mất kết nối lúc COMMIT, caller có thể không biết transaction 
 
 Sau DB commit trước Kafka offset commit là cửa sổ duplicate có chủ đích. Consumer phát hiện marker, skip handler và commit lại offset. Nếu offset commit lỗi vì rebalance, worker đóng/recreate consumer; nó không giả định có quyền tiếp tục từ vị trí đã fetch.
 
-`max_poll_records=1` và `async for` sequential làm mỗi process xử lý từng record. Offset commit chỉ ghi partition của record hiện tại với offset+1; không commit bừa các partition đã prefetched. Consumer restart cũng là đường phục hồi khi gửi DLQ thất bại.
+`getmany(timeout_ms=1000,max_records=1)` sequential làm mỗi process xử lý từng record. Offset commit chỉ ghi partition của record hiện tại với offset+1; không commit bừa các partition đã prefetched. Consumer restart cũng là đường phục hồi khi gửi DLQ thất bại.
+
+Consumer poll bằng getmany mỗi giây, có deadline 15s cho start/fetch/offset commit. Khi nhiều poll rỗng liên tiếp trong 15s, worker kiểm end offsets và position qua broker API: nếu có backlog nhưng fetch không tiến triển, nó recreate consumer từ committed offsets. Topic không có backlog hoặc member chưa có partition không bị restart chỉ vì idle. Handler và DB transaction không bị watchdog này cắt giữa chừng. Cơ chế này xử lý trường hợp heartbeat còn sống nhưng fetcher bị kẹt sau broker outage; `/ready` riêng lẻ không chứng minh consumer có tiến triển.
 
 Processed ledger bảo vệ event ID trong một consumer namespace. Natural unique bảo vệ thêm “cùng nghiệp vụ, event ID khác”. Hai lớp không thay thế nhau: feature tương lai có side effect mới vẫn cần event dedupe dù business resource đã có unique key.
 
@@ -101,6 +103,8 @@ Lock dùng SET NX EX với token UUID. Unlock Lua so sánh token trước DEL; w
 Lease 30 giây **không phải fencing token** cho PostgreSQL. Không có lock renewal hoặc monotonic fencing counter. Worker có thể chạy quá lease; correctness vẫn dựa vào DB uniqueness và processed/idempotency reservation. Lock release trong warranty/repair handler xảy ra trước outer DB commit; transaction khác có thể vào lock rồi chờ DB constraint.
 
 Redis down khác lock busy: down → fallback constraints; busy → TransientError cho warranty/repair creation. API idempotency helper chọn không fail vì lock contention, tiếp tục serialize ở DB.
+
+Redis Cluster dùng replication bất đồng bộ: failover có thể làm mất lock vừa được ACK, khiến hai worker cùng nghĩ mình giữ lease. Các DB invariants vẫn bắt buộc. Cache/generation dùng hash tag theo vehicle UUID để multi-key Lua không bị CROSSSLOT; failover mất một invalidation vẫn có thể trả stale đến TTL. Xem [thiết kế cluster](CLUSTER_INFRASTRUCTURE.md).
 
 ## 6. Cache consistency
 
@@ -123,11 +127,13 @@ Generation key không TTL. Redis AOF giúp persistence cache nhưng không biế
 | DB statement | 10s | Một statement; không phải tổng transaction |
 | Idle transaction | 30s | Có thể kết thúc transaction đang idle chờ dependency |
 | Redis connect/socket | 0.5s | Mỗi operation có thể có chi phí connection/command |
+| Redis operation | 2s | Bao cả slot discovery, command và client retries trong RedisSupport |
 | HTTP connect | 1s | Giai đoạn connect |
 | HTTP read/write/pool | 2s | Timeout theo phase, read timeout không phải tổng stream duration |
 | Warranty lookup | 1 + 2 attempts | Backoff 0.2s, 0.4s |
 | Consumer handler | 1 + 4 attempts | Backoff 1s, 2s, 4s, 8s |
 | Kafka producer start/send | 5s cho mỗi bước | Lazy startup và send là hai timeout scope khác nhau |
+| Kafka request / retry backoff | 10s / 200ms | aiokafka idempotent batch có thể tiếp tục sau deadline caller |
 | Kafka consumer max poll interval | 300s | Phải cân với thời gian xử lý/retry và rebalance |
 
 Ví dụ **ước tính cho read-timeout drill**, khi mỗi HTTP attempt dừng sau khoảng 2s: một coverage lookup khoảng `3 × 2 + 0.2 + 0.4 = 6.6s`; một consumer delivery thử năm lần khoảng `5 × 6.6 + 15 = 48s`, chưa tính DB/Redis/connection/DLQ.
@@ -171,3 +177,7 @@ flowchart LR
 Không reset offset hoặc xóa processed marker chỉ để “chạy lại cho chắc”. Reset offset có thể phát lại toàn partition; xóa marker có thể kích hoạt lại side effect. Dùng event/source identity, kiểm source of truth và chọn replay một record đã điều tra.
 
 Source: [consumer](../common/platform_common/consumer.py), [idempotency](../common/platform_common/idempotency.py), [Redis](../common/platform_common/redis.py), [config](../common/platform_common/config.py). Lệnh thao tác cụ thể ở [Operations](OPERATIONS.md).
+
+## PostgreSQL replica và CDC
+
+Primary commit không đợi replica replay. Chỉ Vehicle GET opt-in `consistency=eventual` dùng reader pool; replica unavailable fallback SELECT primary, stale 404 giữ nguyên. Read replica không điền primary cache. Coverage, mutations, outbox và dedupe luôn dùng primary. Debezium CDC có checkpoint LSN riêng, có thể duplicate sau restart và phụ thuộc WAL còn được giữ. Xem [thiết kế và failure matrix](POSTGRESQL_CDC.md).

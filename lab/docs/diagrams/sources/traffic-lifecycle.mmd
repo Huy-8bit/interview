@@ -1,0 +1,41 @@
+sequenceDiagram
+    %% diagram: traffic-lifecycle
+    participant T as Virtual user
+    participant V as Vehicle API
+    participant I as Inspection API
+    participant K as Domain Kafka
+    participant W as Warranty API and consumer
+    participant R as Repair API and consumer
+    T->>V: POST vehicle with simulation_run_id
+    V-->>T: 201 vehicle_id
+    V-->>K: vehicle.created via outbox
+    K-->>W: Create default warranty
+    K-->>I: Update vehicle projection
+    loop Targets 0 / 100 / 500 / 1000 ms
+        T->>V: GET consistency=eventual
+        V-->>T: 200 or eventual 404, read source
+    end
+    T->>V: GET, GET, PATCH, GET
+    V-->>T: MISS, HIT, updated, MISS
+    T->>I: POST inspection, stable Idempotency-Key
+    opt Duplicate sample
+        T->>I: Concurrent identical POST with same key
+        I-->>T: Same inspection_id
+    end
+    T->>I: Complete PASS or FAIL
+    I-->>K: inspection.passed or inspection.failed
+    opt FAIL
+        K-->>R: inspection.failed
+        R->>W: GET active coverage
+        W-->>R: Coverage snapshot
+        R-->>K: repair.created via outbox
+    end
+    T->>W: Poll active warranty
+    opt FAIL
+        T->>R: Poll repairs by inspection_id
+    end
+    opt Delete sample after downstream convergence
+        T->>V: DELETE with matching X-Simulation-Run-ID
+        V-->>T: 204, WAL later becomes CDC d and tombstone
+    end
+    Note over T: Sleep interval, then start another independent flow

@@ -1,0 +1,17 @@
+sequenceDiagram
+    %% diagram: redis-master-failover
+    participant Client as RedisCluster client
+    participant Master as Slot owner
+    participant Replica
+    participant Majority as Other masters
+    Client->>Master: SET key with TTL
+    Master-->>Client: Reply
+    Master->>Replica: Async replication
+    Note over Master: Master process stops
+    Majority->>Majority: Detect failure after node timeout
+    Replica->>Majority: Request failover authorization
+    Majority-->>Replica: Majority authorizes promotion
+    Replica->>Replica: Become slot owner
+    Client->>Replica: Refresh slot map and route command
+    Replica-->>Client: Reply
+    Note over Master,Replica: Restarted old master rejoins as replica after convergence

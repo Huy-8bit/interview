@@ -1,0 +1,3262 @@
+{
+  "started_at": "2026-09-30T05:19:33.403818+00:00",
+  "completed_at": "2026-09-30T05:21:13.958114+00:00",
+  "node_drills": {
+    "kafka-controller": {
+      "before": {
+        "node": "kafka-3",
+        "topic": "repair-events",
+        "partition": 2,
+        "leader_before": 3,
+        "metadata_controller_hint": 1
+      },
+      "result": {
+        "node": "kafka-3",
+        "partition": 2,
+        "ack": {
+          "partition": 2,
+          "offset": 27
+        },
+        "consumer_received_same_event": true,
+        "same_producer_and_consumer_instances": true,
+        "recovery_seconds": 13.113,
+        "transient_errors": [
+          "TimeoutError",
+          "TimeoutError"
+        ]
+      },
+      "live_brokers_during_outage": [
+        1,
+        2
+      ],
+      "redis_state_during_outage": "ok",
+      "after_brokers": [
+        1,
+        2,
+        3
+      ],
+      "workflow": {
+        "vehicle_id": "db76503f-31c9-4d1e-8d00-62cc830ce59e",
+        "inspection_id": "7e13d13e-67c4-41ec-8947-4dadf2a8e2ee",
+        "repair_id": "3df238ce-1f57-4061-b62e-4c057ba978cc",
+        "cache": "HIT and invalidation verified",
+        "idempotency": "same resource",
+        "notifications": 1
+      },
+      "topic_partitions_during_outage": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1
+              ]
+            }
+          ]
+        }
+      ],
+      "topic_partitions_after_rejoin": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 1,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 1,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                1,
+                3
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "kafka-partition-leader": {
+      "before": {
+        "node": "kafka-1",
+        "topic": "repair-events",
+        "partition": 0,
+        "leader_before": 1,
+        "metadata_controller_hint": 2
+      },
+      "result": {
+        "node": "kafka-1",
+        "partition": 0,
+        "ack": {
+          "partition": 0,
+          "offset": 35
+        },
+        "consumer_received_same_event": true,
+        "same_producer_and_consumer_instances": true,
+        "recovery_seconds": 0.4,
+        "transient_errors": []
+      },
+      "live_brokers_during_outage": [
+        2,
+        3
+      ],
+      "redis_state_during_outage": "ok",
+      "after_brokers": [
+        1,
+        2,
+        3
+      ],
+      "workflow": {
+        "vehicle_id": "0672ce19-0d40-48bf-9fed-f1b6aeaa20c2",
+        "inspection_id": "acbb921a-cd5d-4646-a0c3-e09cc49647b7",
+        "repair_id": "4061be27-c04d-44e8-b569-c9116af8a43a",
+        "cache": "HIT and invalidation verified",
+        "idempotency": "same resource",
+        "notifications": 1
+      },
+      "topic_partitions_during_outage": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3
+              ]
+            }
+          ]
+        }
+      ],
+      "topic_partitions_after_rejoin": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "redis-replica": {
+      "before": {
+        "node": "redis-1",
+        "role_before": "slave",
+        "master_id_before": "ae3e76253a5cb0f97a0e4bdd37664876ad01a16f",
+        "master_before": "redis-5",
+        "key": "vehicle:{fa765fab-8118-44e5-b9ef-b106682e50bf}:probe",
+        "slot": 3271,
+        "vehicle_id": "fa765fab-8118-44e5-b9ef-b106682e50bf"
+      },
+      "result": {
+        "node": "redis-1",
+        "slot_owner_after": "redis-5",
+        "same_redis_client_instance": true,
+        "cache_results_during_recovery": [
+          "HIT"
+        ],
+        "http_statuses_during_recovery": [
+          200
+        ],
+        "cache_hit_and_invalidation_after_recovery": true,
+        "same_inspection_after_retry": "52a5c9ad-556a-457f-b9d9-e70880c0a0b3",
+        "recovery_seconds": 0.019,
+        "transient_errors": []
+      },
+      "live_brokers_during_outage": [
+        1,
+        2,
+        3
+      ],
+      "redis_state_during_outage": "ok",
+      "after_brokers": [
+        1,
+        2,
+        3
+      ],
+      "workflow": {
+        "vehicle_id": "1def16d4-7357-4172-9fff-48a1e5ae49e8",
+        "inspection_id": "31c4e960-11cf-44ea-a2c0-8dee21192009",
+        "repair_id": "1f6b7dbd-dfbe-4800-925d-db4bfb6b35d2",
+        "cache": "HIT and invalidation verified",
+        "idempotency": "same resource",
+        "notifications": 1
+      },
+      "topic_partitions_during_outage": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      ],
+      "topic_partitions_after_rejoin": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "redis-master": {
+      "before": {
+        "node": "redis-3",
+        "role_before": "master",
+        "master_id_before": "6a61367550eafeba5581724faa3a48580b6b8bd6",
+        "master_before": "redis-3",
+        "key": "vehicle:{94883489-764c-4c46-bee6-78b245ec8bef}:probe",
+        "slot": 14676,
+        "vehicle_id": "94883489-764c-4c46-bee6-78b245ec8bef"
+      },
+      "result": {
+        "node": "redis-3",
+        "slot_owner_after": "redis-4",
+        "same_redis_client_instance": true,
+        "cache_results_during_recovery": [
+          "MISS",
+          "MISS",
+          "MISS",
+          "MISS"
+        ],
+        "http_statuses_during_recovery": [
+          200,
+          200,
+          200,
+          200
+        ],
+        "cache_hit_and_invalidation_after_recovery": true,
+        "same_inspection_after_retry": "d39097e7-18be-413f-9b62-09e4ff013fa9",
+        "recovery_seconds": 8.579,
+        "transient_errors": [
+          "TimeoutError",
+          "TimeoutError",
+          "TimeoutError"
+        ]
+      },
+      "live_brokers_during_outage": [
+        1,
+        2,
+        3
+      ],
+      "redis_state_during_outage": "ok",
+      "after_brokers": [
+        1,
+        2,
+        3
+      ],
+      "workflow": {
+        "vehicle_id": "271d5451-18d8-41c5-92e5-492047d812f4",
+        "inspection_id": "2d3abca8-8dcd-4062-8c9a-d962d75cdf47",
+        "repair_id": "e5a09b4f-308e-4e3d-9944-d60dce54b434",
+        "cache": "HIT and invalidation verified",
+        "idempotency": "same resource",
+        "notifications": 1
+      },
+      "topic_partitions_during_outage": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      ],
+      "topic_partitions_after_rejoin": [
+        {
+          "topic": "repair-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "inspection-events-dlq",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "repair-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "vehicle-events-dlq",
+          "partitions": [
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 2,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "topic": "warranty-events",
+          "partitions": [
+            {
+              "partition": 2,
+              "leader": 3,
+              "replicas": [
+                3,
+                1,
+                2
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 0,
+              "leader": 2,
+              "replicas": [
+                1,
+                2,
+                3
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            },
+            {
+              "partition": 1,
+              "leader": 2,
+              "replicas": [
+                2,
+                3,
+                1
+              ],
+              "isr": [
+                2,
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "note": "Recovery times are observations from one local run, not an SLO. Kafka MetadataResponse.controller_id is a forwarding hint, not the active KRaft leader.",
+  "kraft_election": {
+    "before": {
+      "LeaderId": 3,
+      "LeaderEpoch": 7,
+      "HighWatermark": 6012
+    },
+    "after_stop": {
+      "LeaderId": 2,
+      "LeaderEpoch": 9,
+      "HighWatermark": 6142
+    }
+  },
+  "scale": {
+    "baseline": {
+      "state": "Stable",
+      "members": [
+        {
+          "client_id": "repair-service-13881d5f",
+          "partitions": [
+            [
+              "inspection-events",
+              0
+            ],
+            [
+              "inspection-events",
+              1
+            ],
+            [
+              "inspection-events",
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    "repair-scaled": {
+      "state": "Stable",
+      "members": [
+        {
+          "client_id": "repair-service-6daa5de7",
+          "partitions": [
+            [
+              "inspection-events",
+              2
+            ]
+          ]
+        },
+        {
+          "client_id": "repair-service-13881d5f",
+          "partitions": [
+            [
+              "inspection-events",
+              0
+            ]
+          ]
+        },
+        {
+          "client_id": "repair-service-2cd4baed",
+          "partitions": [
+            [
+              "inspection-events",
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    "final": {
+      "state": "Stable",
+      "members": [
+        {
+          "client_id": "repair-service-13881d5f",
+          "partitions": [
+            [
+              "inspection-events",
+              0
+            ],
+            [
+              "inspection-events",
+              1
+            ],
+            [
+              "inspection-events",
+              2
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  "scaled_workflow": {
+    "vehicle_id": "600ac40e-d732-4438-9775-b7fdc90668d1",
+    "inspection_id": "297c120c-6dd9-4432-93bf-3c2d6e46daad",
+    "repair_id": "a80273df-d6fb-477c-834f-8aa3882c874a",
+    "cache": "HIT and invalidation verified",
+    "idempotency": "same resource",
+    "notifications": 1
+  }
+}

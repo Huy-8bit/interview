@@ -22,7 +22,8 @@ class KafkaPublisher:
                 client_id=self.settings.service_name + "-publisher",
                 enable_idempotence=True,
                 acks="all",
-                request_timeout_ms=int(self.settings.kafka_send_timeout * 1000),
+                request_timeout_ms=self.settings.kafka_request_timeout_ms,
+                retry_backoff_ms=self.settings.kafka_retry_backoff_ms,
             )
             try:
                 async with asyncio.timeout(self.settings.kafka_send_timeout):

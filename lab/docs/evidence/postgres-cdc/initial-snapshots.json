@@ -1,0 +1,169 @@
+{
+  "warranty-cdc.public.warranties": {
+    "key": {
+      "id": "5e24442a-0502-4411-a79d-6dc14dff14e1"
+    },
+    "value": {
+      "before": null,
+      "after": {
+        "id": "5e24442a-0502-4411-a79d-6dc14dff14e1",
+        "vehicle_id": "a4389c0e-c3c5-4a45-a6b2-4e73ce6f2fd6",
+        "warranty_type": "DEFAULT",
+        "start_date": 20726,
+        "end_date": 21821,
+        "status": "ACTIVE",
+        "created_at": "2026-09-30T03:40:11.193619Z",
+        "updated_at": "2026-09-30T03:40:11.193622Z"
+      },
+      "source": {
+        "version": "3.2.4.Final",
+        "connector": "postgresql",
+        "name": "warranty-cdc",
+        "ts_ms": 1790746706742,
+        "snapshot": "true",
+        "db": "warranty_db",
+        "sequence": "[null,\"101198712\"]",
+        "ts_us": 1790746706742591,
+        "ts_ns": 1790746706742591000,
+        "schema": "public",
+        "table": "warranties",
+        "txId": 3166,
+        "lsn": 101198712,
+        "xmin": null
+      },
+      "transaction": null,
+      "op": "r",
+      "ts_ms": 1790746706764,
+      "ts_us": 1790746706764971,
+      "ts_ns": 1790746706764971395
+    },
+    "partition": 0,
+    "offset": 0
+  },
+  "inspection-cdc.public.inspections": {
+    "key": {
+      "id": "4ca246ee-d067-47a6-a2d4-2fa2760f7b4a"
+    },
+    "value": {
+      "before": null,
+      "after": {
+        "id": "4ca246ee-d067-47a6-a2d4-2fa2760f7b4a",
+        "vehicle_id": "ac3bfef4-f5e6-4c74-895d-a600ba422984",
+        "inspection_type": "DIAGNOSTIC",
+        "status": "PENDING",
+        "result": null,
+        "failure_reason": null,
+        "notes": "Lab inspection",
+        "created_at": "2026-09-30T03:40:10.877171Z",
+        "updated_at": "2026-09-30T03:40:10.877172Z",
+        "completed_at": null
+      },
+      "source": {
+        "version": "3.2.4.Final",
+        "connector": "postgresql",
+        "name": "inspection-cdc",
+        "ts_ms": 1790746707883,
+        "snapshot": "true",
+        "db": "inspection_db",
+        "sequence": "[null,\"101199136\"]",
+        "ts_us": 1790746707883542,
+        "ts_ns": 1790746707883542000,
+        "schema": "public",
+        "table": "inspections",
+        "txId": 3168,
+        "lsn": 101199136,
+        "xmin": null
+      },
+      "transaction": null,
+      "op": "r",
+      "ts_ms": 1790746707904,
+      "ts_us": 1790746707904132,
+      "ts_ns": 1790746707904132822
+    },
+    "partition": 0,
+    "offset": 0
+  },
+  "vehicle-cdc.public.vehicles": {
+    "key": {
+      "id": "72bdbf35-0de8-4077-bb17-b646fc474a1f"
+    },
+    "value": {
+      "before": null,
+      "after": {
+        "id": "72bdbf35-0de8-4077-bb17-b646fc474a1f",
+        "vin": "LABE4C5558FE01843",
+        "model": "EV-Lab",
+        "manufacturer": "Learning Motors",
+        "production_year": 2026,
+        "owner_name": "Nguyen Van An",
+        "status": "ACTIVE",
+        "created_at": "2026-09-30T03:40:09.267891Z",
+        "updated_at": "2026-09-30T03:40:09.267895Z"
+      },
+      "source": {
+        "version": "3.2.4.Final",
+        "connector": "postgresql",
+        "name": "vehicle-cdc",
+        "ts_ms": 1790746705863,
+        "snapshot": "true",
+        "db": "vehicle_db",
+        "sequence": "[null,\"101198288\"]",
+        "ts_us": 1790746705863326,
+        "ts_ns": 1790746705863326000,
+        "schema": "public",
+        "table": "vehicles",
+        "txId": 3164,
+        "lsn": 101198288,
+        "xmin": null
+      },
+      "transaction": null,
+      "op": "r",
+      "ts_ms": 1790746705939,
+      "ts_us": 1790746705939968,
+      "ts_ns": 1790746705939968538
+    },
+    "partition": 0,
+    "offset": 0
+  },
+  "repair-cdc.public.repair_requests": {
+    "key": {
+      "id": "a4489ebe-c801-4382-891c-58b22c479243"
+    },
+    "value": {
+      "before": null,
+      "after": {
+        "id": "a4489ebe-c801-4382-891c-58b22c479243",
+        "vehicle_id": "a4389c0e-c3c5-4a45-a6b2-4e73ce6f2fd6",
+        "inspection_id": "719c38f8-8ecb-4036-9de5-e5cb09638a76",
+        "warranty_covered": true,
+        "status": "OPEN",
+        "description": "Manual workshop request",
+        "created_at": "2026-09-30T03:40:11.499818Z",
+        "updated_at": "2026-09-30T03:40:11.499820Z"
+      },
+      "source": {
+        "version": "3.2.4.Final",
+        "connector": "postgresql",
+        "name": "repair-cdc",
+        "ts_ms": 1790746708819,
+        "snapshot": "true",
+        "db": "repair_db",
+        "sequence": "[null,\"101199560\"]",
+        "ts_us": 1790746708819065,
+        "ts_ns": 1790746708819065000,
+        "schema": "public",
+        "table": "repair_requests",
+        "txId": 3170,
+        "lsn": 101199560,
+        "xmin": null
+      },
+      "transaction": null,
+      "op": "r",
+      "ts_ms": 1790746708849,
+      "ts_us": 1790746708849874,
+      "ts_ns": 1790746708849874984
+    },
+    "partition": 1,
+    "offset": 0
+  }
+}

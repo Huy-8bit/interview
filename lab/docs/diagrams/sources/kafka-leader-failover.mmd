@@ -1,0 +1,17 @@
+sequenceDiagram
+    %% diagram: kafka-leader-failover
+    participant Producer
+    participant Leader as Broker 1 - old leader
+    participant Replica as Broker 2 - ISR replica
+    participant Quorum as KRaft controller quorum
+    participant Metadata as Broker metadata API
+    Producer->>Leader: Produce with acks all
+    Leader->>Replica: Replicate partition log
+    Replica-->>Leader: Replica caught up
+    Leader-->>Producer: ACK
+    Note over Leader: Hard stop broker 1
+    Quorum->>Replica: Elect a live ISR replica as leader
+    Producer->>Metadata: Refresh broker and partition metadata
+    Producer->>Replica: Retry pending delivery
+    Replica-->>Producer: ACK after surviving ISR replication
+    Note over Leader,Replica: Restarted node catches up before full ISR is restored

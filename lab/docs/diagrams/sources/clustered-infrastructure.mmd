@@ -1,0 +1,22 @@
+flowchart TB
+    %% diagram: clustered-infrastructure
+    apps["4 Python FastAPI services"]
+    subgraph kafka["Kafka Cluster"]
+        k1["kafka-1 / ID 1"]
+        k2["kafka-2 / ID 2"]
+        k3["kafka-3 / ID 3"]
+        policy["KRaft quorum 3 - RF 3 - min ISR 2"]
+    end
+    subgraph redis["Redis Cluster - 16384 slots"]
+        m1["Master A"] -->|"Async replication"| r1["Replica A"]
+        m2["Master B"] -->|"Async replication"| r2["Replica B"]
+        m3["Master C"] -->|"Async replication"| r3["Replica C"]
+    end
+    apps <-->|"All 3 bootstrap servers"| kafka
+    apps <-->|"All 6 startup nodes"| redis
+    apps --> postgres[("PostgreSQL primary - 4 databases")]
+    postgres -->|"Streaming WAL"| pgReplica[("PostgreSQL replica")]
+    apps -->|"Opt-in read"| pgReplica
+    postgres -->|"Logical WAL"| cdc["Debezium Connect"]
+    cdc -->|"CDC topics"| kafka
+    ui["Kafka UI :8080"] --> kafka

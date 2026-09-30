@@ -1,0 +1,13 @@
+{
+  "vehicle": {
+    "vin": "LAB847BABEC015647",
+    "model": "EV-Lab",
+    "manufacturer": "Learning Motors",
+    "production_year": 2026,
+    "owner_name": "Nguyen Van An",
+    "id": "be4e7ac3-acea-4a67-b575-73ca9ba4daa1",
+    "status": "ACTIVE",
+    "created_at": "2026-09-30T05:44:57.647907Z",
+    "updated_at": "2026-09-30T05:44:57.647911Z"
+  }
+}

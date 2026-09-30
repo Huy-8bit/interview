@@ -1,17 +1,19 @@
 name: ${COMPOSE_PROJECT_NAME:-vehicle-platform-lab}
 
 x-app-env: &app-env
-  REDIS_URL: redis://redis:6379/0
-  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  REDIS_CLUSTER_NODES: redis-1:6379,redis-2:6379,redis-3:6379,redis-4:6379,redis-5:6379,redis-6:6379
+  KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
   LOG_LEVEL: ${LOG_LEVEL:-INFO}
   CACHE_TTL: ${CACHE_TTL:-60}
   IDEMPOTENCY_TTL: ${IDEMPOTENCY_TTL:-86400}
   LOCK_TIMEOUT: ${LOCK_TIMEOUT:-30}
+  DB_READ_TIMEOUT: ${DB_READ_TIMEOUT:-3}
   DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
   DB_MAX_OVERFLOW: ${DB_MAX_OVERFLOW:-5}
   DB_POOL_TIMEOUT: ${DB_POOL_TIMEOUT:-3}
   DB_STATEMENT_TIMEOUT_MS: ${DB_STATEMENT_TIMEOUT_MS:-10000}
   REDIS_TIMEOUT: ${REDIS_TIMEOUT:-0.5}
+  REDIS_OPERATION_TIMEOUT: ${REDIS_OPERATION_TIMEOUT:-2}
   HTTP_CONNECT_TIMEOUT: ${HTTP_CONNECT_TIMEOUT:-1}
   HTTP_TIMEOUT: ${HTTP_TIMEOUT:-2}
   HTTP_MAX_CONNECTIONS: ${HTTP_MAX_CONNECTIONS:-20}
@@ -19,18 +21,23 @@ x-app-env: &app-env
   OUTBOX_INTERVAL: ${OUTBOX_INTERVAL:-0.5}
   OUTBOX_RETRY_MAX_SECONDS: ${OUTBOX_RETRY_MAX_SECONDS:-60}
   KAFKA_SEND_TIMEOUT: ${KAFKA_SEND_TIMEOUT:-5}
+  KAFKA_REQUEST_TIMEOUT_MS: ${KAFKA_REQUEST_TIMEOUT_MS:-10000}
+  KAFKA_RETRY_BACKOFF_MS: ${KAFKA_RETRY_BACKOFF_MS:-200}
   CONSUMER_MAX_RETRIES: ${CONSUMER_MAX_RETRIES:-4}
   RETRY_BASE_SECONDS: ${RETRY_BASE_SECONDS:-1}
   CONSUMER_MAX_POLL_INTERVAL_MS: ${CONSUMER_MAX_POLL_INTERVAL_MS:-300000}
+  CONSUMER_FETCH_TIMEOUT: ${CONSUMER_FETCH_TIMEOUT:-15}
+  CONSUMER_STALL_TIMEOUT: ${CONSUMER_STALL_TIMEOUT:-15}
   LAB_MODE: ${LAB_MODE:-false}
 
 x-app: &app
   restart: unless-stopped
   init: true
   stop_grace_period: 20s
+  networks: [default, redis-cluster]
   depends_on:
-    postgres: {condition: service_healthy}
-    redis: {condition: service_healthy}
+    postgres-init: {condition: service_completed_successfully}
+    redis-cluster-init: {condition: service_completed_successfully}
     kafka-init: {condition: service_completed_successfully}
   healthcheck:
     test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=5)"]
@@ -39,84 +46,304 @@ x-app: &app
     retries: 5
     start_period: 20s
 
+x-kafka-env: &kafka-env
+  KAFKA_PROCESS_ROLES: broker,controller
+  KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+  KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+  KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+  KAFKA_MIN_INSYNC_REPLICAS: 2
+  KAFKA_NUM_PARTITIONS: 3
+  KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: "false"
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 1000
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  KAFKA_LOG_DIRS: /var/lib/kafka/data
+  CLUSTER_ID: ${KAFKA_CLUSTER_ID:-q1Sh-9_ISia_zwGINzRvyQ}
+  KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xmx384M -Xms256M}
+
+x-kafka: &kafka
+  image: apache/kafka:3.9.1
+  restart: unless-stopped
+  stop_grace_period: 30s
+  healthcheck:
+    test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+    interval: 10s
+    timeout: 10s
+    retries: 30
+    start_period: 20s
+
+x-redis: &redis
+  image: redis:7.4.4-alpine
+  restart: unless-stopped
+  entrypoint: ["sh", "/usr/local/bin/start-cluster-node.sh"]
+  healthcheck:
+    # Process health only: the init container checks cluster/slots/replicas.
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 3s
+    timeout: 2s
+    retries: 30
+
 services:
-  postgres:
+  postgres-primary:
     image: postgres:16.9-alpine
-    environment:
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_wal_senders=16", "-c", "max_replication_slots=16", "-c", "wal_keep_size=256MB", "-c", "max_slot_wal_keep_size=1GB", "-c", "hot_standby=on", "-c", "max_connections=200", "-c", "hba_file=/etc/postgresql/pg_hba.conf"]
+    environment: &pg-env
       POSTGRES_USER: platform_admin
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lab_admin_password}
+      PGHOST: postgres-primary
+      PGUSER: platform_admin
+      PGPASSWORD: ${POSTGRES_PASSWORD:-lab_admin_password}
       VEHICLE_DB_PASSWORD: ${VEHICLE_DB_PASSWORD:-vehicle_password}
       WARRANTY_DB_PASSWORD: ${WARRANTY_DB_PASSWORD:-warranty_password}
       INSPECTION_DB_PASSWORD: ${INSPECTION_DB_PASSWORD:-inspection_password}
       REPAIR_DB_PASSWORD: ${REPAIR_DB_PASSWORD:-repair_password}
+      VEHICLE_READ_PASSWORD: ${VEHICLE_READ_PASSWORD:-vehicle_read_password}
+      WARRANTY_READ_PASSWORD: ${WARRANTY_READ_PASSWORD:-warranty_read_password}
+      INSPECTION_READ_PASSWORD: ${INSPECTION_READ_PASSWORD:-inspection_read_password}
+      REPAIR_READ_PASSWORD: ${REPAIR_READ_PASSWORD:-repair_read_password}
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-replication_password}
+      DEBEZIUM_PASSWORD: ${DEBEZIUM_PASSWORD:-debezium_password}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./infrastructure/postgres/init-databases.sh:/docker-entrypoint-initdb.d/01-databases.sh:ro
+      - ./infrastructure/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U platform_admin -d postgres"]
+      test: ["CMD-SHELL", "psql -h 127.0.0.1 -U platform_admin -d postgres -tAc 'SELECT NOT pg_is_in_recovery()' | grep -qx t"]
       interval: 5s
       timeout: 3s
-      retries: 20
+      retries: 30
     restart: unless-stopped
 
-  redis:
-    image: redis:7.4.4-alpine
-    command: ["redis-server", "--appendonly", "yes"]
-    ports: ["127.0.0.1:${REDIS_PORT:-6379}:6379"]
-    volumes: ["redis-data:/data"]
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    restart: unless-stopped
+  postgres-init:
+    image: postgres:16.9-alpine
+    environment: *pg-env
+    entrypoint: ["bash", "/init-replication.sh"]
+    volumes: ["./infrastructure/postgres/init-replication.sh:/init-replication.sh:ro"]
+    depends_on:
+      postgres-primary: {condition: service_healthy}
 
-  kafka:
-    image: apache/kafka:3.9.1
-    hostname: kafka
+  postgres-replica:
+    image: postgres:16.9-alpine
+    entrypoint: ["sh", "/start-replica.sh"]
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
-      KAFKA_HEAP_OPTS: -Xmx512M -Xms256M
-    volumes: ["kafka-data:/var/lib/kafka/data"]
+      PGDATA: /var/lib/postgresql/data/pgdata
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-replication_password}
+    volumes:
+      - postgres-replica-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/start-replica.sh:/start-replica.sh:ro
+      - ./infrastructure/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    depends_on:
+      postgres-init: {condition: service_completed_successfully}
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
-      interval: 10s
-      timeout: 10s
-      retries: 20
+      test: ["CMD-SHELL", "psql -U platform_admin -d postgres -tAc 'SELECT pg_is_in_recovery()' | grep -qx t"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
       start_period: 20s
     restart: unless-stopped
+
+  cdc-db-init:
+    image: postgres:16.9-alpine
+    environment: *pg-env
+    entrypoint: ["bash", "/init-cdc.sh"]
+    volumes: ["./infrastructure/postgres/init-cdc.sh:/init-cdc.sh:ro"]
+    depends_on:
+      vehicle-service: {condition: service_healthy}
+      warranty-service: {condition: service_healthy}
+      inspection-service: {condition: service_healthy}
+      repair-service: {condition: service_healthy}
+
+  debezium-connect:
+    image: quay.io/debezium/connect:3.2.4.Final
+    ports: ["127.0.0.1:${CONNECT_PORT:-8083}:8083"]
+    environment:
+      BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      GROUP_ID: vehicle-lab-connect
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_PARTITIONS: 3
+      CONNECT_STATUS_STORAGE_PARTITIONS: 3
+      OFFSET_FLUSH_INTERVAL_MS: 1000
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      ADVERTISED_HOST_NAME: debezium-connect
+      HEAP_OPTS: ${CONNECT_HEAP_OPTS:--Xms256M -Xmx512M}
+      CONNECT_PRODUCER_ACKS: all
+      CONNECT_PRODUCER_ENABLE_IDEMPOTENCE: "true"
+    depends_on:
+      kafka-init: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8083/connectors >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 40
+      start_period: 30s
+    restart: unless-stopped
+
+  debezium-init:
+    image: python:3.12-slim
+    entrypoint: ["python", "/init-connectors.py"]
+    environment:
+      DEBEZIUM_PASSWORD: ${DEBEZIUM_PASSWORD:-debezium_password}
+    volumes: ["./infrastructure/debezium/init-connectors.py:/init-connectors.py:ro"]
+    depends_on:
+      cdc-db-init: {condition: service_completed_successfully}
+      debezium-connect: {condition: service_healthy}
+
+  redis-1:
+    <<: *redis
+    hostname: redis-1
+    environment:
+      REDIS_NODE_IP: ${REDIS_SUBNET_PREFIX:-172.29.86}.11
+      REDIS_NODE_NAME: redis-1
+    networks:
+      redis-cluster:
+        ipv4_address: ${REDIS_SUBNET_PREFIX:-172.29.86}.11
+    volumes:
+      - redis-1-data:/data
+      - ./infrastructure/redis/start-node.sh:/usr/local/bin/start-cluster-node.sh:ro
+
+  redis-2:
+    <<: *redis
+    hostname: redis-2
+    environment:
+      REDIS_NODE_IP: ${REDIS_SUBNET_PREFIX:-172.29.86}.12
+      REDIS_NODE_NAME: redis-2
+    networks:
+      redis-cluster:
+        ipv4_address: ${REDIS_SUBNET_PREFIX:-172.29.86}.12
+    volumes:
+      - redis-2-data:/data
+      - ./infrastructure/redis/start-node.sh:/usr/local/bin/start-cluster-node.sh:ro
+
+  redis-3:
+    <<: *redis
+    hostname: redis-3
+    environment:
+      REDIS_NODE_IP: ${REDIS_SUBNET_PREFIX:-172.29.86}.13
+      REDIS_NODE_NAME: redis-3
+    networks:
+      redis-cluster:
+        ipv4_address: ${REDIS_SUBNET_PREFIX:-172.29.86}.13
+    volumes:
+      - redis-3-data:/data
+      - ./infrastructure/redis/start-node.sh:/usr/local/bin/start-cluster-node.sh:ro
+
+  redis-4:
+    <<: *redis
+    hostname: redis-4
+    environment:
+      REDIS_NODE_IP: ${REDIS_SUBNET_PREFIX:-172.29.86}.14
+      REDIS_NODE_NAME: redis-4
+    networks:
+      redis-cluster:
+        ipv4_address: ${REDIS_SUBNET_PREFIX:-172.29.86}.14
+    volumes:
+      - redis-4-data:/data
+      - ./infrastructure/redis/start-node.sh:/usr/local/bin/start-cluster-node.sh:ro
+
+  redis-5:
+    <<: *redis
+    hostname: redis-5
+    environment:
+      REDIS_NODE_IP: ${REDIS_SUBNET_PREFIX:-172.29.86}.15
+      REDIS_NODE_NAME: redis-5
+    networks:
+      redis-cluster:
+        ipv4_address: ${REDIS_SUBNET_PREFIX:-172.29.86}.15
+    volumes:
+      - redis-5-data:/data
+      - ./infrastructure/redis/start-node.sh:/usr/local/bin/start-cluster-node.sh:ro
+
+  redis-6:
+    <<: *redis
+    hostname: redis-6
+    environment:
+      REDIS_NODE_IP: ${REDIS_SUBNET_PREFIX:-172.29.86}.16
+      REDIS_NODE_NAME: redis-6
+    networks:
+      redis-cluster:
+        ipv4_address: ${REDIS_SUBNET_PREFIX:-172.29.86}.16
+    volumes:
+      - redis-6-data:/data
+      - ./infrastructure/redis/start-node.sh:/usr/local/bin/start-cluster-node.sh:ro
+
+  redis-cluster-init:
+    image: redis:7.4.4-alpine
+    entrypoint: ["sh", "/init-cluster.sh"]
+    networks: [redis-cluster]
+    environment:
+      REDIS_SUBNET_PREFIX: ${REDIS_SUBNET_PREFIX:-172.29.86}
+    volumes: ["./infrastructure/redis/init-cluster.sh:/init-cluster.sh:ro"]
+    depends_on:
+      redis-1: {condition: service_healthy}
+      redis-2: {condition: service_healthy}
+      redis-3: {condition: service_healthy}
+      redis-4: {condition: service_healthy}
+      redis-5: {condition: service_healthy}
+      redis-6: {condition: service_healthy}
+
+  kafka-1:
+    <<: *kafka
+    hostname: kafka-1
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
+    volumes: ["kafka-1-data:/var/lib/kafka/data"]
+
+  kafka-2:
+    <<: *kafka
+    hostname: kafka-2
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 2
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092
+    volumes: ["kafka-2-data:/var/lib/kafka/data"]
+
+  kafka-3:
+    <<: *kafka
+    hostname: kafka-3
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 3
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092
+    volumes: ["kafka-3-data:/var/lib/kafka/data"]
 
   kafka-init:
     image: apache/kafka:3.9.1
     entrypoint: ["/bin/bash", "/init-topics.sh"]
     environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
       KAFKA_TOPIC_PARTITIONS: ${KAFKA_TOPIC_PARTITIONS:-3}
     volumes: ["./infrastructure/kafka/init-topics.sh:/init-topics.sh:ro"]
     depends_on:
-      kafka: {condition: service_healthy}
+      kafka-1: {condition: service_healthy}
+      kafka-2: {condition: service_healthy}
+      kafka-3: {condition: service_healthy}
 
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
     ports: ["127.0.0.1:${KAFKA_UI_PORT:-8080}:8080"]
     environment:
-      KAFKA_CLUSTERS_0_NAME: vehicle-lab
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_NAME: vehicle-lab-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
     depends_on:
-      kafka: {condition: service_healthy}
+      kafka-init: {condition: service_completed_successfully}
+      # Mark the final init job as a successful-completion dependency so that
+      # repeated `up --wait` accepts its normal exit code 0.
+      debezium-init: {condition: service_completed_successfully}
     restart: unless-stopped
 
   vehicle-service:
@@ -126,7 +353,8 @@ services:
     environment:
       <<: *app-env
       SERVICE_NAME: vehicle-service
-      DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres:5432/vehicle_db
+      WRITE_DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres-primary:5432/vehicle_db
+      READ_DATABASE_URL: postgresql+asyncpg://vehicle_reader:${VEHICLE_READ_PASSWORD:-vehicle_read_password}@postgres-replica:5432/vehicle_db
 
   warranty-service:
     <<: *app
@@ -135,7 +363,8 @@ services:
     environment:
       <<: *app-env
       SERVICE_NAME: warranty-service
-      DATABASE_URL: postgresql+asyncpg://warranty_app:${WARRANTY_DB_PASSWORD:-warranty_password}@postgres:5432/warranty_db
+      WRITE_DATABASE_URL: postgresql+asyncpg://warranty_app:${WARRANTY_DB_PASSWORD:-warranty_password}@postgres-primary:5432/warranty_db
+      READ_DATABASE_URL: postgresql+asyncpg://warranty_reader:${WARRANTY_READ_PASSWORD:-warranty_read_password}@postgres-replica:5432/warranty_db
       KAFKA_CONSUMER_GROUP: warranty-service-v1
       DEFAULT_WARRANTY_DAYS: ${DEFAULT_WARRANTY_DAYS:-1095}
       WARRANTY_EXPIRY_INTERVAL: ${WARRANTY_EXPIRY_INTERVAL:-30}
@@ -147,34 +376,81 @@ services:
     environment:
       <<: *app-env
       SERVICE_NAME: inspection-service
-      DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres:5432/inspection_db
+      WRITE_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres-primary:5432/inspection_db
+      READ_DATABASE_URL: postgresql+asyncpg://inspection_reader:${INSPECTION_READ_PASSWORD:-inspection_read_password}@postgres-replica:5432/inspection_db
       KAFKA_CONSUMER_GROUP: inspection-service-v1
 
   repair-service:
     <<: *app
     build: {context: ., dockerfile: services/repair-service/Dockerfile}
-    ports: ["127.0.0.1:${REPAIR_PORT:-8004}:8000"]
+    ports: ["127.0.0.1:${REPAIR_PORT:-8004}-${REPAIR_PORT_END:-8006}:8000"]
     environment:
       <<: *app-env
       SERVICE_NAME: repair-service
-      DATABASE_URL: postgresql+asyncpg://repair_app:${REPAIR_DB_PASSWORD:-repair_password}@postgres:5432/repair_db
+      WRITE_DATABASE_URL: postgresql+asyncpg://repair_app:${REPAIR_DB_PASSWORD:-repair_password}@postgres-primary:5432/repair_db
+      READ_DATABASE_URL: postgresql+asyncpg://repair_reader:${REPAIR_READ_PASSWORD:-repair_read_password}@postgres-replica:5432/repair_db
       KAFKA_CONSUMER_GROUP: repair-service-v1
       WARRANTY_SERVICE_URL: http://warranty-service:8000
 
+  traffic-generator:
+    build: {context: ., dockerfile: Dockerfile.traffic}
+    init: true
+    restart: "no"
+    stop_grace_period: 15s
+    environment:
+      TRAFFIC_ENABLED: ${TRAFFIC_ENABLED:-true}
+      TRAFFIC_MODE: ${TRAFFIC_MODE:-continuous}
+      VIRTUAL_USERS: ${VIRTUAL_USERS:-${TRAFFIC_CONCURRENCY:-5}}
+      TRAFFIC_INTERVAL_MS: ${TRAFFIC_INTERVAL_MS:-2000}
+      TRAFFIC_ERROR_RATE: ${TRAFFIC_ERROR_RATE:-0.05}
+      REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-5}
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+      RETRY_BACKOFF_MS: ${RETRY_BACKOFF_MS:-200}
+      DUPLICATE_REQUEST_RATE: ${DUPLICATE_REQUEST_RATE:-0.05}
+      DELETE_RATE: ${DELETE_RATE:-0.01}
+      FAIL_INSPECTION_RATE: ${FAIL_INSPECTION_RATE:-0.30}
+      CONVERGENCE_TIMEOUT_SECONDS: ${CONVERGENCE_TIMEOUT_SECONDS:-45}
+      FLOW_TIMEOUT_SECONDS: ${FLOW_TIMEOUT_SECONDS:-120}
+      SUMMARY_INTERVAL_SECONDS: ${SUMMARY_INTERVAL_SECONDS:-30}
+      REPLICA_READ_DELAYS_MS: ${REPLICA_READ_DELAYS_MS:-0,100,500,1000}
+      VEHICLE_SERVICE_URL: http://vehicle-service:8000
+      WARRANTY_SERVICE_URL: http://warranty-service:8000
+      INSPECTION_SERVICE_URL: http://inspection-service:8000
+      REPAIR_SERVICE_URL: http://repair-service:8000
+    depends_on:
+      vehicle-service: {condition: service_healthy}
+      warranty-service: {condition: service_healthy}
+      inspection-service: {condition: service_healthy}
+      repair-service: {condition: service_healthy}
+      debezium-init: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "python", "-m", "traffic_generator.healthcheck"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+
   toolbox:
+    networks: [default, redis-cluster]
     profiles: [tools]
     build: {context: ., dockerfile: Dockerfile.tools}
     environment:
+      CONNECT_URL: http://debezium-connect:8083
+      POSTGRES_ADMIN_PASSWORD: ${POSTGRES_PASSWORD:-lab_admin_password}
+      VEHICLE_READ_DATABASE_URL: postgresql+asyncpg://vehicle_reader:${VEHICLE_READ_PASSWORD:-vehicle_read_password}@postgres-replica:5432/vehicle_db
       VEHICLE_URL: http://vehicle-service:8000
       WARRANTY_URL: http://warranty-service:8000
       INSPECTION_URL: http://inspection-service:8000
       REPAIR_URL: http://repair-service:8000
-      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      REDIS_URL: redis://redis:6379/0
-      VEHICLE_DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres:5432/vehicle_db
-      WARRANTY_DATABASE_URL: postgresql+asyncpg://warranty_app:${WARRANTY_DB_PASSWORD:-warranty_password}@postgres:5432/warranty_db
-      INSPECTION_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres:5432/inspection_db
-      REPAIR_DATABASE_URL: postgresql+asyncpg://repair_app:${REPAIR_DB_PASSWORD:-repair_password}@postgres:5432/repair_db
+      KAFKA_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      REDIS_CLUSTER_NODES: redis-1:6379,redis-2:6379,redis-3:6379,redis-4:6379,redis-5:6379,redis-6:6379
+      VEHICLE_DATABASE_URL: postgresql+asyncpg://vehicle_app:${VEHICLE_DB_PASSWORD:-vehicle_password}@postgres-primary:5432/vehicle_db
+      WARRANTY_DATABASE_URL: postgresql+asyncpg://warranty_app:${WARRANTY_DB_PASSWORD:-warranty_password}@postgres-primary:5432/warranty_db
+      INSPECTION_DATABASE_URL: postgresql+asyncpg://inspection_app:${INSPECTION_DB_PASSWORD:-inspection_password}@postgres-primary:5432/inspection_db
+      REPAIR_DATABASE_URL: postgresql+asyncpg://repair_app:${REPAIR_DB_PASSWORD:-repair_password}@postgres-primary:5432/repair_db
     depends_on:
       vehicle-service: {condition: service_healthy}
       warranty-service: {condition: service_healthy}
@@ -183,5 +459,20 @@ services:
 
 volumes:
   postgres-data:
-  redis-data:
-  kafka-data:
+  postgres-replica-data:
+  redis-1-data:
+  redis-2-data:
+  redis-3-data:
+  redis-4-data:
+  redis-5-data:
+  redis-6-data:
+  kafka-1-data:
+  kafka-2-data:
+  kafka-3-data:
+
+networks:
+  default:
+  redis-cluster:
+    ipam:
+      config:
+        - subnet: ${REDIS_SUBNET_PREFIX:-172.29.86}.0/24

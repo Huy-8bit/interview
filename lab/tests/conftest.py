@@ -1,10 +1,10 @@
 import os
 
 import pytest_asyncio
-from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from platform_common.redis import cluster_client
 from scripts.lab_client import LabClient
 
 
@@ -19,7 +19,7 @@ async def client():
 
 @pytest_asyncio.fixture
 async def redis_client():
-    client = Redis.from_url(os.environ["REDIS_URL"], decode_responses=True)
+    client = cluster_client(os.environ["REDIS_CLUSTER_NODES"])
     try:
         yield client
     finally:

@@ -1,0 +1,21 @@
+flowchart TB
+    %% diagram: traffic-architecture
+    generator["Traffic Generator - asyncio virtual users"] -->|"REST create / read / patch / scoped delete"| vehicle["Vehicle"]
+    generator -->|"REST create / complete"| inspection["Inspection"]
+    generator -->|"REST query"| warranty["Warranty"]
+    generator -->|"REST query"| repair["Repair"]
+    subgraph apps["Domain processing"]
+        vehicle
+        inspection
+        warranty
+        repair
+    end
+    apps -->|"Own DB transactions"| primary[("PostgreSQL primary - 4 DBs")]
+    primary -->|"Physical WAL"| replica[("PostgreSQL replica")]
+    vehicle -->|"Eventual GET bypasses cache"| replica
+    apps <-->|"Cache / idempotency / locks"| redis["Redis Cluster 3M + 3R"]
+    primary -->|"Logical WAL"| debezium["Debezium - 4 connectors"]
+    debezium -->|"Row c / u / d"| cdc["Kafka CDC topics"]
+    apps <-->|"Outbox / idempotent consumers"| domain["Kafka domain topics"]
+    cdc --> ui["Kafka UI"]
+    domain --> ui

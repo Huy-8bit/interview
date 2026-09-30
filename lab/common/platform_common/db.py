@@ -29,9 +29,9 @@ class Timestamps:
     )
 
 
-def database(settings):
+def database(settings, *, read=False):
     engine = create_async_engine(
-        settings.database_url,
+        (settings.read_database_url or settings.write_database_url) if read else settings.write_database_url,
         pool_size=settings.db_pool_size,
         max_overflow=settings.db_max_overflow,
         pool_timeout=settings.db_pool_timeout,

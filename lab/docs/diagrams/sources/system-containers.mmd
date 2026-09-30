@@ -1,19 +1,29 @@
 flowchart TB
     %% diagram: system-containers
-    client["Client / CLI"]
+    client["Client / CLI / Traffic Generator"]
     subgraph apps["4 FastAPI services"]
         vehicle["Vehicle :8001"]
         warranty["Warranty :8002"]
         inspection["Inspection :8003"]
-        repair["Repair :8004"]
+        repair["Repair :8004-8006"]
     end
     client --> vehicle
     client --> warranty
     client --> inspection
     client --> repair
-    vehicle --> vehicleDb[("vehicle_db")]
-    warranty --> warrantyDb[("warranty_db")]
-    inspection --> inspectionDb[("inspection_db")]
-    repair --> repairDb[("repair_db")]
-    apps <-->|"Cache / idempotency / locks"| redis[("Redis")]
-    apps <-->|"Outbox / consumers"| kafka["Kafka KRaft"]
+    subgraph primary["PostgreSQL primary"]
+        vehicleDb[("vehicle_db")]
+        warrantyDb[("warranty_db")]
+        inspectionDb[("inspection_db")]
+        repairDb[("repair_db")]
+    end
+    vehicle --> vehicleDb
+    warranty --> warrantyDb
+    inspection --> inspectionDb
+    repair --> repairDb
+    primary -->|"Physical WAL"| replica[("PostgreSQL replica")]
+    vehicle -->|"Opt-in eventual read"| replica
+    primary -->|"Logical WAL"| debezium["Debezium - 4 connectors"]
+    debezium -->|"CDC topics"| kafka
+    apps <-->|"Cache / idempotency / locks"| redis[("Redis Cluster - 3M + 3R")]
+    apps <-->|"Outbox / consumers"| kafka["Kafka KRaft - 3 brokers"]

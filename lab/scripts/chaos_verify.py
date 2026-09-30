@@ -6,11 +6,11 @@ import os
 from uuid import uuid4
 
 import httpx
-from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from lab_client import LabClient, poll
+from platform_common.redis import cluster_client, vehicle_cache_key
 
 
 async def main():
@@ -19,7 +19,7 @@ async def main():
         s: create_async_engine(os.environ[s.upper() + "_DATABASE_URL"])
         for s in ("vehicle", "repair")
     }
-    redis = Redis.from_url(os.environ["REDIS_URL"], decode_responses=True)
+    redis = cluster_client(os.environ["REDIS_CLUSTER_NODES"])
 
     async def query(service, sql, **params):
         async with engines[service].connect() as connection:
@@ -49,7 +49,7 @@ async def main():
 
         original = await client.json("vehicle", "GET", f"/vehicles/{vehicle['id']}")
         stale = {**original, "owner_name": "STALE (injected for two seconds)"}
-        await redis.set(f"vehicle:{vehicle['id']}", json.dumps(stale), ex=2)
+        await redis.set(vehicle_cache_key(vehicle["id"]), json.dumps(stale), ex=2)
         assert (await client.json("vehicle", "GET", f"/vehicles/{vehicle['id']}"))[
             "owner_name"
         ] == stale["owner_name"]

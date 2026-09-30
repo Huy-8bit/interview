@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 
+from platform_common.redis import vehicle_cache_key
 from scripts.lab_client import poll
 
 pytestmark = pytest.mark.integration
@@ -21,7 +22,7 @@ async def test_vehicle_api_validation_cache_and_outbox(client, db, redis_client)
     first = await client.request("vehicle", "GET", path)
     second = await client.request("vehicle", "GET", path)
     assert first.headers["x-cache"] == "MISS" and second.headers["x-cache"] == "HIT"
-    assert await redis_client.ttl(f"vehicle:{vehicle['id']}") > 0
+    assert await redis_client.ttl(vehicle_cache_key(vehicle["id"])) > 0
     patched = await client.json("vehicle", "PATCH", path, json={"owner_name": "Updated owner"})
     assert patched["owner_name"] == "Updated owner"
     refreshed = await client.request("vehicle", "GET", path)

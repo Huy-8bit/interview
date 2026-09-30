@@ -1,0 +1,19 @@
+sequenceDiagram
+    %% diagram: postgres-replica-lag
+    participant Client
+    participant API as Vehicle API
+    participant Primary
+    participant Replica
+    Client->>API: POST vehicle
+    API->>Primary: INSERT vehicle + outbox, COMMIT
+    Primary-->>API: Commit acknowledged
+    API-->>Client: 201 Created
+    Client->>API: GET id?consistency=eventual
+    API->>Replica: SELECT in read-only transaction
+    Replica-->>API: Row not replayed yet
+    API-->>Client: 404, valid stale read
+    Primary->>Replica: WAL replay catches up
+    Client->>API: Retry eventual GET
+    API->>Replica: SELECT after replay
+    Replica-->>API: Row visible
+    API-->>Client: 200, X-Read-Source replica

@@ -14,9 +14,10 @@ async def get(session, vehicle_id, *, lock=False):
     return vehicle
 
 
-async def list_page(session, limit, offset):
+async def list_page(session, limit, offset, vin=None):
+    query = select(Vehicle).order_by(Vehicle.created_at, Vehicle.id).limit(limit).offset(offset)
+    if vin is not None:
+        query = query.where(Vehicle.vin == vin)
     return (
-        await session.scalars(
-            select(Vehicle).order_by(Vehicle.created_at, Vehicle.id).limit(limit).offset(offset)
-        )
+        await session.scalars(query)
     ).all()

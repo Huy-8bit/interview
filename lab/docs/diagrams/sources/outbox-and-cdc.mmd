@@ -1,0 +1,23 @@
+sequenceDiagram
+    %% diagram: outbox-and-cdc
+    participant Client
+    participant API as Vehicle API
+    participant PG as PostgreSQL primary
+    participant Replica
+    participant Outbox as Outbox task
+    participant DBZ as Debezium
+    participant Kafka
+    Client->>API: POST vehicles
+    API->>PG: Transaction: INSERT vehicles + outbox_events
+    PG-->>API: COMMIT
+    API-->>Client: 201 Created
+    par Physical replication
+        PG->>Replica: WAL receive and replay
+    and Domain publishing
+        Outbox->>PG: Claim pending outbox row
+        Outbox->>Kafka: vehicle-events / vehicle.created
+        Outbox->>PG: Mark published after ACK
+    and Database change capture
+        PG->>DBZ: pgoutput logical stream
+        DBZ->>Kafka: vehicle-cdc.public.vehicles / op c
+    end

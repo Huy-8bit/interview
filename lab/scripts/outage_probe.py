@@ -88,6 +88,10 @@ async def main(component):
                 return rows[0]["pending"] == 0
 
             await poll(drained, timeout=90)
+            # Metadata/readiness and an empty source outbox do not prove consumer progress.
+            from scripts.cluster_verify import workflow
+
+            await workflow()
         print(f"PASS: {component}", flush=True)
     finally:
         await client.close()

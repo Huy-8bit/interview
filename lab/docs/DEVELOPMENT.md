@@ -32,7 +32,7 @@ make demo
 
 Không bắt buộc Python host. Khi không có Make, chạy service tests trong container và root suite trong toolbox như hướng dẫn README. Test service dùng schema PostgreSQL tạm; integration tests dùng HTTP/Kafka/Redis thật và để lại data UUID/VIN mới. Không thay bằng SQLite vì semantics ON CONFLICT/locks/JSONB là một phần bài lab.
 
-Test timeout trong Repair có MockTransport để điều khiển lỗi cục bộ. Fault drill `chaos_verify.py` bổ sung test giữa service thật; không chạy fault drill song song với suite thường. Kết quả 24 tests và các drill đã thực thi trước đó ở [Validation](VALIDATION.md).
+Test timeout trong Repair có MockTransport để điều khiển lỗi cục bộ. Fault drill `chaos_verify.py` bổ sung test giữa service thật; không chạy fault drill song song với suite thường. Kết quả giai đoạn ban đầu ở [Validation](VALIDATION.md); phiên bản cluster và các bài failover có báo cáo riêng ở [Cluster Validation](CLUSTER_VALIDATION.md).
 
 ## 3. Thêm một business operation
 
@@ -61,7 +61,7 @@ Migrations runtime đặt trong từng service. Initial revision gọi DDL commo
 Với developer có Python environment tùy chọn:
 
 ```sh
-# Sau khi cấu hình DATABASE_URL tới database phát triển riêng
+# Sau khi cấu hình WRITE_DATABASE_URL tới database phát triển riêng
 # và cài dependencies + PYTHONPATH thích hợp:
 # cd services/vehicle-service
 # alembic revision --autogenerate -m "describe schema change"
@@ -97,6 +97,8 @@ Test fixture create_all không chứng minh migration từ revision trước ch�
 | Repair/notification uniqueness, HTTP timeout rollback | [test_repair.py](../services/repair-service/tests/test_repair.py) |
 | Actual HTTP workflow/cache/coverage | [test_api_flow.py](../tests/integration/test_api_flow.py) |
 | Kafka duplicate, retry and DLQ ACK/offset | [test_kafka.py](../tests/integration/test_kafka.py) |
+| Cluster RF/ISR, slots, replica links, lock token và discovery fallback | [test_clusters.py](../tests/integration/test_clusters.py) |
+| Live node failure và consumer rebalance | [cluster_drills.sh](../scripts/cluster_drills.sh), [cluster_verify.py](../scripts/cluster_verify.py) |
 | Health and database credential isolation | [test_operations.py](../tests/integration/test_operations.py) |
 
 Các test này không phải performance test hoặc chứng minh mọi interleaving của distributed system. Đọc failure design để biết crash windows và giới hạn còn lại; đo tải riêng nếu thay đổi pool/worker/timeout.
@@ -125,3 +127,11 @@ Công cụ render dựa trên [Mermaid CLI chính thức](https://github.com/mer
 - Nếu thêm tenant, phải scope cả API idempotency, cache/lock key, authorization và unique business rules.
 - Nếu thêm auth/PII, kiểm log và DLQ payload retention; correlation ID không phải authorization token.
 - Trước cleanup ledger/outbox, xác định retry/replay horizon và chiến lược restore, tránh biến replay thành side effect mới.
+
+## 9. REST traffic worker
+
+[traffic_generator](../traffic_generator/worker.py) là package độc lập, image [Dockerfile.traffic](../Dockerfile.traffic) chỉ có HTTPX/Pydantic. Không import runtime DB/Redis/Kafka vào worker. Flow giữ correlation ID và stable VIN/key qua retry; metrics dùng cửa sổ latency hữu hạn. Thêm API step phải tôn trọng flow timeout, cancellation và stable mutation intent.
+
+Unit tests [test_traffic_generator.py](../tests/unit/test_traffic_generator.py) dùng HTTPX MockTransport để kiểm retry budget, 4xx, timeout sau commit/reconcile, metrics và flow failure isolation. `make traffic-test` dùng [observer](../scripts/traffic_verify.py) ngoài worker đọc Kafka để đối chiếu dữ liệu thật. `make traffic-drills` do shell orchestrator dừng/restore infrastructure; worker không có Docker socket. `make test` pause/resume traffic để bài integration cũ có thể kiểm outbox/lag hội tụ.
+
+Vehicle migration 0002 thêm nullable `simulation_run_id`; header/run guard bảo vệ dữ liệu thường trong endpoint DELETE mô phỏng. Nếu mở rộng xóa nghiệp vụ, phải thiết kế event/cascade/retention riêng thay vì bỏ guard hiện tại.

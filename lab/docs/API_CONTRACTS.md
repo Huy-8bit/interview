@@ -9,7 +9,9 @@
 | Vehicle | `http://localhost:8001` | [Swagger](http://localhost:8001/docs) / [JSON](http://localhost:8001/openapi.json) |
 | Warranty | `http://localhost:8002` | [Swagger](http://localhost:8002/docs) / [JSON](http://localhost:8002/openapi.json) |
 | Inspection | `http://localhost:8003` | [Swagger](http://localhost:8003/docs) / [JSON](http://localhost:8003/openapi.json) |
-| Repair | `http://localhost:8004` | [Swagger](http://localhost:8004/docs) / [JSON](http://localhost:8004/openapi.json) |
+| Repair | Cổng cấp động trong 8004–8006 | Thêm `/docs` hoặc `/openapi.json` vào URL thực tế |
+
+Lấy Repair base URL bằng `REPAIR_URL="http://$(docker compose port --index 1 repair-service 8000)"`. Cổng có thể đổi khi recreate/scale container; chạy lại lệnh trước khi dùng curl.
 
 Request/response JSON, UUID cho IDs và ISO 8601 cho thời gian. Request schemas cấm extra fields. Chưa có URL version prefix hoặc authentication. Trong network Compose dùng tên service với port 8000, không dùng host port.
 
@@ -17,14 +19,17 @@ Headers `X-Request-ID`, `X-Correlation-ID` nhận UUID hợp lệ; không có ho
 
 List vehicle/inspection/repair trả **JSON array**, không có wrapper `items/total`. `limit=20` mặc định, 1–100; `offset=0` mặc định, không âm. GET warranty list theo xe trả array tất cả warranty của xe, không phân trang.
 
+Vehicle detail GET hỗ trợ `?consistency=eventual`: đọc replica, bỏ qua cache; replica lỗi thì fallback primary. Headers `X-Read-Source: replica|primary-fallback`, `X-Cache: BYPASS`. Replica lag có thể trả 404 dù primary vừa commit; 404 này không kích hoạt fallback. Mặc định đọc cache/primary như trước, trả `X-Read-Source: cache|primary`. Xem [read routing](POSTGRESQL_CDC.md#4-read--write-routing-và-consistency).
+
 ## 2. Vehicle endpoints
 
 | Method | Path | Input | Thành công | Lỗi đáng chú ý |
 |---|---|---|---|---|
 | POST | `/vehicles` | VehicleCreate | 201 VehicleRead | 409 VIN trùng |
-| GET | `/vehicles` | limit, offset | 200 array VehicleRead | 422 query sai |
+| GET | `/vehicles` | limit, offset, vin exact-match tùy chọn | 200 array VehicleRead | 422 query sai |
 | GET | `/vehicles/{vehicle_id}` | UUID | 200 VehicleRead; X-Cache HIT/MISS | 404 vehicle_not_found |
 | PATCH | `/vehicles/{vehicle_id}` | VehicleUpdate | 200 VehicleRead | 404; 422 empty/null patch |
+| DELETE | `/vehicles/{vehicle_id}` | X-Simulation-Run-ID UUID bắt buộc | 204 empty | 403 simulation_delete_forbidden; 404 vehicle_not_found; 422 header sai/thiếu |
 
 VehicleCreate:
 
@@ -41,6 +46,8 @@ VehicleCreate:
 VIN phải đủ 17 ký tự, gồm chữ hoa hoặc chữ số, loại trừ I/O/Q theo pattern `^[A-HJ-NPR-Z0-9]{17}$`. Ví dụ trên có LAB + 14 ký tự. Các lệnh chạy thực tế trong README sinh VIN mới tự động. `model/manufacturer`: 1–100; `owner_name`: 1–200; year: 1886–2100. POST không nhận `id`, `status` hay timestamp.
 
 VehicleRead có các field của create và `id`, `status`, `created_at`, `updated_at`. Default status ACTIVE. PATCH chỉ nhận model, manufacturer, production_year, owner_name, status ACTIVE/INACTIVE; ít nhất một field và không field nào được null. VIN không sửa được.
+
+`simulation_run_id` là UUID nullable tùy chọn trong VehicleCreate/Read, mặc định null. Có marker thì VIN phải bắt đầu `TRF`; marker bất biến qua PATCH. GET list với `vin` dùng unique VIN trên primary, phục vụ reconcile POST timeout; không đọc cache/replica. DELETE khóa row và chỉ cho phép VIN `TRF` có persisted marker bằng header, rồi invalidate cache. Header không phải cơ chế xác thực trong lab chưa auth. Không có bulk DELETE hay cascade xuống warranty/inspection/repair; không phát vehicle.deleted. DELETE lần nữa trả 404. Xem [phạm vi dữ liệu mô phỏng](TRAFFIC_GENERATOR.md#6-insert--update--delete-qua-rest).
 
 Create/update enqueue vehicle.created/updated trong cùng transaction. GET dùng cache; `X-Cache=MISS` bao gồm cả Redis unavailable, không đồng nghĩa Redis chắc chắn hoạt động.
 

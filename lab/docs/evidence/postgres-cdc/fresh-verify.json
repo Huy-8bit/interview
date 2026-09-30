@@ -1,0 +1,591 @@
+{
+  "recorded_at": "2026-09-30 05:53:12.048445+00:00",
+  "primary": {
+    "recovery": false,
+    "lsn": 68790832,
+    "wal_level": "logical",
+    "system_identifier": "7691201835457101857"
+  },
+  "replica": {
+    "recovery": true,
+    "receive_lsn": 68790832,
+    "replay_lsn": 68790832,
+    "system_identifier": "7691201835457101857"
+  },
+  "replication": [
+    {
+      "application_name": "postgres-replica",
+      "state": "streaming",
+      "sync_state": "async",
+      "sent_lsn": 68790832,
+      "write_lsn": 68790832,
+      "flush_lsn": 68790832,
+      "replay_lsn": 68790832,
+      "lag_bytes": "0"
+    },
+    {
+      "application_name": "Debezium Streaming",
+      "state": "streaming",
+      "sync_state": "async",
+      "sent_lsn": 68790832,
+      "write_lsn": 68789192,
+      "flush_lsn": null,
+      "replay_lsn": null,
+      "lag_bytes": null
+    },
+    {
+      "application_name": "Debezium Streaming",
+      "state": "streaming",
+      "sync_state": "async",
+      "sent_lsn": 68790832,
+      "write_lsn": 68789616,
+      "flush_lsn": null,
+      "replay_lsn": null,
+      "lag_bytes": null
+    },
+    {
+      "application_name": "Debezium Streaming",
+      "state": "streaming",
+      "sync_state": "async",
+      "sent_lsn": 68790832,
+      "write_lsn": 68790040,
+      "flush_lsn": null,
+      "replay_lsn": null,
+      "lag_bytes": null
+    },
+    {
+      "application_name": "Debezium Streaming",
+      "state": "streaming",
+      "sync_state": "async",
+      "sent_lsn": 68790832,
+      "write_lsn": 68790464,
+      "flush_lsn": null,
+      "replay_lsn": null,
+      "lag_bytes": null
+    }
+  ],
+  "slots": [
+    {
+      "slot_name": "dbz_inspection",
+      "slot_type": "logical",
+      "plugin": "pgoutput",
+      "database": "inspection_db",
+      "active": true,
+      "restart_lsn": 68789984,
+      "confirmed_flush_lsn": 68790040,
+      "wal_status": "reserved",
+      "retained_bytes": "848"
+    },
+    {
+      "slot_name": "dbz_repair",
+      "slot_type": "logical",
+      "plugin": "pgoutput",
+      "database": "repair_db",
+      "active": true,
+      "restart_lsn": 68790408,
+      "confirmed_flush_lsn": 68790464,
+      "wal_status": "reserved",
+      "retained_bytes": "424"
+    },
+    {
+      "slot_name": "dbz_vehicle",
+      "slot_type": "logical",
+      "plugin": "pgoutput",
+      "database": "vehicle_db",
+      "active": true,
+      "restart_lsn": 68789136,
+      "confirmed_flush_lsn": 68789192,
+      "wal_status": "reserved",
+      "retained_bytes": "1696"
+    },
+    {
+      "slot_name": "dbz_warranty",
+      "slot_type": "logical",
+      "plugin": "pgoutput",
+      "database": "warranty_db",
+      "active": true,
+      "restart_lsn": 68789560,
+      "confirmed_flush_lsn": 68789616,
+      "wal_status": "reserved",
+      "retained_bytes": "1272"
+    },
+    {
+      "slot_name": "lab_physical_replica",
+      "slot_type": "physical",
+      "plugin": null,
+      "database": null,
+      "active": true,
+      "restart_lsn": 68790832,
+      "confirmed_flush_lsn": null,
+      "wal_status": "reserved",
+      "retained_bytes": "0"
+    }
+  ],
+  "publications": {
+    "vehicle": [
+      {
+        "pubname": "dbz_vehicle",
+        "schemaname": "public",
+        "tablename": "vehicles"
+      },
+      {
+        "pubname": "dbz_vehicle",
+        "schemaname": "public",
+        "tablename": "cdc_heartbeat"
+      }
+    ],
+    "warranty": [
+      {
+        "pubname": "dbz_warranty",
+        "schemaname": "public",
+        "tablename": "warranties"
+      },
+      {
+        "pubname": "dbz_warranty",
+        "schemaname": "public",
+        "tablename": "cdc_heartbeat"
+      }
+    ],
+    "inspection": [
+      {
+        "pubname": "dbz_inspection",
+        "schemaname": "public",
+        "tablename": "inspections"
+      },
+      {
+        "pubname": "dbz_inspection",
+        "schemaname": "public",
+        "tablename": "cdc_heartbeat"
+      }
+    ],
+    "repair": [
+      {
+        "pubname": "dbz_repair",
+        "schemaname": "public",
+        "tablename": "repair_requests"
+      },
+      {
+        "pubname": "dbz_repair",
+        "schemaname": "public",
+        "tablename": "cdc_heartbeat"
+      }
+    ]
+  },
+  "connectors": {
+    "vehicle": {
+      "name": "vehicle-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    },
+    "warranty": {
+      "name": "warranty-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    },
+    "inspection": {
+      "name": "inspection-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    },
+    "repair": {
+      "name": "repair-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    }
+  },
+  "topics": [
+    {
+      "error_code": 0,
+      "topic": "connect-configs",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            3,
+            1,
+            2
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "inspection-cdc.public.inspections",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 1,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            1,
+            2,
+            3
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            3,
+            1,
+            2
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "connect-status",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 1,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            1,
+            2,
+            3
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            3,
+            1,
+            2
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "connect-offsets",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 1,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            1,
+            2,
+            3
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            3,
+            1,
+            2
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "warranty-cdc.public.warranties",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 1,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            1,
+            2,
+            3
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            3,
+            1,
+            2
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "vehicle-cdc.public.vehicles",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 1,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            1,
+            2,
+            3
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            3,
+            1,
+            2
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "repair-cdc.public.repair_requests",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            3,
+            1,
+            2
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 1,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            1,
+            2,
+            3
+          ],
+          "offline_replicas": []
+        }
+      ]
+    }
+  ]
+}

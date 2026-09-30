@@ -148,6 +148,11 @@ def create_app(router, *, handlers=None, extra_workers=(), settings=None):
             finally:
                 await admin.close()
 
+        async def redis_check():
+            info = await runtime.redis.cluster_info()
+            if info.get("cluster_state") != "ok" or int(info.get("cluster_slots_ok", 0)) != 16384:
+                raise RuntimeError("Redis Cluster slots unavailable")
+
         async def check(fn):
             try:
                 async with asyncio.timeout(3):
@@ -157,7 +162,7 @@ def create_app(router, *, handlers=None, extra_workers=(), settings=None):
                 return "unavailable"
 
         results = await asyncio.gather(
-            check(db_check), check(runtime.redis.ping), check(kafka_check)
+            check(db_check), check(redis_check), check(kafka_check)
         )
         checks = dict(zip(("postgres", "redis", "kafka"), results, strict=True))
         checks["workers"] = "ok" if all(not task.done() for task in runtime.tasks) else "failed"

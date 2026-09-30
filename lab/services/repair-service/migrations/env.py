@@ -17,7 +17,7 @@ def migrate(connection):
 
 
 async def online():
-    engine = create_async_engine(os.environ["DATABASE_URL"], poolclass=pool.NullPool)
+    engine = create_async_engine(os.environ["WRITE_DATABASE_URL"], poolclass=pool.NullPool)
     async with engine.connect() as connection:
         # Concurrent replicas serialize startup migrations in this database.
         await connection.exec_driver_sql("SELECT pg_advisory_lock(72143819)")
@@ -30,7 +30,7 @@ async def online():
 
 if context.is_offline_mode():
     context.configure(
-        url=os.environ["DATABASE_URL"], target_metadata=Base.metadata, literal_binds=True
+        url=os.environ["WRITE_DATABASE_URL"], target_metadata=Base.metadata, literal_binds=True
     )
     with context.begin_transaction():
         context.run_migrations()

@@ -1,0 +1,15 @@
+flowchart LR
+    %% diagram: consumer-partition-rebalance
+    subgraph topic["inspection-events"]
+        p0["Partition 0"]
+        p1["Partition 1"]
+        p2["Partition 2"]
+    end
+    subgraph group["repair-service-v1"]
+        c1["Repair instance A"]
+        c2["Repair instance B"]
+        c3["Repair instance C"]
+    end
+    p0 --> c1
+    p1 --> c2
+    p2 --> c3

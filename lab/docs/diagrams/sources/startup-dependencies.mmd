@@ -2,12 +2,20 @@ flowchart LR
     %% diagram: startup-dependencies
     postgres["PostgreSQL starts"] --> dbInit["Create 4 DBs and roles on empty volume"]
     dbInit --> pgReady["PostgreSQL healthy"]
-    redis["Redis starts"] --> redisReady["Redis healthy"]
-    kafka["Kafka KRaft starts"] --> brokerReady["Broker healthy"]
-    brokerReady --> topicInit["kafka-init creates 8 topics"]
-    pgReady --> appStart["Start each application"]
+    redis["6 Redis nodes start"] --> redisReady["Cluster init - slots and replicas ready"]
+    kafka["3 Kafka KRaft nodes start"] --> brokerReady["Broker healthy"]
+    brokerReady --> topicInit["kafka-init: domain, CDC and Connect topics"]
+    pgReady --> replicationInit["postgres-init: replication and reader roles"]
+    replicationInit --> replica["Replica pg_basebackup and WAL streaming"]
+    replicationInit --> appStart["Start each application"]
     redisReady --> appStart
     topicInit --> appStart
     appStart --> migration["Alembic under DB advisory lock"]
     migration --> api["Uvicorn and lifespan workers"]
     api --> readiness["Ready checks DB / Redis / Kafka / tasks"]
+    readiness --> cdcInit["cdc-db-init: publications and grants"]
+    topicInit --> connect["Debezium Connect healthy"]
+    cdcInit --> register["debezium-init: 4 connectors RUNNING"]
+    connect --> register
+    register --> traffic["Traffic Generator - continuous REST workload"]
+    readiness --> traffic

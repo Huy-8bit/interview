@@ -14,7 +14,7 @@ Các quyết định dưới đây mô tả implementation hiện tại. “Xem 
 
 **Phương án khác:** một modular monolith với transaction chung dễ vận hành hơn; shared DB microservices giảm chi phí integration nhưng làm mờ ownership và coupling schema.
 
-**Hệ quả:** không có cross-DB FK/JOIN; reference validation/projection phải explicit, eventual consistency hiện rõ. Cùng PostgreSQL instance tiết kiệm tài nguyên lab nhưng vẫn là một failure domain hạ tầng.
+**Hệ quả:** không có cross-DB FK/JOIN; reference validation/projection phải explicit, eventual consistency hiện rõ. Bốn database dùng chung primary–replica PostgreSQL để tiết kiệm tài nguyên; primary write endpoint và Docker host vẫn là failure domains chung.
 
 **Xem xét lại khi:** domain/customer/notification có lifecycle hoặc ownership đội ngũ độc lập; deployment/HA requirements vượt mô hình laptop. Tách thêm domain sẽ thay đổi giới hạn bốn service của bài lab.
 
@@ -115,3 +115,49 @@ Các quyết định dưới đây mô tả implementation hiện tại. “Xem 
 **Hệ quả:** API/consumer giữ DB transaction khi gọi REST; connection usage tăng khi upstream chậm. Lab không tạo phiếu pending coverage và không có circuit breaker.
 
 **Xem xét lại khi:** business cần nhận repair ngay cả lúc Warranty down, hoặc cần audit warranty ID/checked_at/terms version. Khi đó phải mở rộng schema/state machine và test unknown→resolved transitions.
+
+## ADR-009 — Kafka ba node combined KRaft, RF=3 và min ISR=2
+
+**Trạng thái:** Đã áp dụng, thay thế hạ tầng một broker của phiên bản lab ban đầu.
+
+**Bối cảnh:** Cần quan sát partition leaders, ISR, quorum election và producer/consumer recovery khi mất node.
+
+**Quyết định:** Ba broker/controller dùng chung cluster ID, voters cố định; business/DLQ có tối thiểu ba partitions, RF=3, min ISR=2, unclean election tắt. Mỗi node có log volume riêng; mọi client có ba bootstrap servers.
+
+**Phương án khác:** Controller riêng tách failure domain và tài nguyên tốt hơn nhưng tăng container. Kafka transactions không thay thế PostgreSQL outbox/processed ledger.
+
+**Hệ quả:** Chịu một node failure khi replica đồng bộ, mất hai node sẽ mất availability; cùng Docker host vẫn là failure domain chung. Tăng RAM/disk/CPU so với lab một broker. Startup chờ đủ nodes/init, không tự sửa RF của topic cũ có dữ liệu.
+
+**Xem xét lại khi:** Cần chịu lỗi host/AZ, workload khiến controller tranh tài nguyên broker hoặc cần thay đổi quorum membership.
+
+## ADR-010 — Redis Cluster sáu node, hash tags và DB fallback
+
+**Trạng thái:** Đã áp dụng, thay thế Redis standalone của phiên bản đầu.
+
+**Bối cảnh:** Cần học slot distribution, MOVED/ASK, master promotion và client recovery, trong khi cache Lua dùng nhiều key.
+
+**Quyết định:** Ba master + ba replica; async RedisCluster client có sáu seed nodes; cache/generation hash tag theo vehicle ID; AOF và nodes.conf trên volume riêng. Node IP ổn định trên subnet Docker riêng, role không cố định. Deadline 2s mỗi thao tác, fallback DB giữ các invariants đã có.
+
+**Phương án khác:** Sentinel cung cấp failover nhưng không shard 16.384 slots; single-master client không đáp ứng yêu cầu cluster routing. Một hash tag cho mọi key làm mất phân phối tải.
+
+**Hệ quả:** Multi-key operations phải cùng slot; replica promotion có cửa sổ mất write đã ACK. Token lease không fencing, không có guarantee mutual exclusion xuyên async failover. DB unique/ledger/idempotency tiếp tục chịu trách nhiệm correctness. Subnet cần không trùng network/VPN đang dùng.
+
+**Xem xét lại khi:** Cần Redis persistence/stronger consistency cho dữ liệu gốc, reshard online ở tải lớn hoặc đa vùng. Các thay đổi đó cần thiết kế consistency riêng, không chỉ tăng replica count.
+
+## ADR-011 — Physical PostgreSQL replica, read opt-in, không tự promote
+
+**Trạng thái:** đã áp dụng.
+
+**Quyết định:** giữ PostgreSQL 16.9/data volume hiện có làm primary, bootstrap hot standby bằng pg_basebackup/physical slot. Tách writer/reader URL và reader role. Chỉ Vehicle detail GET opt-in eventual được route replica; lỗi query fallback read-only primary, stale 404 giữ nguyên và không cache. Các quyết định nghiệp vụ đọc primary.
+
+**Hệ quả:** quan sát được lag/replication failure mà không làm sai read-after-write mặc định. Primary vẫn quyết định write availability; chưa có Patroni/DCS/fencing hoặc automatic promotion. Một Docker host là failure domain chung.
+
+## ADR-012 — Debezium raw-table CDC song song với custom outbox
+
+**Trạng thái:** đã áp dụng.
+
+**Quyết định:** một Connect worker, bốn PostgreSQL connectors/slots/publications; snapshot initial, pgoutput, bảng chính REPLICA IDENTITY FULL. CDC topics tách domain topics; outbox/ledger loại khỏi capture. Init jobs tự tạo/verify; internal topics RF3 và compaction.
+
+**Hệ quả:** thấy được c/u/d/r và full before image, đổi lại tăng WAL, CDC permissions, checkpoint/retention và schema coupling. Không chạy Debezium Outbox Router cùng publisher. Worker down không dừng business transaction, nhưng CDC lag tăng và phải bảo đảm WAL còn. PostgreSQL 16 logical-slot failover không được tự động hóa.
+
+**Xem xét lại khi:** cần Connect worker HA, failover primary tự động, CDC throughput lớn, schema registry hoặc chuyển domain publishing sang Outbox Event Router có kế hoạch.

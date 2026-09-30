@@ -1,0 +1,9 @@
+      slot_name       | active | restart_lsn | confirmed_flush_lsn | retained_bytes 
+----------------------+--------+-------------+---------------------+----------------
+ lab_physical_replica | t      | 0/60E8080   |                     |              0
+ dbz_vehicle          | f      | 0/608D138   | 0/60CDEB0           |         372552
+ dbz_warranty         | f      | 0/608D138   | 0/60D07D8           |         372552
+ dbz_inspection       | f      | 0/608D138   | 0/60D0718           |         372552
+ dbz_repair           | f      | 0/608D138   | 0/60CA3A8           |         372552
+(5 rows)
+

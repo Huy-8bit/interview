@@ -8,6 +8,7 @@ erDiagram
         integer production_year
         varchar owner_name
         varchar status "ACTIVE or INACTIVE"
+        uuid simulation_run_id "Nullable, immutable API marker"
         timestamptz created_at
         timestamptz updated_at
     }

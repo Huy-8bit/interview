@@ -1,0 +1,8 @@
+ClusterId:              q1Sh-9_ISia_zwGINzRvyQ
+LeaderId:               3
+LeaderEpoch:            7
+HighWatermark:          6012
+MaxFollowerLag:         0
+MaxFollowerLagTimeMs:   413
+CurrentVoters:          [{"id": 1, "directoryId": null, "endpoints": ["CONTROLLER://kafka-1:9093"]}, {"id": 2, "directoryId": null, "endpoints": ["CONTROLLER://kafka-2:9093"]}, {"id": 3, "directoryId": null, "endpoints": ["CONTROLLER://kafka-3:9093"]}]
+CurrentObservers:       []

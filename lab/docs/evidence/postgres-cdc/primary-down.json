@@ -1,0 +1,82 @@
+{
+  "replica_read_status": 200,
+  "write_status": 503,
+  "readiness": {
+    "status": "degraded",
+    "checks": {
+      "postgres": "unavailable",
+      "redis": "ok",
+      "kafka": "ok",
+      "workers": "ok"
+    }
+  },
+  "replica": [
+    {
+      "recovery": true,
+      "lsn": 101620224
+    }
+  ],
+  "receiver": [],
+  "connectors": {
+    "vehicle": {
+      "name": "vehicle-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    },
+    "warranty": {
+      "name": "warranty-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    },
+    "inspection": {
+      "name": "inspection-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    },
+    "repair": {
+      "name": "repair-postgres-connector",
+      "connector": {
+        "state": "RUNNING",
+        "worker_id": "debezium-connect:8083"
+      },
+      "tasks": [
+        {
+          "id": 0,
+          "state": "RUNNING",
+          "worker_id": "debezium-connect:8083"
+        }
+      ],
+      "type": "source"
+    }
+  }
+}

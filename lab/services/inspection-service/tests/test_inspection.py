@@ -45,7 +45,8 @@ async def test_concurrent_idempotency_and_redis_eviction(runtime):
     assert len({row["id"] for row in results}) == 1
     keys = [key async for key in runtime.redis.scan_iter(f"idem:{runtime.settings.service_name}:*")]
     if keys:
-        await runtime.redis.delete(*keys)
+        for cache_key in keys:
+            await runtime.redis.delete(cache_key)  # Different slots: no cross-slot multi-key DEL.
     assert await service.create(body, key) == results[0]
     with pytest.raises(DomainError) as error:
         await service.create(body.model_copy(update={"notes": "changed"}), key)

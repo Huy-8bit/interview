@@ -1,0 +1,291 @@
+{
+  "workflow": {
+    "vehicle_id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+    "inspection_id": "4a38ec58-f6a7-443c-b743-dfdcf0f6e46e",
+    "repair_id": "dabf6c43-c2ed-404e-a7ec-d6d186332d95",
+    "cache": "HIT and invalidation verified",
+    "idempotency": "same resource",
+    "notifications": 1
+  },
+  "records": [
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 0,
+      "key": {
+        "id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "vin": "LAB242D12515FBC49",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "Nguyen Van An",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:13.948201Z",
+          "updated_at": "2026-09-30T05:53:13.948217Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790747593960,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"68791080\",\"68791080\"]",
+          "ts_us": 1790747593960199,
+          "ts_ns": 1790747593960199000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 825,
+          "lsn": 68791080,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790747594228,
+        "ts_us": 1790747594228546,
+        "ts_ns": 1790747594228546704
+      }
+    },
+    {
+      "topic": "warranty-cdc.public.warranties",
+      "partition": 1,
+      "offset": 0,
+      "key": {
+        "id": "f7b4f063-efc1-4075-8f94-77e24db5ee84"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "f7b4f063-efc1-4075-8f94-77e24db5ee84",
+          "vehicle_id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "warranty_type": "DEFAULT",
+          "start_date": 20726,
+          "end_date": 21821,
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:14.446185Z",
+          "updated_at": "2026-09-30T05:53:14.446189Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "warranty-cdc",
+          "ts_ms": 1790747594474,
+          "snapshot": "false",
+          "db": "warranty_db",
+          "sequence": "[\"68793608\",\"68795264\"]",
+          "ts_us": 1790747594474024,
+          "ts_ns": 1790747594474024000,
+          "schema": "public",
+          "table": "warranties",
+          "txId": 828,
+          "lsn": 68795264,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790747594998,
+        "ts_us": 1790747594998368,
+        "ts_ns": 1790747594998368866
+      }
+    },
+    {
+      "topic": "inspection-cdc.public.inspections",
+      "partition": 1,
+      "offset": 0,
+      "key": {
+        "id": "4a38ec58-f6a7-443c-b743-dfdcf0f6e46e"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "4a38ec58-f6a7-443c-b743-dfdcf0f6e46e",
+          "vehicle_id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "inspection_type": "DIAGNOSTIC",
+          "status": "PENDING",
+          "result": null,
+          "failure_reason": null,
+          "notes": "Lab inspection",
+          "created_at": "2026-09-30T05:53:14.553317Z",
+          "updated_at": "2026-09-30T05:53:14.553320Z",
+          "completed_at": null
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "inspection-cdc",
+          "ts_ms": 1790747594558,
+          "snapshot": "false",
+          "db": "inspection_db",
+          "sequence": "[\"68790368\",\"68798624\"]",
+          "ts_us": 1790747594558463,
+          "ts_ns": 1790747594558463000,
+          "schema": "public",
+          "table": "inspections",
+          "txId": 830,
+          "lsn": 68798624,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790747595015,
+        "ts_us": 1790747595015810,
+        "ts_ns": 1790747595015810905
+      }
+    },
+    {
+      "topic": "inspection-cdc.public.inspections",
+      "partition": 1,
+      "offset": 1,
+      "key": {
+        "id": "4a38ec58-f6a7-443c-b743-dfdcf0f6e46e"
+      },
+      "value": {
+        "before": {
+          "id": "4a38ec58-f6a7-443c-b743-dfdcf0f6e46e",
+          "vehicle_id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "inspection_type": "DIAGNOSTIC",
+          "status": "PENDING",
+          "result": null,
+          "failure_reason": null,
+          "notes": "Lab inspection",
+          "created_at": "2026-09-30T05:53:14.553317Z",
+          "updated_at": "2026-09-30T05:53:14.553320Z",
+          "completed_at": null
+        },
+        "after": {
+          "id": "4a38ec58-f6a7-443c-b743-dfdcf0f6e46e",
+          "vehicle_id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "inspection_type": "DIAGNOSTIC",
+          "status": "COMPLETED",
+          "result": "FAIL",
+          "failure_reason": "High voltage battery coolant leak",
+          "notes": "Lab inspection",
+          "created_at": "2026-09-30T05:53:14.553317Z",
+          "updated_at": "2026-09-30T05:53:14.583273Z",
+          "completed_at": "2026-09-30T05:53:14.582233Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "inspection-cdc",
+          "ts_ms": 1790747594586,
+          "snapshot": "false",
+          "db": "inspection_db",
+          "sequence": "[\"68799736\",\"68799792\"]",
+          "ts_us": 1790747594586473,
+          "ts_ns": 1790747594586473000,
+          "schema": "public",
+          "table": "inspections",
+          "txId": 831,
+          "lsn": 68799792,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790747595018,
+        "ts_us": 1790747595018202,
+        "ts_ns": 1790747595018202474
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 1,
+      "key": {
+        "id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57"
+      },
+      "value": {
+        "before": {
+          "id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "vin": "LAB242D12515FBC49",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "Nguyen Van An",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:13.948201Z",
+          "updated_at": "2026-09-30T05:53:13.948217Z"
+        },
+        "after": {
+          "id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "vin": "LAB242D12515FBC49",
+          "model": "EV-Lab",
+          "manufacturer": "Learning Motors",
+          "production_year": 2026,
+          "owner_name": "Cluster verified",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T05:53:13.948201Z",
+          "updated_at": "2026-09-30T05:53:15.245540Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790747595250,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"68793360\",\"68807464\"]",
+          "ts_us": 1790747595250561,
+          "ts_ns": 1790747595250561000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 836,
+          "lsn": 68807464,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790747595257,
+        "ts_us": 1790747595257829,
+        "ts_ns": 1790747595257829092
+      }
+    },
+    {
+      "topic": "repair-cdc.public.repair_requests",
+      "partition": 0,
+      "offset": 0,
+      "key": {
+        "id": "dabf6c43-c2ed-404e-a7ec-d6d186332d95"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "dabf6c43-c2ed-404e-a7ec-d6d186332d95",
+          "vehicle_id": "cd68b67a-8b1e-4d78-b0df-b299fb57ff57",
+          "inspection_id": "4a38ec58-f6a7-443c-b743-dfdcf0f6e46e",
+          "warranty_covered": true,
+          "status": "OPEN",
+          "description": "High voltage battery coolant leak",
+          "created_at": "2026-09-30T05:53:15.174089Z",
+          "updated_at": "2026-09-30T05:53:15.174090Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "repair-cdc",
+          "ts_ms": 1790747595182,
+          "snapshot": "false",
+          "db": "repair_db",
+          "sequence": "[\"68790792\",\"68804408\"]",
+          "ts_us": 1790747595182795,
+          "ts_ns": 1790747595182795000,
+          "schema": "public",
+          "table": "repair_requests",
+          "txId": 835,
+          "lsn": 68804408,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790747595638,
+        "ts_us": 1790747595638686,
+        "ts_ns": 1790747595638686416
+      }
+    }
+  ]
+}

@@ -20,4 +20,5 @@ class Vehicle(Timestamps, Base):
     manufacturer: Mapped[str] = mapped_column(String(100))
     production_year: Mapped[int]
     owner_name: Mapped[str] = mapped_column(String(200))
+    simulation_run_id: Mapped[UUID | None] = mapped_column(nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="ACTIVE")

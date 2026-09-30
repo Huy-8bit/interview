@@ -1,0 +1,61 @@
+ Image vehicle-platform-lab-toolbox Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 560B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile.tools
+#2 transferring dockerfile: 512B 0.0s done
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 115B done
+#4 DONE 0.0s
+
+#5 [1/9] FROM docker.io/library/python:3.12-slim
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 147.12kB 0.0s done
+#6 DONE 0.0s
+
+#7 [3/9] COPY requirements.txt requirements.lock ./
+#7 CACHED
+
+#8 [4/9] RUN pip install --no-cache-dir -r requirements.txt -c requirements.lock && useradd --create-home lab
+#8 CACHED
+
+#9 [2/9] WORKDIR /opt/lab
+#9 CACHED
+
+#10 [5/9] COPY common /opt/common
+#10 CACHED
+
+#11 [6/9] COPY scripts /opt/lab/scripts
+#11 DONE 0.4s
+
+#12 [7/9] COPY tests /opt/lab/tests
+#12 DONE 1.3s
+
+#13 [8/9] COPY traffic_generator /opt/lab/traffic_generator
+#13 DONE 0.6s
+
+#14 [9/9] COPY pyproject.toml /opt/lab/
+#14 DONE 0.1s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 0.1s done
+#15 writing image sha256:c72ef02c200ecc8c0472accc812c6ffbd6a77fb350b97d4ab2764f98ba3a180d done
+#15 naming to docker.io/library/vehicle-platform-lab-toolbox done
+#15 DONE 0.1s
+
+#16 resolving provenance for metadata file
+#16 DONE 0.0s
+ Image vehicle-platform-lab-toolbox Built 
+ Container vehicle-platform-lab-toolbox-run-f550711a7106 Creating 
+ Container vehicle-platform-lab-toolbox-run-f550711a7106 Created 
+..........                                                               [100%]
+10 passed in 0.16s

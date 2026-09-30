@@ -6,6 +6,7 @@ RUN pip install --no-cache-dir -r requirements.txt -c requirements.lock && usera
 COPY common /opt/common
 COPY scripts /opt/lab/scripts
 COPY tests /opt/lab/tests
+COPY traffic_generator /opt/lab/traffic_generator
 COPY pyproject.toml /opt/lab/
 USER lab
 CMD ["python", "scripts/demo.py"]

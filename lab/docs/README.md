@@ -9,6 +9,11 @@ Bộ tài liệu này giải thích **hệ thống đang chạy trong repository
 | Tài liệu | Nội dung | Khi nào cần đọc |
 |---|---|---|
 | [System Design](SYSTEM_DESIGN.md) | Yêu cầu, ranh giới service, high-level/low-level design, deployment, capacity, security và hướng production | Muốn hiểu thiết kế tổng thể và lý do lựa chọn |
+| [Cluster Infrastructure](CLUSTER_INFRASTRUCTURE.md) | Kafka 3 brokers, Redis 3M+3R, quorum/slots, failover, consumer scale và command thực hành | Học replication/HA và test node failure |
+| [PostgreSQL & CDC](POSTGRESQL_CDC.md) | Primary/replica, WAL, read routing, Debezium, CDC vs domain events và 8 bài thử lỗi | Học database replication và CDC thật |
+| [PostgreSQL & CDC Validation](POSTGRESQL_CDC_VALIDATION.md) | Kết quả streaming replication, CRUD CDC, outage/recovery và khởi động mới | Xem bằng chứng phiên bản hiện tại |
+| [Traffic Generator](TRAFFIC_GENERATOR.md) | REST-only worker, virtual users, retry, duplicate/CDC/cache/replica observation và live guide | Tạo traffic tự động và quan sát xuyên hệ thống |
+| [Traffic Validation](TRAFFIC_VALIDATION.md) | PASS/FAIL scenarios, CDC bằng REST và năm dependency outage | Xem bằng chứng của generator |
 | [Data Model](DATA_MODEL.md) | ERD, dictionary dữ liệu, constraint/index, state machine, migration và retention | Thiết kế/chỉnh schema hoặc tìm invariant nghiệp vụ |
 | [API Contracts](API_CONTRACTS.md) | Toàn bộ endpoint nghiệp vụ, input/output, validation, error và retry contract | Viết client hoặc sửa API |
 | [Event Contracts](EVENT_CONTRACTS.md) | 8 event types, envelope, topics/groups, payload, ordering và versioning | Viết consumer hoặc điều tra event |
@@ -17,6 +22,7 @@ Bộ tài liệu này giải thích **hệ thống đang chạy trong repository
 | [Operations Runbook](OPERATIONS.md) | Chạy hệ thống, health/log/SQL/Kafka, xử lý 12 failure scenarios, DLQ replay và phục hồi | Thực hành vận hành, quan sát và debug |
 | [Development Guide](DEVELOPMENT.md) | Bản đồ code, thêm feature/event, migration, kiểm thử và cập nhật diagram | Phát triển tiếp bài lab |
 | [Architecture Decisions](ARCHITECTURE_DECISIONS.md) | Các quyết định đã áp dụng, phương án thay thế, hệ quả và điều kiện xem xét lại | Review thiết kế hoặc đánh giá trade-off |
+| [Cluster Validation](CLUSTER_VALIDATION.md) | Kết quả kiểm chứng 3 Kafka brokers, 6 Redis nodes, node failure, outage và rebalance | Xem bằng chứng infrastructure hiện tại |
 | [Validation Report](VALIDATION.md) | Kết quả chạy thực tế trước đó, phạm vi đã kiểm chứng và giới hạn | Phân biệt bằng chứng chạy với mục tiêu thiết kế |
 | [Diagram Gallery](diagrams/README.md) | Tất cả sơ đồ SVG và source Mermaid | Xem riêng, phóng to hoặc đưa vào tài liệu khác |
 

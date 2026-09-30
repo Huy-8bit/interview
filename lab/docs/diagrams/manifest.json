@@ -1,5 +1,33 @@
 [
   {
+    "id": "clustered-infrastructure",
+    "document": "CLUSTER_INFRASTRUCTURE.md",
+    "heading": "1. Topology đang triển khai",
+    "source_sha256": "ba3aaa2db30fb76957592776ef8b394c354714e1bfe6643111079c4861bb233a",
+    "svg_sha256": "ee14cae0d15b26f5a4382794a788192cec2dabe79abc5e6320a4883ef7d9de1a"
+  },
+  {
+    "id": "kafka-leader-failover",
+    "document": "CLUSTER_INFRASTRUCTURE.md",
+    "heading": "2. Kafka KRaft, replication và quorum",
+    "source_sha256": "ffaaab863268f3c6c14e63150a871f0ed20e3a4f39b5b2eac2ef9a3edbf2144d",
+    "svg_sha256": "c5fc1cd01bcaec590a90ccd501cd3e79732f345184698908804853f9b66b08d1"
+  },
+  {
+    "id": "consumer-partition-rebalance",
+    "document": "CLUSTER_INFRASTRUCTURE.md",
+    "heading": "Producer và consumer",
+    "source_sha256": "faadaba10e763d98d05871293f21037522d2e456d03abfd427828bffd5a0ea11",
+    "svg_sha256": "fa27e28b800fe740d4c77b2b350c53ab7d18de4ef5b03da8b8103d0d85747087"
+  },
+  {
+    "id": "redis-master-failover",
+    "document": "CLUSTER_INFRASTRUCTURE.md",
+    "heading": "Failover và correctness",
+    "source_sha256": "ffd19e7694cfcbbb6f38126a70ff97d4b9f0a3e8597a193683e21cb116e16f0b",
+    "svg_sha256": "fb1108a1ac2d0a94d0ceaeb9ab95055ba62c3b45f3ae3c521e09e2f047d3a6a3"
+  },
+  {
     "id": "outbox-reliability",
     "document": "CONSISTENCY_AND_FAILURES.md",
     "heading": "2. Transactional outbox và các cửa sổ crash",
@@ -31,8 +59,8 @@
     "id": "vehicle-erd",
     "document": "DATA_MODEL.md",
     "heading": "2. Vehicle database",
-    "source_sha256": "1406700c934237d59abbb2b0a7f5d911d70859027ec9c83f2e7ffd88473c66a9",
-    "svg_sha256": "f026f39dedb141bb4184eeb583a2573a4068eab6f56d540d59292d9c7c4bc39c"
+    "source_sha256": "2ad7c0b6b29400334616591175e868073d402a769314ec25c1c6576cdc05f629",
+    "svg_sha256": "44990ba8bcd754e00b134a43e4769b9b4c701fc946739a67742262430d7460d3"
   },
   {
     "id": "warranty-erd",
@@ -98,6 +126,34 @@
     "svg_sha256": "257536128b6b7695678be8e18a4dc34ac16f185c867917661524e40d744e228a"
   },
   {
+    "id": "postgres-cdc-infrastructure",
+    "document": "POSTGRESQL_CDC.md",
+    "heading": "1. Thiết kế đang chạy",
+    "source_sha256": "5f1bd95a61f841abf7106525383c4d32c037643f77d7ca0e34105e1fdd567e3c",
+    "svg_sha256": "48a12cb56e9b33cee1e22cde906636857e7ffcd07d1ca0593f6d616d9b95b4b9"
+  },
+  {
+    "id": "postgres-replica-lag",
+    "document": "POSTGRESQL_CDC.md",
+    "heading": "Thay bằng ID trả về từ POST /vehicles",
+    "source_sha256": "9dc0d956160d3ddc4b1ab9a13afcd0af0ee5c6ceccd2b248b6ba4bdf284f539f",
+    "svg_sha256": "5bd74adf3cd68ab4b25222469500bf1f054aa90d3959ed8233a190a64faad26b"
+  },
+  {
+    "id": "debezium-snapshot-recovery",
+    "document": "POSTGRESQL_CDC.md",
+    "heading": "6. Initial snapshot và continuous CDC",
+    "source_sha256": "0d0d30991771d8436e120e5c2af97eab20446977fc56fa85ecbbb5a37c092cd0",
+    "svg_sha256": "6fcdda19e7c310a169b9a5d8984153557939515cadc90df1ceb6d2db995efb54"
+  },
+  {
+    "id": "outbox-and-cdc",
+    "document": "POSTGRESQL_CDC.md",
+    "heading": "8. Hai đường phát sự kiện độc lập",
+    "source_sha256": "28be2b77f94cc2fb8aa81a7b53135e8d2e9642121c101f6ab050c753fbe6b490",
+    "svg_sha256": "8f5cede9154ad95cfd7507e8bbe1cc756a41caeade0e4823b563a1cfebb1d658"
+  },
+  {
     "id": "vehicle-creation-sequence",
     "document": "REQUEST_FLOWS.md",
     "heading": "1. Tạo vehicle → default warranty → projection",
@@ -150,8 +206,8 @@
     "id": "system-containers",
     "document": "SYSTEM_DESIGN.md",
     "heading": "3. High-level design",
-    "source_sha256": "e557f9c76dbe43c2e9170dc23dfe9f6bb5eb673f2a31720d51df69d4351f1eab",
-    "svg_sha256": "0cd13dbed49d503928f40cb9782c2eba6f2cc350333ca3515fc8e16af860e335"
+    "source_sha256": "2421421d3ae26e308e64540557d3c1ba36325529be041f7b3459f5fdd4044de1",
+    "svg_sha256": "7b2e90b1c3794133b9f47a623ea3f970e3b859110589ccca22a00fe2c9519ddc"
   },
   {
     "id": "service-components",
@@ -164,8 +220,8 @@
     "id": "startup-dependencies",
     "document": "SYSTEM_DESIGN.md",
     "heading": "6. Deployment và lifecycle",
-    "source_sha256": "4fa27e0e71db1f7a992a4bee772fbbbd52005289f2f36a542d6724d3b7e5c376",
-    "svg_sha256": "7654893ffa78e7614fc3dcd47bb4b565cad8100841a2ab830f4edd6d162080e6"
+    "source_sha256": "15817a9dd98b8c2feebc6d76f1b5613712bfceae4d8567e992873082066fa2f0",
+    "svg_sha256": "374a7b96a1079c7ef8b1127790897c297f0178f789e4affbe933a90a07f60f0d"
   },
   {
     "id": "production-target",
@@ -173,5 +229,26 @@
     "heading": "9. Hướng production — chưa triển khai",
     "source_sha256": "1cbc42b8706ff713dbc8a4b63982a277cdb48592179472dfb7a1d65ef3c9b3a5",
     "svg_sha256": "88cc10ceb57e6d388ebaa461d57465e17246dda5c7d5ab26ca6ee91f681e878e"
+  },
+  {
+    "id": "traffic-architecture",
+    "document": "TRAFFIC_GENERATOR.md",
+    "heading": "1. Mục tiêu và ranh giới",
+    "source_sha256": "625e0b45a6611c2f093e43273914896c3f177e8f20919e5cf934e0fe1e9668f1",
+    "svg_sha256": "259491dcaa180987aaebe2503967e9b617e8ef708ed58bda7ffdfd7dc13d1493"
+  },
+  {
+    "id": "traffic-lifecycle",
+    "document": "TRAFFIC_GENERATOR.md",
+    "heading": "2. Một lifecycle",
+    "source_sha256": "726a7a6259b75a0f2658b496bb38c3939e49195d8d72a692463853031a7160f2",
+    "svg_sha256": "45457526538a371fb830ddec996906357a1d9db0118773f57c44ccb6401c2aae"
+  },
+  {
+    "id": "traffic-retry",
+    "document": "TRAFFIC_GENERATOR.md",
+    "heading": "3. Retry, idempotency và timeout",
+    "source_sha256": "6dbba3503883f47df5c21525376960919ed3ea19cd5bfbfb21108bb451e5a854",
+    "svg_sha256": "601778fad2535ef88e4e79be4f581bab4690356e492f0718825c8231208e9dab"
   }
 ]

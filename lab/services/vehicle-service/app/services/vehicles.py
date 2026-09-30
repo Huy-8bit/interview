@@ -3,7 +3,9 @@ import logging
 from app.models.vehicle import Vehicle
 from app.repositories import vehicles as repository
 from app.schemas.vehicle import VehicleRead
+from platform_common.errors import DomainError
 from platform_common.events import enqueue
+from platform_common.redis import vehicle_cache_key
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ class VehicleService:
         return result
 
     async def get(self, vehicle_id):
-        key = f"vehicle:{vehicle_id}"
+        key = vehicle_cache_key(vehicle_id)
         cached, generation = await self.runtime.cache.cache_read(key)
         if cached:
             log.info("vehicle_cache_hit")
@@ -42,12 +44,27 @@ class VehicleService:
             await session.flush()
             result = VehicleRead.model_validate(vehicle).model_dump(mode="json")
             enqueue(session, self.runtime.settings, "vehicle.updated", vehicle.id, result)
-        await self.runtime.cache.invalidate(f"vehicle:{vehicle_id}")
+        await self.runtime.cache.invalidate(vehicle_cache_key(vehicle_id))
         return result
 
-    async def list(self, limit, offset):
+    async def get_eventual(self, vehicle_id):
+        async def read(session):
+            vehicle = await repository.get(session, vehicle_id)
+            return VehicleRead.model_validate(vehicle).model_dump(mode="json")
+
+        return await self.runtime.read(read)
+
+    async def delete_simulation(self, vehicle_id, run_id):
+        async with self.runtime.sessions.begin() as session:
+            vehicle = await repository.get(session, vehicle_id, lock=True)
+            if vehicle.simulation_run_id != run_id or not vehicle.vin.startswith("TRF"):
+                raise DomainError(403, "simulation_delete_forbidden", "Only this simulation run's vehicles can be deleted")
+            await session.delete(vehicle)
+        await self.runtime.cache.invalidate(vehicle_cache_key(vehicle_id))
+
+    async def list(self, limit, offset, vin=None):
         async with self.runtime.sessions() as session:
             return [
                 VehicleRead.model_validate(v)
-                for v in await repository.list_page(session, limit, offset)
+                for v in await repository.list_page(session, limit, offset, vin)
             ]

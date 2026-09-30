@@ -4,7 +4,7 @@
 
 ## 1. Bài toán và phạm vi
 
-Vehicle Service & Warranty Platform mô phỏng một nền tảng đăng ký xe, quản lý bảo hành, kiểm định và tạo yêu cầu sửa chữa. Thiết kế có **đúng bốn application nghiệp vụ**, mỗi application sở hữu database của mình. PostgreSQL, Redis, Kafka, Kafka UI và init/toolbox là hạ tầng hoặc công cụ.
+Vehicle Service & Warranty Platform mô phỏng một nền tảng đăng ký xe, quản lý bảo hành, kiểm định và tạo yêu cầu sửa chữa. Thiết kế có **đúng bốn application nghiệp vụ**, mỗi application sở hữu database của mình. PostgreSQL primary/replica, Debezium Connect, Redis, Kafka, Kafka UI và init/toolbox là hạ tầng hoặc công cụ. `traffic-generator` là worker client REST riêng, mặc định tự sinh workload cho bốn application; không sở hữu nghiệp vụ hay database.
 
 | Actor | Nhu cầu | Đường vào hiện tại |
 |---|---|---|
@@ -64,28 +64,38 @@ Không có service đọc trực tiếp DB của service khác. Inspection chỉ
 ```mermaid
 flowchart TB
     %% diagram: system-containers
-    client["Client / CLI"]
+    client["Client / CLI / Traffic Generator"]
     subgraph apps["4 FastAPI services"]
         vehicle["Vehicle :8001"]
         warranty["Warranty :8002"]
         inspection["Inspection :8003"]
-        repair["Repair :8004"]
+        repair["Repair :8004-8006"]
     end
     client --> vehicle
     client --> warranty
     client --> inspection
     client --> repair
-    vehicle --> vehicleDb[("vehicle_db")]
-    warranty --> warrantyDb[("warranty_db")]
-    inspection --> inspectionDb[("inspection_db")]
-    repair --> repairDb[("repair_db")]
-    apps <-->|"Cache / idempotency / locks"| redis[("Redis")]
-    apps <-->|"Outbox / consumers"| kafka["Kafka KRaft"]
+    subgraph primary["PostgreSQL primary"]
+        vehicleDb[("vehicle_db")]
+        warrantyDb[("warranty_db")]
+        inspectionDb[("inspection_db")]
+        repairDb[("repair_db")]
+    end
+    vehicle --> vehicleDb
+    warranty --> warrantyDb
+    inspection --> inspectionDb
+    repair --> repairDb
+    primary -->|"Physical WAL"| replica[("PostgreSQL replica")]
+    vehicle -->|"Opt-in eventual read"| replica
+    primary -->|"Logical WAL"| debezium["Debezium - 4 connectors"]
+    debezium -->|"CDC topics"| kafka
+    apps <-->|"Cache / idempotency / locks"| redis[("Redis Cluster - 3M + 3R")]
+    apps <-->|"Outbox / consumers"| kafka["Kafka KRaft - 3 brokers"]
 ```
 
 [Xem sơ đồ SVG](diagrams/system-containers.svg)
 
-Ports trên sơ đồ là host ports; bên trong container cả bốn application nghe port 8000. Các database nằm trên cùng một PostgreSQL instance nhưng có role/CONNECT permission riêng. Redis là một instance dùng key namespace. Kafka là một broker/controller KRaft kết hợp, ba partition/topic.
+Ports trên sơ đồ là host ports; bên trong container cả bốn application nghe port 8000. Các database nằm trên PostgreSQL primary, có role/CONNECT permission riêng, và được physical streaming replication sang hot standby. [PostgreSQL & CDC](POSTGRESQL_CDC.md) mô tả read routing, WAL, Debezium và giới hạn failover. Redis Cluster có sáu node (3 master + 3 replica), 16.384 slots và key namespace. Kafka có ba broker/controller KRaft kết hợp, ít nhất ba partition/topic, RF=3 và min ISR=2.
 
 Mũi tên nối vào khung application gom các kết nối hạ tầng để sơ đồ gọn hơn. Vehicle dùng Redis cache; Warranty dùng lock; Inspection dùng idempotency; Repair dùng idempotency và lock. [Event topology](EVENT_CONTRACTS.md#1-topology-và-subscriptions) tách riêng từng topic và subscription. Kết nối REST từ Repair sang Warranty được trình bày trong bảng dưới và [sequence FAIL → repair](REQUEST_FLOWS.md#2-complete-fail--coverage-rest--repair-và-notification).
 
@@ -132,12 +142,12 @@ Sơ đồ thể hiện các vai trò; một số handler như Inspection project
 | Thành phần | Trách nhiệm | Source |
 |---|---|---|
 | App factory / middleware | Lifespan, error mapping, request context, health | [api.py](../common/platform_common/api.py) |
-| Runtime | Một engine/session factory, Redis client, HTTP pool, Kafka publisher và tasks/process | [runtime.py](../common/platform_common/runtime.py) |
+| Runtime | Hai engine/session factories cho primary/replica, Redis client, HTTP pool, Kafka publisher và tasks/process | [runtime.py](../common/platform_common/runtime.py) |
 | Router/schema | HTTP contract, validation, dependency injection | `services/*/app/api`, `services/*/app/schemas` |
 | Business/repository | State transition, transaction, row lookup/lock | `services/*/app/services`, `services/*/app/repositories` |
 | Messaging | Envelope, outbox, retries và consumer ledger | [events.py](../common/platform_common/events.py), [consumer.py](../common/platform_common/consumer.py) |
 
-Mỗi container chạy một uvicorn process. API và tasks asyncio chia sẻ pool nhưng không chia sẻ một `AsyncSession` giữa task. Vehicle có outbox task; ba service còn lại thêm consumer; Warranty thêm expiry task. Không có cron container hay worker application thứ năm.
+Mỗi container chạy một uvicorn process. API và tasks asyncio chia sẻ pool nhưng không chia sẻ một `AsyncSession` giữa task. Vehicle có outbox task; ba service còn lại thêm consumer; Warranty thêm expiry task. Traffic Generator là process độc lập chạy virtual users bằng HTTPX; các domain background tasks vẫn nằm trong bốn FastAPI process. Xem [thiết kế generator](TRAFFIC_GENERATOR.md).
 
 ## 5. Consistency contract
 
@@ -160,15 +170,23 @@ flowchart LR
     %% diagram: startup-dependencies
     postgres["PostgreSQL starts"] --> dbInit["Create 4 DBs and roles on empty volume"]
     dbInit --> pgReady["PostgreSQL healthy"]
-    redis["Redis starts"] --> redisReady["Redis healthy"]
-    kafka["Kafka KRaft starts"] --> brokerReady["Broker healthy"]
-    brokerReady --> topicInit["kafka-init creates 8 topics"]
-    pgReady --> appStart["Start each application"]
+    redis["6 Redis nodes start"] --> redisReady["Cluster init - slots and replicas ready"]
+    kafka["3 Kafka KRaft nodes start"] --> brokerReady["Broker healthy"]
+    brokerReady --> topicInit["kafka-init: domain, CDC and Connect topics"]
+    pgReady --> replicationInit["postgres-init: replication and reader roles"]
+    replicationInit --> replica["Replica pg_basebackup and WAL streaming"]
+    replicationInit --> appStart["Start each application"]
     redisReady --> appStart
     topicInit --> appStart
     appStart --> migration["Alembic under DB advisory lock"]
     migration --> api["Uvicorn and lifespan workers"]
     api --> readiness["Ready checks DB / Redis / Kafka / tasks"]
+    readiness --> cdcInit["cdc-db-init: publications and grants"]
+    topicInit --> connect["Debezium Connect healthy"]
+    cdcInit --> register["debezium-init: 4 connectors RUNNING"]
+    connect --> register
+    register --> traffic["Traffic Generator - continuous REST workload"]
+    readiness --> traffic
 ```
 
 [Xem sơ đồ SVG](diagrams/startup-dependencies.svg)
@@ -181,7 +199,7 @@ Shutdown cancel/await tasks rồi đóng producer, HTTP client, Redis và engine
 
 ## 7. Capacity model và scaling
 
-**Đây là cách ước tính, chưa phải benchmark.** Không suy ra production TPS từ việc 24 tests pass.
+**Đây là cách ước tính, chưa phải benchmark.** Không suy ra production TPS từ số lượng tests pass.
 
 ### Connection budget
 
@@ -189,10 +207,17 @@ Với `R_s` replica của service `s`, upper bound pool ứng dụng theo cấu 
 
 ```text
 C_app_max = Σ R_s × (DB_POOL_SIZE_s + DB_MAX_OVERFLOW_s)
-Default: 4 × (5 + 5) = 40 connections
+Writer pools: 4 × (5 + 5) = 40 connections on primary
+Reader pools: up to another 40 on replica if all services start using reads
 ```
 
 Cộng thêm connection của migrations, operator, toolbox và monitoring; chừa headroom cho PostgreSQL. Pool không mở sẵn toàn bộ 40 connection. Tăng replica để xử lý lag cũng tăng áp lực DB và HTTP upstream.
+
+Khi scale riêng Repair lên ba instance, tổng process tăng từ bốn lên sáu: writer pool budget thành `6 × 10 = 60` (reader pools có budget riêng tương tự), chưa gồm công cụ kiểm thử/vận hành. [Cluster Infrastructure](CLUSTER_INFRASTRUCTURE.md) mô tả topology, port range và cách quan sát assignment khi scale.
+
+### Client workload
+
+Traffic Generator mặc định năm virtual users; mỗi user chạy một lifecycle rồi nghỉ 2s. Đây là closed-loop workload: dependency chậm làm giảm số flow/giây, không tạo task vô hạn. Rate 5% duplicate/5% invalid PATCH/30% FAIL/1% DELETE là xác suất theo flow. Summary chỉ đo HTTP attempts của worker; cần đo riêng event latency/consumer lag trước khi kết luận capacity. Dữ liệu và ledgers tăng liên tục, không có retention job.
 
 ### Consumer throughput
 
@@ -217,7 +242,7 @@ Xóa processed ledger quá sớm rồi replay Kafka có thể chạy lại nghi�
 
 ## 8. Availability, security và quan sát
 
-Hiện tại một PostgreSQL instance, một Kafka broker và một Redis là các điểm lỗi đơn. Redis outage có fallback DB; PostgreSQL outage ảnh hưởng writes và consumers; Kafka outage giữ write intent trong outbox; Warranty outage chặn tạo repair mới chưa có sẵn.
+Kafka và Redis chịu được một node failure khi quorum/replica còn đủ. PostgreSQL có hot standby nhưng chưa có failover manager: primary vẫn là điểm lỗi đối với writes, còn eventual reads có thể dùng replica. Docker host vẫn là failure domain chung. Redis outage có fallback DB; PostgreSQL outage ảnh hưởng writes và consumers; Kafka outage giữ write intent trong outbox; Warranty outage chặn tạo repair mới chưa có sẵn.
 
 `/ready` là readiness tổng hợp theo policy thận trọng: Redis/Kafka lỗi vẫn trả 503 dù một số endpoint có thể chạy bằng fallback. Task chưa kết thúc không có nghĩa task đang có tiến triển. Health endpoints chưa kiểm consumer lag, oldest outbox age, DLQ backlog hay schema compatibility.
 
@@ -247,7 +272,7 @@ Tách deployment API/worker vẫn giữ bốn domain service; implementation hi�
 | Ưu tiên | Thay đổi đề xuất | Bằng chứng cần có trước rollout |
 |---|---|---|
 | Correctness | Tenant/user scope, authorization, xác thực manual repair reference | Test quyền, cross-tenant isolation, migration strategy |
-| Reliability | HA DB/Kafka, backup/PITR, replay policy, retry jitter và circuit breaker | Failover/restore drill, không mất committed intent |
+| Reliability | HA PostgreSQL, Kafka/Redis trên nhiều host/AZ, backup/PITR, replay policy, retry jitter và circuit breaker | Host/storage failure và restore drills ngoài node-failure drills hiện có |
 | Observability | Metrics outbox age, lag, DLQ, pool waits; tracing propagation | Dashboard và alert gắn với user impact |
 | Performance | Load test, query plan, cursor pagination, worker isolation | p95/p99 và throughput theo workload đo thật |
 | Operations | Secrets/TLS/CVE scanning, migrations job, schema compatibility | Rotation/rollback drill, compatible deploy trước/sau |

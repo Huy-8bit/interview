@@ -33,3 +33,17 @@ def test_event_version_is_explicitly_validated():
     assert Event(**data).event_version == "1.0"
     with pytest.raises(ValidationError):
         Event(**data, event_version="2.0")
+
+
+def test_vehicle_cache_and_generation_share_cluster_slot_without_global_hotspot():
+    from redis.cluster import key_slot
+
+    from platform_common.redis import vehicle_cache_key
+
+    slots = set()
+    for _ in range(30):
+        key = vehicle_cache_key(uuid4())
+        slot = key_slot(key.encode())
+        assert slot == key_slot((key + ":generation").encode())
+        slots.add(slot)
+    assert len(slots) > 1

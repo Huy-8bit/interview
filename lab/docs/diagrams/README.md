@@ -6,6 +6,10 @@ Chạy `make docs-render` để cập nhật; file này được tạo tự đ�
 
 | Sơ đồ | Tài liệu | SVG | Mermaid source |
 |---|---|---|---|
+| 1. Topology đang triển khai | [CLUSTER_INFRASTRUCTURE.md](../CLUSTER_INFRASTRUCTURE.md) | [Xem SVG](clustered-infrastructure.svg) | [Source](sources/clustered-infrastructure.mmd) |
+| 2. Kafka KRaft, replication và quorum | [CLUSTER_INFRASTRUCTURE.md](../CLUSTER_INFRASTRUCTURE.md) | [Xem SVG](kafka-leader-failover.svg) | [Source](sources/kafka-leader-failover.mmd) |
+| Producer và consumer | [CLUSTER_INFRASTRUCTURE.md](../CLUSTER_INFRASTRUCTURE.md) | [Xem SVG](consumer-partition-rebalance.svg) | [Source](sources/consumer-partition-rebalance.mmd) |
+| Failover và correctness | [CLUSTER_INFRASTRUCTURE.md](../CLUSTER_INFRASTRUCTURE.md) | [Xem SVG](redis-master-failover.svg) | [Source](sources/redis-master-failover.mmd) |
 | 2. Transactional outbox và các cửa sổ crash | [CONSISTENCY_AND_FAILURES.md](../CONSISTENCY_AND_FAILURES.md) | [Xem SVG](outbox-reliability.svg) | [Source](sources/outbox-reliability.mmd) |
 | 3. Idempotent consumer và offset discipline | [CONSISTENCY_AND_FAILURES.md](../CONSISTENCY_AND_FAILURES.md) | [Xem SVG](consumer-processing.svg) | [Source](sources/consumer-processing.mmd) |
 | 9. Recovery khác compensation | [CONSISTENCY_AND_FAILURES.md](../CONSISTENCY_AND_FAILURES.md) | [Xem SVG](recovery-strategy.svg) | [Source](sources/recovery-strategy.mmd) |
@@ -20,6 +24,10 @@ Chạy `make docs-render` để cập nhật; file này được tạo tự đ�
 | 6. Infrastructure tables trong từng database | [DATA_MODEL.md](../DATA_MODEL.md) | [Xem SVG](messaging-tables-erd.svg) | [Source](sources/messaging-tables-erd.mmd) |
 | 1. Topology và subscriptions | [EVENT_CONTRACTS.md](../EVENT_CONTRACTS.md) | [Xem SVG](event-topology.svg) | [Source](sources/event-topology.mmd) |
 | 4. Quy trình điều tra một inspection FAIL chưa có repair | [OPERATIONS.md](../OPERATIONS.md) | [Xem SVG](incident-triage.svg) | [Source](sources/incident-triage.mmd) |
+| 1. Thiết kế đang chạy | [POSTGRESQL_CDC.md](../POSTGRESQL_CDC.md) | [Xem SVG](postgres-cdc-infrastructure.svg) | [Source](sources/postgres-cdc-infrastructure.mmd) |
+| Thay bằng ID trả về từ POST /vehicles | [POSTGRESQL_CDC.md](../POSTGRESQL_CDC.md) | [Xem SVG](postgres-replica-lag.svg) | [Source](sources/postgres-replica-lag.mmd) |
+| 6. Initial snapshot và continuous CDC | [POSTGRESQL_CDC.md](../POSTGRESQL_CDC.md) | [Xem SVG](debezium-snapshot-recovery.svg) | [Source](sources/debezium-snapshot-recovery.mmd) |
+| 8. Hai đường phát sự kiện độc lập | [POSTGRESQL_CDC.md](../POSTGRESQL_CDC.md) | [Xem SVG](outbox-and-cdc.svg) | [Source](sources/outbox-and-cdc.mmd) |
 | 1. Tạo vehicle → default warranty → projection | [REQUEST_FLOWS.md](../REQUEST_FLOWS.md) | [Xem SVG](vehicle-creation-sequence.svg) | [Source](sources/vehicle-creation-sequence.mmd) |
 | 2. Complete FAIL → coverage REST → repair và notification | [REQUEST_FLOWS.md](../REQUEST_FLOWS.md) | [Xem SVG](inspection-repair-sequence.svg) | [Source](sources/inspection-repair-sequence.mmd) |
 | 3. Hai API create request cùng Idempotency-Key | [REQUEST_FLOWS.md](../REQUEST_FLOWS.md) | [Xem SVG](api-idempotency-sequence.svg) | [Source](sources/api-idempotency-sequence.mmd) |
@@ -31,3 +39,6 @@ Chạy `make docs-render` để cập nhật; file này được tạo tự đ�
 | 4. Low-level design trong một application | [SYSTEM_DESIGN.md](../SYSTEM_DESIGN.md) | [Xem SVG](service-components.svg) | [Source](sources/service-components.mmd) |
 | 6. Deployment và lifecycle | [SYSTEM_DESIGN.md](../SYSTEM_DESIGN.md) | [Xem SVG](startup-dependencies.svg) | [Source](sources/startup-dependencies.mmd) |
 | 9. Hướng production — chưa triển khai | [SYSTEM_DESIGN.md](../SYSTEM_DESIGN.md) | [Xem SVG](production-target.svg) | [Source](sources/production-target.mmd) |
+| 1. Mục tiêu và ranh giới | [TRAFFIC_GENERATOR.md](../TRAFFIC_GENERATOR.md) | [Xem SVG](traffic-architecture.svg) | [Source](sources/traffic-architecture.mmd) |
+| 2. Một lifecycle | [TRAFFIC_GENERATOR.md](../TRAFFIC_GENERATOR.md) | [Xem SVG](traffic-lifecycle.svg) | [Source](sources/traffic-lifecycle.mmd) |
+| 3. Retry, idempotency và timeout | [TRAFFIC_GENERATOR.md](../TRAFFIC_GENERATOR.md) | [Xem SVG](traffic-retry.svg) | [Source](sources/traffic-retry.mmd) |

@@ -3,13 +3,15 @@ import logging
 from uuid import uuid4
 
 import httpx
-from redis.asyncio import Redis
+from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 from platform_common.consumer import consumer_loop
 from platform_common.db import database
 from platform_common.kafka import KafkaPublisher
 from platform_common.outbox import outbox_loop
-from platform_common.redis import RedisSupport
+from platform_common.redis import RedisSupport, cluster_client
 
 log = logging.getLogger(__name__)
 
@@ -19,11 +21,11 @@ class Runtime:
         self.instance_id = str(uuid4())
         self.settings = settings
         self.engine, self.sessions = database(settings)
-        self.redis = Redis.from_url(
-            settings.redis_url,
-            decode_responses=True,
-            socket_connect_timeout=settings.redis_timeout,
-            socket_timeout=settings.redis_timeout,
+        self.read_engine, self.read_sessions = database(settings, read=True)
+        self.redis = cluster_client(
+            settings.redis_cluster_nodes,
+            timeout=settings.redis_timeout,
+            client_name=f"{settings.service_name}-{self.instance_id[:8]}",
         )
         self.cache = RedisSupport(self.redis, settings)
         self.publisher = KafkaPublisher(settings)
@@ -37,6 +39,24 @@ class Runtime:
         self.outbox_failures = 0
         self.consumer_delay = 0.0
         self.http_delay = 0.0
+
+    async def read(self, operation):
+        """Only opt-in, side-effect-free reads may retry on the primary.
+
+        A missing row is a valid stale replica result, not a connection failure.
+        Neither the result nor a stale miss is inserted into the primary cache.
+        """
+        async def execute(sessions):
+            async with asyncio.timeout(self.settings.db_read_timeout):
+                async with sessions.begin() as session:
+                    await session.execute(text("SET TRANSACTION READ ONLY"))
+                    return await operation(session)
+
+        try:
+            return await execute(self.read_sessions), "replica"
+        except (DBAPIError, PoolTimeout, OSError, TimeoutError):
+            log.warning("replica_unavailable_read_primary_fallback")
+            return await execute(self.sessions), "primary-fallback"
 
     async def start(self, handlers=None, extra_workers=()):
         if self.settings.background_workers:
@@ -56,3 +76,4 @@ class Runtime:
         await self.http.aclose()
         await self.redis.aclose()
         await self.engine.dispose()
+        await self.read_engine.dispose()

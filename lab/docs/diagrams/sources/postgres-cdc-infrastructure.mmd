@@ -1,0 +1,14 @@
+flowchart TB
+    %% diagram: postgres-cdc-infrastructure
+    client["Client"] --> apps["4 FastAPI services"]
+    apps <-->|"Cache, idempotency, lease"| redis["Redis Cluster - 3M + 3R"]
+    apps -->|"Writes and consistent business reads"| primary[("postgres-primary - 4 owned databases")]
+    apps -->|"Vehicle GET consistency=eventual"| replica[("postgres-replica - hot standby")]
+    primary -->|"Physical streaming replication"| replica
+    primary -->|"Logical WAL - pgoutput - 4 slots"| connect["debezium-connect - 4 PostgreSQL connectors"]
+    apps -->|"Custom outbox publisher"| domain["4 domain topics + 4 DLQ"]
+    connect -->|"Database row changes"| cdc["4 CDC table topics"]
+    domain --> kafka["Kafka KRaft - 3 brokers - RF 3"]
+    cdc --> kafka
+    kafka --> consumers["Domain consumers / CDC probe"]
+    kafka --> ui["Kafka UI :8080"]

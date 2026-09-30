@@ -1,0 +1,435 @@
+{
+  "flow": {
+    "timestamp": "2026-09-30T06:23:18.730984+00:00",
+    "service": "traffic-generator",
+    "action": "flow_completed",
+    "run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c",
+    "flow_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+    "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+    "virtual_user": 1,
+    "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+    "inspection_id": "0713e224-047d-4482-967f-39595cf0057f",
+    "inspection_result": "PASS",
+    "duplicated": true,
+    "deleted": false,
+    "result": "ok"
+  },
+  "summary": {
+    "timestamp": "2026-09-30T06:23:18.731372+00:00",
+    "service": "traffic-generator",
+    "action": "summary_final",
+    "run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c",
+    "heartbeat_unix": 1790749398.7311375,
+    "state": "stopped",
+    "mode": "scenario",
+    "enabled": true,
+    "virtual_users": 5,
+    "counts": {
+      "flows_started": 1,
+      "total_requests": 15,
+      "successful_requests": 14,
+      "created_vehicles": 1,
+      "replica_visible_reads": 4,
+      "cache_miss": 2,
+      "cache_hit": 1,
+      "failed_requests": 1,
+      "expected_error_responses": 1,
+      "injected_errors": 1,
+      "duplicate_requests_verified": 1,
+      "created_inspections": 1,
+      "passed_inspections": 1,
+      "flows_completed": 1
+    },
+    "elapsed_seconds": 1.12,
+    "avg_latency_ms": 7.43,
+    "p95_latency_ms": 24.24,
+    "latency_window_samples": 15,
+    "latency_window_limit": 10000
+  },
+  "request_count": 15,
+  "cache": [
+    {
+      "timestamp": "2026-09-30T06:23:18.684097+00:00",
+      "service": "traffic-generator",
+      "action": "cache_observation",
+      "run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c",
+      "flow_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+      "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+      "virtual_user": 1,
+      "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+      "expected": "MISS",
+      "observed": "MISS",
+      "matched": true,
+      "observation": "cache_first_get"
+    },
+    {
+      "timestamp": "2026-09-30T06:23:18.686139+00:00",
+      "service": "traffic-generator",
+      "action": "cache_observation",
+      "run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c",
+      "flow_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+      "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+      "virtual_user": 1,
+      "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+      "expected": "HIT",
+      "observed": "HIT",
+      "matched": true,
+      "observation": "cache_second_get"
+    },
+    {
+      "timestamp": "2026-09-30T06:23:18.697050+00:00",
+      "service": "traffic-generator",
+      "action": "cache_observation",
+      "run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c",
+      "flow_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+      "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+      "virtual_user": 1,
+      "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+      "expected": "MISS",
+      "observed": "MISS",
+      "matched": true,
+      "observation": "cache_after_invalidation"
+    }
+  ],
+  "domain_records": [
+    {
+      "topic": "inspection-events",
+      "partition": 1,
+      "offset": 106,
+      "key": "37b8a268-4494-40ae-9884-1dfd718386d5",
+      "value": {
+        "data": {
+          "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "occurred_at": "2026-09-30T06:23:18.722479+00:00",
+          "inspection_id": "0713e224-047d-4482-967f-39595cf0057f",
+          "failure_reason": null
+        },
+        "event_id": "5a669462-a930-4551-91a4-bc4838271ece",
+        "producer": "inspection-service",
+        "event_type": "inspection.passed",
+        "occurred_at": "2026-09-30T06:23:18.722890Z",
+        "event_version": "1.0",
+        "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d"
+      }
+    },
+    {
+      "topic": "vehicle-events",
+      "partition": 1,
+      "offset": 183,
+      "key": "37b8a268-4494-40ae-9884-1dfd718386d5",
+      "value": {
+        "data": {
+          "id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "vin": "TRF4WU9S9MH4BHGHY",
+          "model": "CR-V",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:17.662541Z",
+          "owner_name": "Nguyen An",
+          "updated_at": "2026-09-30T06:23:17.662543Z",
+          "manufacturer": "Honda",
+          "production_year": 2020,
+          "simulation_run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c"
+        },
+        "event_id": "bbb68034-0a92-4fbe-a975-395c1bd7ca54",
+        "producer": "vehicle-service",
+        "event_type": "vehicle.created",
+        "occurred_at": "2026-09-30T06:23:17.662885Z",
+        "event_version": "1.0",
+        "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d"
+      }
+    },
+    {
+      "topic": "vehicle-events",
+      "partition": 1,
+      "offset": 185,
+      "key": "37b8a268-4494-40ae-9884-1dfd718386d5",
+      "value": {
+        "data": {
+          "id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "vin": "TRF4WU9S9MH4BHGHY",
+          "model": "CR-V",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:17.662541Z",
+          "owner_name": "Hoang Ha updated db50e2a0",
+          "updated_at": "2026-09-30T06:23:18.688696Z",
+          "manufacturer": "Honda",
+          "production_year": 2020,
+          "simulation_run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c"
+        },
+        "event_id": "6d054437-8808-480f-9573-1b9958cc8962",
+        "producer": "vehicle-service",
+        "event_type": "vehicle.updated",
+        "occurred_at": "2026-09-30T06:23:18.689019Z",
+        "event_version": "1.0",
+        "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d"
+      }
+    },
+    {
+      "topic": "warranty-events",
+      "partition": 1,
+      "offset": 113,
+      "key": "37b8a268-4494-40ae-9884-1dfd718386d5",
+      "value": {
+        "data": {
+          "id": "3d6fd0fc-b075-4a01-85c6-29ce2bebd6ab",
+          "status": "ACTIVE",
+          "end_date": "2029-09-29",
+          "created_at": "2026-09-30T06:23:17.956465Z",
+          "start_date": "2026-09-30",
+          "updated_at": "2026-09-30T06:23:17.956466Z",
+          "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "warranty_type": "DEFAULT"
+        },
+        "event_id": "2500b452-a88c-414a-88bc-8f1cf1f65c91",
+        "producer": "warranty-service",
+        "event_type": "warranty.created",
+        "occurred_at": "2026-09-30T06:23:17.956895Z",
+        "event_version": "1.0",
+        "correlation_id": "db50e2a0-26a0-407f-a2ea-31d49f773b3d"
+      }
+    }
+  ],
+  "cdc_records": [
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 166,
+      "key": {
+        "id": "37b8a268-4494-40ae-9884-1dfd718386d5"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "vin": "TRF4WU9S9MH4BHGHY",
+          "model": "CR-V",
+          "manufacturer": "Honda",
+          "production_year": 2020,
+          "owner_name": "Nguyen An",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:17.662541Z",
+          "updated_at": "2026-09-30T06:23:17.662543Z",
+          "simulation_run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790749397663,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"114558880\",\"114566592\"]",
+          "ts_us": 1790749397663364,
+          "ts_ns": 1790749397663364000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 7176,
+          "lsn": 114566592,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790749397978,
+        "ts_us": 1790749397978792,
+        "ts_ns": 1790749397978792545
+      }
+    },
+    {
+      "topic": "vehicle-cdc.public.vehicles",
+      "partition": 2,
+      "offset": 169,
+      "key": {
+        "id": "37b8a268-4494-40ae-9884-1dfd718386d5"
+      },
+      "value": {
+        "before": {
+          "id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "vin": "TRF4WU9S9MH4BHGHY",
+          "model": "CR-V",
+          "manufacturer": "Honda",
+          "production_year": 2020,
+          "owner_name": "Nguyen An",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:17.662541Z",
+          "updated_at": "2026-09-30T06:23:17.662543Z",
+          "simulation_run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c"
+        },
+        "after": {
+          "id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "vin": "TRF4WU9S9MH4BHGHY",
+          "model": "CR-V",
+          "manufacturer": "Honda",
+          "production_year": 2020,
+          "owner_name": "Hoang Ha updated db50e2a0",
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:17.662541Z",
+          "updated_at": "2026-09-30T06:23:18.688696Z",
+          "simulation_run_id": "7c6c7233-ea5c-4025-a7ae-322807956d5c"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "vehicle-cdc",
+          "ts_ms": 1790749398689,
+          "snapshot": "false",
+          "db": "vehicle_db",
+          "sequence": "[\"114603216\",\"114606176\"]",
+          "ts_us": 1790749398689742,
+          "ts_ns": 1790749398689742000,
+          "schema": "public",
+          "table": "vehicles",
+          "txId": 7205,
+          "lsn": 114606176,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790749399009,
+        "ts_us": 1790749399009919,
+        "ts_ns": 1790749399009919249
+      }
+    },
+    {
+      "topic": "inspection-cdc.public.inspections",
+      "partition": 0,
+      "offset": 163,
+      "key": {
+        "id": "0713e224-047d-4482-967f-39595cf0057f"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "0713e224-047d-4482-967f-39595cf0057f",
+          "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "inspection_type": "PERIODIC",
+          "status": "PENDING",
+          "result": null,
+          "failure_reason": null,
+          "notes": "Traffic flow db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+          "created_at": "2026-09-30T06:23:18.708662Z",
+          "updated_at": "2026-09-30T06:23:18.708664Z",
+          "completed_at": null
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "inspection-cdc",
+          "ts_ms": 1790749398709,
+          "snapshot": "false",
+          "db": "inspection_db",
+          "sequence": "[\"114606120\",\"114608056\"]",
+          "ts_us": 1790749398709572,
+          "ts_ns": 1790749398709572000,
+          "schema": "public",
+          "table": "inspections",
+          "txId": 7206,
+          "lsn": 114608056,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790749399105,
+        "ts_us": 1790749399105146,
+        "ts_ns": 1790749399105146444
+      }
+    },
+    {
+      "topic": "inspection-cdc.public.inspections",
+      "partition": 0,
+      "offset": 164,
+      "key": {
+        "id": "0713e224-047d-4482-967f-39595cf0057f"
+      },
+      "value": {
+        "before": {
+          "id": "0713e224-047d-4482-967f-39595cf0057f",
+          "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "inspection_type": "PERIODIC",
+          "status": "PENDING",
+          "result": null,
+          "failure_reason": null,
+          "notes": "Traffic flow db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+          "created_at": "2026-09-30T06:23:18.708662Z",
+          "updated_at": "2026-09-30T06:23:18.708664Z",
+          "completed_at": null
+        },
+        "after": {
+          "id": "0713e224-047d-4482-967f-39595cf0057f",
+          "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "inspection_type": "PERIODIC",
+          "status": "COMPLETED",
+          "result": "PASS",
+          "failure_reason": null,
+          "notes": "Traffic flow db50e2a0-26a0-407f-a2ea-31d49f773b3d",
+          "created_at": "2026-09-30T06:23:18.708662Z",
+          "updated_at": "2026-09-30T06:23:18.722624Z",
+          "completed_at": "2026-09-30T06:23:18.722479Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "inspection-cdc",
+          "ts_ms": 1790749398723,
+          "snapshot": "false",
+          "db": "inspection_db",
+          "sequence": "[\"114609040\",\"114609240\"]",
+          "ts_us": 1790749398723412,
+          "ts_ns": 1790749398723412000,
+          "schema": "public",
+          "table": "inspections",
+          "txId": 7207,
+          "lsn": 114609240,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "u",
+        "ts_ms": 1790749399105,
+        "ts_us": 1790749399105609,
+        "ts_ns": 1790749399105609867
+      }
+    },
+    {
+      "topic": "warranty-cdc.public.warranties",
+      "partition": 1,
+      "offset": 113,
+      "key": {
+        "id": "3d6fd0fc-b075-4a01-85c6-29ce2bebd6ab"
+      },
+      "value": {
+        "before": null,
+        "after": {
+          "id": "3d6fd0fc-b075-4a01-85c6-29ce2bebd6ab",
+          "vehicle_id": "37b8a268-4494-40ae-9884-1dfd718386d5",
+          "warranty_type": "DEFAULT",
+          "start_date": 20726,
+          "end_date": 21821,
+          "status": "ACTIVE",
+          "created_at": "2026-09-30T06:23:17.956465Z",
+          "updated_at": "2026-09-30T06:23:17.956466Z"
+        },
+        "source": {
+          "version": "3.2.4.Final",
+          "connector": "postgresql",
+          "name": "warranty-cdc",
+          "ts_ms": 1790749397957,
+          "snapshot": "false",
+          "db": "warranty_db",
+          "sequence": "[\"114584880\",\"114590320\"]",
+          "ts_us": 1790749397957598,
+          "ts_ns": 1790749397957598000,
+          "schema": "public",
+          "table": "warranties",
+          "txId": 7192,
+          "lsn": 114590320,
+          "xmin": null
+        },
+        "transaction": null,
+        "op": "c",
+        "ts_ms": 1790749398012,
+        "ts_us": 1790749398012651,
+        "ts_ns": 1790749398012651639
+      }
+    }
+  ],
+  "correlation_propagated": true
+}

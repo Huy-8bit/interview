@@ -1,0 +1,604 @@
+{
+  "recorded_at": "2026-09-30T05:21:13.958114+00:00",
+  "kafka": {
+    "throttle_time_ms": 0,
+    "brokers": [
+      {
+        "node_id": 1,
+        "host": "kafka-1",
+        "port": 9092,
+        "rack": null
+      },
+      {
+        "node_id": 2,
+        "host": "kafka-2",
+        "port": 9092,
+        "rack": null
+      },
+      {
+        "node_id": 3,
+        "host": "kafka-3",
+        "port": 9092,
+        "rack": null
+      }
+    ],
+    "cluster_id": "q1Sh-9_ISia_zwGINzRvyQ",
+    "controller_id": 1
+  },
+  "topics": [
+    {
+      "error_code": 0,
+      "topic": "repair-events-dlq",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "inspection-events",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "inspection-events-dlq",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "vehicle-events",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "warranty-events-dlq",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "repair-events",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "vehicle-events-dlq",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    },
+    {
+      "error_code": 0,
+      "topic": "warranty-events",
+      "is_internal": false,
+      "partitions": [
+        {
+          "error_code": 0,
+          "partition": 2,
+          "leader": 3,
+          "replicas": [
+            3,
+            1,
+            2
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 0,
+          "leader": 2,
+          "replicas": [
+            1,
+            2,
+            3
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        },
+        {
+          "error_code": 0,
+          "partition": 1,
+          "leader": 2,
+          "replicas": [
+            2,
+            3,
+            1
+          ],
+          "isr": [
+            2,
+            3,
+            1
+          ],
+          "offline_replicas": []
+        }
+      ]
+    }
+  ],
+  "repair_group": {
+    "state": "Stable",
+    "members": [
+      {
+        "client_id": "repair-service-13881d5f",
+        "partitions": [
+          [
+            "inspection-events",
+            0
+          ],
+          [
+            "inspection-events",
+            1
+          ],
+          [
+            "inspection-events",
+            2
+          ]
+        ]
+      }
+    ]
+  },
+  "redis_info": {
+    "cluster_state": "ok",
+    "cluster_slots_assigned": "16384",
+    "cluster_slots_ok": "16384",
+    "cluster_slots_pfail": "0",
+    "cluster_slots_fail": "0",
+    "cluster_known_nodes": "6",
+    "cluster_size": "3",
+    "cluster_current_epoch": "9",
+    "cluster_my_epoch": "7",
+    "cluster_stats_messages_ping_sent": "2077",
+    "cluster_stats_messages_pong_sent": "1997",
+    "cluster_stats_messages_fail_sent": "10",
+    "cluster_stats_messages_auth-ack_sent": "2",
+    "cluster_stats_messages_update_sent": "2",
+    "cluster_stats_messages_sent": "4088",
+    "cluster_stats_messages_ping_received": "1997",
+    "cluster_stats_messages_pong_received": "2077",
+    "cluster_stats_messages_fail_received": "2",
+    "cluster_stats_messages_auth-req_received": "2",
+    "cluster_stats_messages_received": "4078",
+    "total_cluster_links_buffer_limit_exceeded": "0"
+  },
+  "redis_nodes": {
+    "172.29.86.12:6379": {
+      "node_id": "76155496b1d0a60dd86f82286b766a46643df9fd",
+      "hostname": "redis-2",
+      "flags": "slave",
+      "master_id": "3329c812ac47758c842e2baf0308db3ef19e2e0b",
+      "last_ping_sent": "0",
+      "last_pong_rcvd": "1790745672360",
+      "epoch": "8",
+      "slots": [],
+      "migrations": [],
+      "connected": true
+    },
+    "172.29.86.14:6379": {
+      "node_id": "db3526535d84c2289d2c50c9b389150e3eb898f2",
+      "hostname": "redis-4",
+      "flags": "master",
+      "master_id": "-",
+      "last_ping_sent": "0",
+      "last_pong_rcvd": "1790745673000",
+      "epoch": "9",
+      "slots": [
+        [
+          "10923",
+          "16383"
+        ]
+      ],
+      "migrations": [],
+      "connected": true
+    },
+    "172.29.86.13:6379": {
+      "node_id": "6a61367550eafeba5581724faa3a48580b6b8bd6",
+      "hostname": "redis-3",
+      "flags": "slave",
+      "master_id": "db3526535d84c2289d2c50c9b389150e3eb898f2",
+      "last_ping_sent": "0",
+      "last_pong_rcvd": "1790745672000",
+      "epoch": "9",
+      "slots": [],
+      "migrations": [],
+      "connected": true
+    },
+    "172.29.86.16:6379": {
+      "node_id": "3329c812ac47758c842e2baf0308db3ef19e2e0b",
+      "hostname": "redis-6",
+      "flags": "master",
+      "master_id": "-",
+      "last_ping_sent": "0",
+      "last_pong_rcvd": "1790745672564",
+      "epoch": "8",
+      "slots": [
+        [
+          "5461",
+          "10922"
+        ]
+      ],
+      "migrations": [],
+      "connected": true
+    },
+    "172.29.86.11:6379": {
+      "node_id": "bab50e76c33bbe0ef752ebc18f2203d740779631",
+      "hostname": "redis-1",
+      "flags": "slave",
+      "master_id": "ae3e76253a5cb0f97a0e4bdd37664876ad01a16f",
+      "last_ping_sent": "0",
+      "last_pong_rcvd": "1790745673390",
+      "epoch": "7",
+      "slots": [],
+      "migrations": [],
+      "connected": true
+    },
+    "172.29.86.15:6379": {
+      "node_id": "ae3e76253a5cb0f97a0e4bdd37664876ad01a16f",
+      "hostname": "redis-5",
+      "flags": "myself,master",
+      "master_id": "-",
+      "last_ping_sent": "0",
+      "last_pong_rcvd": "0",
+      "epoch": "7",
+      "slots": [
+        [
+          "0",
+          "5460"
+        ]
+      ],
+      "migrations": [],
+      "connected": true
+    }
+  }
+}

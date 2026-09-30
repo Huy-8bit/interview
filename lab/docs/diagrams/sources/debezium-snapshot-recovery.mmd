@@ -1,0 +1,11 @@
+flowchart LR
+    %% diagram: debezium-snapshot-recovery
+    start["Connector starts"] --> offsets{"Stored offset exists?"}
+    offsets -->|"No"| snapshot["Consistent initial snapshot - op r"]
+    snapshot --> wal["Continue WAL from snapshot position"]
+    offsets -->|"Yes and WAL retained"| resume["Resume stored LSN"]
+    resume --> wal
+    wal --> kafka["Publish c, u, d to Kafka"]
+    kafka --> checkpoint["Flush offsets to compacted Connect topic"]
+    checkpoint --> wal
+    offsets -->|"Required WAL unavailable"| incident["Operator recovery and reconciliation"]

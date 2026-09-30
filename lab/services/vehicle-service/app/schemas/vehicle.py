@@ -12,6 +12,13 @@ class VehicleCreate(BaseModel):
     manufacturer: str = Field(min_length=1, max_length=100)
     production_year: int = Field(ge=1886, le=2100)
     owner_name: str = Field(min_length=1, max_length=200)
+    simulation_run_id: UUID | None = None
+
+    @model_validator(mode="after")
+    def simulation_marker(self):
+        if self.simulation_run_id is not None and not self.vin.startswith("TRF"):
+            raise ValueError("Simulation vehicles must use a TRF-prefixed VIN")
+        return self
 
 
 class VehicleUpdate(BaseModel):

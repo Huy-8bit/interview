@@ -1,0 +1,12 @@
+flowchart TD
+    %% diagram: traffic-retry
+    request["Send REST attempt with request deadline"] --> result{"Outcome"}
+    result -->|"2xx"| success["Continue lifecycle"]
+    result -->|"Transport / timeout / 5xx"| budget{"Retries remain?"}
+    budget -->|"Yes"| sleep["Exponential backoff with jitter"]
+    sleep --> request
+    budget -->|"No"| failed["Log flow failure, continue next lifecycle"]
+    result -->|"Known pending projection / warranty"| poll["Bounded convergence polling"]
+    poll --> request
+    result -->|"Replica 404 / injected 422"| observe["Record expected observation"]
+    result -->|"Other 4xx"| failed

@@ -3,6 +3,7 @@ import base64
 import json
 import logging
 import os
+import time
 from pathlib import Path
 
 from aiokafka import AIOKafkaConsumer, TopicPartition
@@ -108,6 +109,17 @@ async def deliver(runtime, message, handlers):
             context.event_id.reset(et)
 
 
+async def ensure_fetch_progress(consumer):
+    """An idle topic is healthy; backlog with repeated empty polls needs recovery."""
+    partitions = consumer.assignment()
+    if not partitions:
+        return
+    ends = await consumer.end_offsets(partitions)
+    for partition in partitions:
+        if await consumer.position(partition) < ends[partition]:
+            raise TimeoutError(f"Consumer fetch stalled with backlog on {partition}")
+
+
 async def consumer_loop(runtime, handlers: dict):
     topics = sorted({name.split(".")[0] + "-events" for name in handlers})
     while True:
@@ -115,19 +127,37 @@ async def consumer_loop(runtime, handlers: dict):
             *topics,
             bootstrap_servers=runtime.settings.kafka_bootstrap_servers,
             group_id=runtime.settings.kafka_consumer_group,
-            client_id=runtime.settings.service_name,
+            client_id=f"{runtime.settings.service_name}-{runtime.instance_id[:8]}",
             enable_auto_commit=False,
             auto_offset_reset="earliest",
             max_poll_records=1,
             max_poll_interval_ms=runtime.settings.consumer_max_poll_interval_ms,
+            request_timeout_ms=runtime.settings.kafka_request_timeout_ms,
+            retry_backoff_ms=runtime.settings.kafka_retry_backoff_ms,
         )
         try:
-            await consumer.start()
-            async for message in consumer:
-                await deliver(runtime, message, handlers)
-                await consumer.commit(
-                    {TopicPartition(message.topic, message.partition): message.offset + 1}
-                )
+            async with asyncio.timeout(runtime.settings.consumer_fetch_timeout):
+                await consumer.start()
+            idle_since = time.monotonic()
+            while True:
+                # Bounded polling revisits coordinator errors instead of waiting forever
+                # inside a single getone(), including a stalled assignment after outages.
+                async with asyncio.timeout(runtime.settings.consumer_fetch_timeout):
+                    batches = await consumer.getmany(timeout_ms=1000, max_records=1)
+                if not batches:
+                    if time.monotonic() - idle_since >= runtime.settings.consumer_stall_timeout:
+                        async with asyncio.timeout(runtime.settings.consumer_fetch_timeout):
+                            await ensure_fetch_progress(consumer)
+                        idle_since = time.monotonic()
+                    continue
+                for messages in batches.values():
+                    for message in messages:
+                        await deliver(runtime, message, handlers)
+                        async with asyncio.timeout(runtime.settings.consumer_fetch_timeout):
+                            await consumer.commit(
+                                {TopicPartition(message.topic, message.partition): message.offset + 1}
+                            )
+                idle_since = time.monotonic()
         except Exception:
             log.exception("consumer_restart_from_committed_offset")
         finally:

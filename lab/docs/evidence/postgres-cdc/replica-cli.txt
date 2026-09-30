@@ -1,0 +1,10 @@
+ pg_is_in_recovery | pg_last_wal_receive_lsn | pg_last_wal_replay_lsn 
+-------------------+-------------------------+------------------------
+ t                 | 0/65A1AD0               | 0/65A1AD0
+(1 row)
+
+  status   |   sender_host    | written_lsn | flushed_lsn 
+-----------+------------------+-------------+-------------
+ streaming | postgres-primary | 0/65A1AD0   | 0/65A1AD0
+(1 row)
+
