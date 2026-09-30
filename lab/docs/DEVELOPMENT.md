@@ -6,6 +6,7 @@
 
 | Muốn hiểu/thay đổi | Đọc file |
 |---|---|
+| CLI startup progress | [up.sh](../scripts/up.sh), [Getting Started](GETTING_STARTED.md); từng API dùng [start.sh](../scripts/start.sh) để chạy migration trước Uvicorn |
 | Startup và composition | `services/<service>/app/main.py`, [app factory](../common/platform_common/api.py) |
 | Env và timeout/pool budgets | [config.py](../common/platform_common/config.py), [db.py](../common/platform_common/db.py), [runtime.py](../common/platform_common/runtime.py) |
 | Vehicle cache và mutation | [vehicles.py](../services/vehicle-service/app/services/vehicles.py) |
@@ -24,7 +25,7 @@
 ## 2. Chạy và kiểm tra thay đổi
 
 ```sh
-docker compose up --build -d --wait
+make up
 make test
 make lint
 make demo

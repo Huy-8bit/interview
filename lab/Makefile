@@ -3,7 +3,7 @@ SERVICES = vehicle-service warranty-service inspection-service repair-service
 
 .PHONY: up down build logs test seed demo clean ps lint chaos-up test-chaos docs-render docs-check cluster-check cluster-test
 up:
-	$(COMPOSE) up --build -d --wait
+	bash scripts/up.sh
 down:
 	$(COMPOSE) down
 build:

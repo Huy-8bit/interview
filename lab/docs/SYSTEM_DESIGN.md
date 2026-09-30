@@ -191,6 +191,8 @@ flowchart LR
 
 [Xem sơ đồ SVG](diagrams/startup-dependencies.svg)
 
+`make up` dùng [launcher 10 bước](../scripts/up.sh), in RUNNING/WAIT/OK/FAILED cùng elapsed time, giữ log mỗi phiên và dừng tại gate lỗi. [Getting Started](GETTING_STARTED.md) ghi thứ tự CLI và cách đọc status. Compose trực tiếp vẫn dùng dependency graph trên; launcher chủ động chia các nhóm container theo từng bước.
+
 Startup chờ dependencies; resilience khi Kafka down áp dụng sau khi application đã chạy. Migration lỗi thì uvicorn chưa được mở. Lock migration thuộc từng DB nên các domain không cần khóa chung.
 
 Shutdown cancel/await tasks rồi đóng producer, HTTP client, Redis và engine. Nếu process bị kill giữa ACK/commit, recovery dựa vào durable rows và redelivery. Docker restart policy xử lý process crash; healthcheck chuyển unhealthy không tự làm Docker restart container.

@@ -7,9 +7,14 @@ Bài lab backend Python dành cho Senior/Lead: **4 microservice nghiệp vụ v�
 Chỉ cần Docker và Docker Compose v2+ trên host. `make` là tiện ích tùy chọn; mọi lệnh có bản Docker tương đương. Cấu hình cluster đã được kiểm thử với 8 GB RAM và 8 CPU cấp cho Docker; mức sử dụng thay đổi theo workload. Các image được kiểm thử trên Linux ARM64 qua Docker; không ép kiến trúc CPU trong Compose.
 
 ```sh
-docker compose up --build -d --wait
-docker compose run --build --rm toolbox python scripts/demo.py
+[ -f .env ] || cp .env.example .env
+make up                 # 10 bước RUNNING / WAIT / OK / FAILED
+make ps
+make traffic-status
+make traffic-logs       # Ctrl+C để thoát logs; containers vẫn chạy
 ```
+
+**Thứ tự CLI và log khởi động:** [Getting Started](docs/GETTING_STARTED.md). Không có Make: `bash scripts/up.sh`. Đợi `READY Startup completed`; traffic tự chạy. Log từng lần khởi động lưu trong `artifacts/startup/<timestamp>-<pid>/startup.log`.
 
 Swagger: [Vehicle :8001](http://localhost:8001/docs), [Warranty :8002](http://localhost:8002/docs), [Inspection :8003](http://localhost:8003/docs). Repair nhận một cổng trong dải 8004–8006; lấy địa chỉ bằng `docker compose port --index 1 repair-service 8000` rồi mở `/docs`. [Kafka UI :8080](http://localhost:8080) hiển thị topic, partition, message, group và lag. Kết quả traffic ở [Traffic Validation](docs/TRAFFIC_VALIDATION.md); PostgreSQL ở [PostgreSQL & CDC Validation](docs/POSTGRESQL_CDC_VALIDATION.md); bằng chứng Kafka/Redis ở [Cluster Validation](docs/CLUSTER_VALIDATION.md).
 
@@ -534,6 +539,8 @@ docker compose logs -f --tail=100
 # XÓA dữ liệu lab và containers:
 docker compose --profile tools down -v --remove-orphans
 ```
+
+Khởi động theo 10 bước có status log bằng `make up` hoặc `bash scripts/up.sh`; xem [thứ tự CLI](docs/GETTING_STARTED.md). Lệnh Compose trực tiếp vẫn dùng được, nhưng không có nhãn tổng thể của launcher.
 
 Make targets: `make up`, `down`, `build`, `logs`, `ps`, `demo`, `seed`, `test`, `lint`, `chaos-up`, `test-chaos`, `clean`. `make clean` xóa cả named volumes. Port đang bận: sửa các biến `*_PORT` trong `.env`. Nếu init script thay đổi trên volume cũ, migration không tự tạo lại DB/role; dùng volume mới hoặc thực hiện migration vận hành rõ ràng.
 
