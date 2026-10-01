@@ -1,5 +1,7 @@
 # 00 — Learning path (18 phase)
 
+Danh sách lệnh theo đúng thứ tự: [lab-commands.md](lab-commands.md).
+
 Mỗi phase: **đọc** → **chạy lab** → **quan sát** → **expected** → **tự trả lời**. Sau mỗi lab: `make reset` (hoặc `./scripts/reset-lab.sh`).
 Chạy một lab: `make lab L=04_ordering` hoặc `./labs/04_ordering/run.sh`. Mỗi lab in `[OK] EXPECT ...` / `[FAIL]` và kết thúc bằng `LAB PASSED`.
 

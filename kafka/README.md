@@ -150,6 +150,8 @@ make reset-hard     # docker compose down -v && up --build (xoá mọi dữ li�
 
 ## Learning path
 
+**Thứ tự lệnh chạy lab: [docs/lab-commands.md](docs/lab-commands.md).**
+
 Bắt đầu ở [docs/00-learning-path.md](docs/00-learning-path.md) (18 phase: đọc gì, chạy lab nào, nhìn metric nào, kết quả mong đợi, câu hỏi tự kiểm tra).
 
 | Docs | |
