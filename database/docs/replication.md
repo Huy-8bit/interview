@@ -339,14 +339,30 @@ Chẩn đoán nhanh:
 | `pg_stat_wal_receiver` | `status`, `sender_host`, `slot_name`, `flushed_lsn`, `latest_end_lsn` (vị trí cuối primary báo), `last_msg_receipt_time`. |
 | `pg_is_wal_replay_paused()`, `pg_wal_replay_pause()`, `pg_wal_replay_resume()` | Tạm dừng / tiếp tục replay (WAL vẫn được **nhận**). |
 
-**Lag theo thời gian** nhìn từ replica:
+**Lag theo thời gian nhìn từ replica — cái bẫy**:
 
 ```sql
-SELECT CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN interval '0'
-            ELSE now() - pg_last_xact_replay_timestamp() END AS replay_delay;
+SELECT now() - pg_last_xact_replay_timestamp() AS since_last_replayed_commit;
 ```
 
-Chú ý bẫy: nếu primary **không có transaction nào**, `now() - pg_last_xact_replay_timestamp()` cứ tăng dù replica không hề trễ — vì vậy phải so `receive_lsn = replay_lsn` trước.
+Đây **không phải** lag: nếu primary không có transaction nào, con số này cứ tăng dù replica không hề trễ. Cách "vá" hay gặp trên mạng — trả về 0 khi `pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn()` — cũng không đáng tin: `receive_lsn` có thể dừng ở giữa một WAL record chưa nhận đủ (primary mới flush tới biên trang WAL), record đó chưa replay được nên `replay_lsn` đứng ở record trước. Đo thật trên lab khi primary đứng yên: `receive_lsn = 0/70904000`, `replay_lsn = 0/70903A48`, công thức vá báo trễ **13 giây** trong khi replica đã replay xong mọi commit.
+
+Cách đo đúng là **so với vị trí của primary**:
+
+```sql
+-- PRIMARY: byte lag + time lag do walsender đo (NULL khi không có WAL mới = không có gì để trễ)
+SELECT application_name,
+       pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn) AS replay_lag_bytes,
+       replay_lag
+FROM pg_stat_replication;
+
+-- REPLICA: chỉ có vị trí primary báo về gần nhất (latest_end_lsn), không phải vị trí hiện tại
+SELECT pg_wal_lsn_diff(latest_end_lsn, pg_last_wal_replay_lsn()) AS behind_last_reported_bytes,
+       latest_end_time
+FROM pg_stat_wal_receiver;
+```
+
+`./scripts/check-replication.sh` đọc `pg_last_wal_replay_lsn()` trên replica, `pg_current_wal_lsn()` trên primary, rồi tính hiệu số.
 
 ### Thí nghiệm: nhìn thấy lag
 

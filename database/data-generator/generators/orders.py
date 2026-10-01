@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 
 from .context import Context
 from .db import Progress, copy_rows
-from .distributions import (UTC, WeightedSampler, cents_to_str, holiday_season_between, poisson,
+from .distributions import (UTC, WeightedSampler, cents_to_str, from_us, holiday_season_between, poisson,
                             random_time_of_day, skewed_between)
 from .products import ProductData
 from .reference import COUPON_WEIGHTS, COUPONS
@@ -48,11 +48,44 @@ FAIL_CODES = ("card_declined", "insufficient_funds", "expired_card", "processing
 
 
 @dataclass
-class Purchase:
-    user_id: int
-    product_id: int
-    order_id: int
-    ordered_at: datetime
+class Purchases:
+    """(user, product, order, time) of COMPLETED order lines that will get a verified
+    review. Parallel arrays: millions of entries at ~32 bytes each."""
+    user_id: array
+    product_id: array
+    order_id: array
+    ordered_ts: array           # orders.created_at as a POSIX timestamp
+
+    @classmethod
+    def empty(cls) -> "Purchases":
+        return cls(array("q"), array("q"), array("q"), array("d"))
+
+    def __len__(self) -> int:
+        return len(self.order_id)
+
+    def append(self, user_id: int, product_id: int, order_id: int, ordered_ts: float) -> None:
+        self.user_id.append(user_id)
+        self.product_id.append(product_id)
+        self.order_id.append(order_id)
+        self.ordered_ts.append(ordered_ts)
+
+
+# Shipping snapshot = the user's default address at checkout time, read back from
+# `addresses` for the users of one batch (served by ux_addresses_one_default_per_user).
+DEFAULT_ADDRESS_SQL = """
+SELECT user_id, country_code,
+       jsonb_build_object('recipient_name', recipient_name, 'phone', phone, 'line1', line1, 'line2', line2,
+                          'city', city, 'state', state, 'postal_code', postal_code,
+                          'country_code', country_code)::text
+FROM addresses
+WHERE is_default AND user_id = ANY(%s)
+"""
+
+
+def _default_addresses(ctx: Context, user_ids) -> dict[int, tuple[str, str]]:
+    with ctx.conn.cursor() as cur:
+        cur.execute(DEFAULT_ADDRESS_SQL, (list(set(user_ids)),))
+        return {uid: (country, snapshot) for uid, country, snapshot in cur}
 
 
 def _order_headers(ctx: Context, users: UserData):
@@ -69,7 +102,7 @@ def _order_headers(ctx: Context, users: UserData):
         user_id = users.pick_buyer(ctx)
         s = status_sampler.sample(rng)
         max_age, min_age = STATUS_AGE[STATUSES[s]]
-        user_created = users.created_at[user_id - 1]
+        user_created = from_us(users.created_us[user_id - 1])
         lo = max(user_created, history_start if max_age is None else now - timedelta(days=max_age))
         hi = now - timedelta(days=min_age)
         if lo >= hi:                    # brand-new user: can only have a fresh, open order
@@ -110,15 +143,16 @@ def _provider_response(rng, method: str, status: str, when: datetime) -> str | N
     return json.dumps(resp, separators=(",", ":"))
 
 
-def generate_orders(ctx: Context, users: UserData, products: ProductData) -> list[Purchase]:
+def generate_orders(ctx: Context, users: UserData, products: ProductData) -> Purchases:
     cfg, rng, now = ctx.cfg, ctx.rng, ctx.now
     n = cfg.num_orders
+    purchases = Purchases.empty()
     if n == 0:
-        return []
+        return purchases
 
     print("Generating orders (planning timestamps / buyers / statuses)...", flush=True)
     ts, uid, st = _order_headers(ctx, users)
-    order = sorted(range(n), key=ts.__getitem__)
+    order = array("q", sorted(range(n), key=ts.__getitem__))
 
     method_sampler = WeightedSampler(METHODS, METHOD_WEIGHTS)
     coupon_sampler = WeightedSampler(COUPONS, COUPON_WEIGHTS)
@@ -131,12 +165,12 @@ def generate_orders(ctx: Context, users: UserData, products: ProductData) -> lis
     max_purchases = int(cfg.num_reviews * 0.75)
     expected_completed_items = cfg.num_order_items * STATUS_WEIGHTS[4] / sum(STATUS_WEIGHTS)
     review_prob = min(1.0, 1.3 * max_purchases / max(1.0, expected_completed_items))
-    purchases: list[Purchase] = []
 
     progress = Progress("Orders", n)
     items_total = payments_total = 0
     for start, end in ctx.batches(n):
         order_rows, item_rows, payment_rows = [], [], []
+        addresses = _default_addresses(ctx, (uid[order[pos]] for pos in range(start, end)))
         for pos in range(start, end):
             i = order[pos]
             order_id = pos + 1
@@ -162,7 +196,7 @@ def generate_orders(ctx: Context, users: UserData, products: ProductData) -> lis
                 item_rows.append((order_id, product_id, qty, cents_to_str(unit), cents_to_str(line_discount),
                                   cents_to_str(line_total)))
                 if status == "COMPLETED" and len(purchases) < max_purchases and rng.random() < review_prob:
-                    purchases.append(Purchase(user_id, product_id, order_id, created))
+                    purchases.append(user_id, product_id, order_id, ts[i])
 
             # ---- money
             coupon = None
@@ -172,7 +206,7 @@ def generate_orders(ctx: Context, users: UserData, products: ProductData) -> lis
                 if coupon == "BLACKFRIDAY25" and created.month not in (11, 12):
                     coupon = "SAVE15"
                 discount = min(subtotal * COUPON_PERCENT[coupon] // 100, 10_000)
-            country = users.country[user_id - 1]
+            country, shipping_snapshot = addresses[user_id]
             if coupon == "FREESHIP" or subtotal >= 5_000:
                 shipping = 0
             elif country != "US":
@@ -186,7 +220,7 @@ def generate_orders(ctx: Context, users: UserData, products: ProductData) -> lis
             order_rows.append((
                 order_id, user_id, f"ORD-{created:%y%m%d}-{order_id:08d}", status,
                 cents_to_str(subtotal), cents_to_str(discount), cents_to_str(shipping), cents_to_str(total),
-                "USD", coupon, users.shipping_address[user_id - 1],
+                "USD", coupon, shipping_snapshot,
                 rng.choice(ORDER_NOTES) if rng.random() < 0.04 else None, created, updated,
             ))
 

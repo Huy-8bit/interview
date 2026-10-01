@@ -6,12 +6,12 @@ import json
 import math
 from array import array
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from .catalog import Catalog, LeafCategory
 from .context import Context
 from .db import Progress, copy_rows
-from .distributions import WeightedSampler, days_ago, skewed_between, zipf_weights
+from .distributions import WeightedSampler, days_ago, skewed_between, to_us
 from .reference import (ADJECTIVES, BENEFITS, BOOK_LANGUAGE_WEIGHTS, BOOK_LANGUAGES, BOOK_WORDS_A, BOOK_WORDS_B,
                         CAR_MAKES, COLOR_WEIGHTS, COLORS, FEATURES, HOME_MATERIALS, MATERIALS, PRODUCT_TAG_WEIGHTS,
                         PRODUCT_TAGS)
@@ -29,7 +29,7 @@ class ProductData:
     price_cents: array            # index = product_id - 1
     popularity: WeightedSampler[int]
     quality: bytearray            # hidden "true quality" -> drives review ratings
-    created_at: list[datetime]
+    created_us: array             # epoch microseconds, index = product_id - 1
 
 
 class _AttributeBuilder:
@@ -198,19 +198,24 @@ def generate_products(ctx: Context, catalog: Catalog) -> ProductData:
         progress.advance(len(product_rows))
     progress.finish(f"{inventory_total:,} inventory rows")
 
+    created_us = array("q", map(to_us, created_at))
+    del created_at
+
     # Popularity: Zipf over a random ranking of products, damped for expensive
     # items; DRAFT products never sell, DISCONTINUED ones rarely.
-    ranking = list(range(n))
+    # Same formula as distributions.zipf_weights (1 / (rank + 50)^1.1), computed
+    # inline into arrays so 5M products cost ~80 MB instead of ~500 MB of lists.
+    ranking = array("q", range(n))
     rng.shuffle(ranking)
-    zw = zipf_weights(n)
-    weights = [0.0] * n
-    for rank, idx in enumerate(ranking):
-        w = zw[rank] / math.sqrt(1 + price_cents[idx] / 20_000)
+    weights = array("d", bytes(8 * n))
+    for rank, idx in enumerate(ranking, start=1):
+        w = (1.0 / ((rank + 50) ** 1.1)) / math.sqrt(1 + price_cents[idx] / 20_000)
         if statuses[idx] == "DRAFT":
             w = 0.0
         elif statuses[idx] == "DISCONTINUED":
             w *= 0.3
         weights[idx] = w
-    popularity = WeightedSampler(list(range(1, n + 1)), weights)
+    del ranking, statuses
+    popularity = WeightedSampler(range(1, n + 1), weights)
 
-    return ProductData(price_cents, popularity, quality, created_at)
+    return ProductData(price_cents, popularity, quality, created_us)

@@ -702,7 +702,7 @@ PostgreSQL **không** tự tạo index cho cột FK (khác MySQL/InnoDB). Mỗi 
 
 ### 7.1
 
-Xem từng bước và output thật: [query-optimization-lab.md §2](query-optimization-lab.md#2-bài-chính-đơn-completed-của-một-user). Tóm tắt:
+Xem từng bước và output thật: [index-lab.md §3.1](index-lab.md#31-bài-tập-tối-ưu-truy-vấn-đơn-hàng-của-tôi). Tóm tắt:
 
 ```sql
 CREATE INDEX idx_orders_user_status_created ON orders (user_id, status, created_at DESC);

@@ -313,7 +313,118 @@ SELECT deadlocks FROM pg_stat_database WHERE datname = 'ecommerce';
 
 ---
 
-## 8. Idle in transaction
+## 8. Long-running transaction
+
+Một transaction "chạy lâu" (báo cáo nặng, batch job, hoặc đơn giản là ai đó mở `BEGIN` trong DBeaver rồi đi ăn trưa) gây hai loại thiệt hại khác nhau: **giữ lock** và **giữ snapshot**.
+
+### 8.1 Hàng đợi lock: một SELECT bình thường cũng bị treo
+
+Mọi câu lệnh đọc bảng đều lấy `AccessShareLock` trên bảng đó và giữ **tới hết transaction**. `ALTER TABLE` cần `AccessExclusiveLock` — xung đột với mọi thứ. Lock trong PostgreSQL xếp hàng **FIFO**: ai đến sau một yêu cầu đang chờ thì phải chờ sau nó, kể cả khi bản thân không xung đột với người đang giữ lock.
+
+| t | Session A | Session B | Session C |
+| --- | --- | --- | --- |
+| t1 | `BEGIN;` | | |
+| t2 | `SELECT count(*) FROM orders WHERE id < 10;` *(giữ AccessShareLock tới khi COMMIT)* | | |
+| t3 | | `ALTER TABLE orders ADD COLUMN tmp_col int;` → **treo** | |
+| t4 | | | `SELECT id FROM orders WHERE id = 1;` → **cũng treo** ❗ |
+| t5 | *(Session D chạy truy vấn giám sát bên dưới)* | | |
+| t6 | `COMMIT;` | → ALTER chạy xong | → SELECT trả kết quả |
+| t7 | | `ALTER TABLE orders DROP COLUMN tmp_col;` | |
+
+Giám sát ở t5:
+
+```sql
+SELECT pid, application_name, state, wait_event_type, wait_event,
+       pg_blocking_pids(pid) AS blocked_by, left(query, 45) AS query
+FROM pg_stat_activity
+WHERE datname = 'ecommerce' AND backend_type = 'client backend' AND pid <> pg_backend_pid()
+ORDER BY backend_start;
+
+SELECT l.pid, a.application_name, l.mode, l.granted
+FROM pg_locks l JOIN pg_stat_activity a USING (pid)
+WHERE l.relation = 'orders'::regclass
+ORDER BY l.granted DESC, l.pid;
+```
+
+Kết quả thật đo trên lab này (đặt `application_name` để dễ nhìn):
+
+```text
+ pid |    app    | state  | wait_event_type | wait_event | blocked_by |                   query
+-----+-----------+--------+-----------------+------------+------------+--------------------------------------------
+ 634 | session_A | active | Timeout         | PgSleep    | {}         | SELECT pg_sleep(9);
+ 640 | session_B | active | Lock            | relation   | {634}      | ALTER TABLE orders ADD COLUMN tmp_col int;
+ 646 | session_C | active | Lock            | relation   | {640}      | SELECT id FROM orders WHERE id = 1;
+
+ pid | application_name |        mode         | granted
+-----+------------------+---------------------+---------
+ 634 | session_A        | AccessShareLock     | t
+ 640 | session_B        | AccessExclusiveLock | f
+ 646 | session_C        | AccessShareLock     | f
+```
+
+Điểm mấu chốt: C bị chặn bởi **B** (`blocked_by = {640}`), không phải A. Trên production, đây là cách một migration "chỉ thêm một cột" làm sập toàn bộ API: mọi request đọc bảng `orders` dồn sau câu `ALTER`, connection pool cạn.
+
+**Phòng tránh**: luôn đặt `lock_timeout` cho DDL và retry:
+
+```sql
+SET lock_timeout = '3s';
+ALTER TABLE orders ADD COLUMN tmp_col int;
+-- ERROR:  canceling statement due to lock timeout   -> B tự huỷ, hàng đợi được giải phóng, thử lại sau
+```
+
+### 8.2 Giữ snapshot: VACUUM không dọn được dead tuple
+
+Transaction ở `REPEATABLE READ` / `SERIALIZABLE` (hoặc **một câu lệnh** chạy lâu ở `READ COMMITTED`) giữ một snapshot — thể hiện ở cột `backend_xmin`. Mọi phiên bản dòng bị xoá/cập nhật **sau** `backend_xmin` đó có thể vẫn còn cần với snapshot này, nên VACUUM phải giữ lại — trên **mọi bảng** của database, không chỉ bảng mà transaction đang đọc.
+
+| t | Session A | Session B |
+| --- | --- | --- |
+| t0 | | `INSERT INTO replication_test (token, note) SELECT 'vac-' \|\| g, 'vacuum lab' FROM generate_series(1, 10000) g;` |
+| t1 | `BEGIN ISOLATION LEVEL REPEATABLE READ;` | |
+| t2 | `SELECT count(*) FROM users WHERE id = 1;` *(snapshot được chụp ở câu lệnh đầu tiên)* | |
+| t3 | | `DELETE FROM replication_test WHERE token LIKE 'vac-%';` |
+| t4 | | `VACUUM (VERBOSE) replication_test;` |
+| t5 | `COMMIT;` | |
+| t6 | | `VACUUM (VERBOSE) replication_test;` |
+
+Ở t4 (A vẫn mở — chú ý A **không hề đọc** `replication_test`):
+
+```text
+tuples: 0 removed, 10001 remain, 10000 are dead but not yet removable
+removable cutoff: 936, which was 1 XIDs old when operation ended
+```
+
+Ở t6 (sau khi A commit):
+
+```text
+tuples: 10000 removed, 1 remain, 0 are dead but not yet removable
+removable cutoff: 937, which was 1 XIDs old when operation ended
+```
+
+Tìm thủ phạm giữ `xmin` lâu nhất:
+
+```sql
+SELECT pid, application_name, state, backend_xmin, age(backend_xmin) AS xmin_age_xids,
+       now() - xact_start AS xact_age, left(query, 60) AS query
+FROM pg_stat_activity
+WHERE backend_xmin IS NOT NULL
+ORDER BY age(backend_xmin) DESC;
+
+-- Cả replication slot cũng có thể giữ xmin: replica của lab bật hot_standby_feedback,
+-- nên một query dài trên REPLICA (5433) cũng làm VACUUM trên PRIMARY không dọn được.
+SELECT slot_name, xmin, catalog_xmin, age(xmin) AS xmin_age FROM pg_replication_slots;
+```
+
+Thử: mở `BEGIN ISOLATION LEVEL REPEATABLE READ; SELECT count(*) FROM orders;` trên **replica**, rồi lặp lại t3–t4 trên primary — VACUUM vẫn báo *dead but not yet removable*; `pg_replication_slots.xmin` chính là `backend_xmin` của transaction trên replica.
+
+Hậu quả nếu để lâu: bảng/index phình (bloat), Index Only Scan phải đọc heap nhiều hơn (visibility map không được set), và ở mức cực đoan là nguy cơ **transaction ID wraparound** (xem [mvcc-lab.md](mvcc-lab.md#7-transaction-id-và-wraparound)).
+
+**Phòng tránh**: transaction ngắn; báo cáo nặng chạy trên replica với `hot_standby_feedback` cân nhắc kỹ; giới hạn bằng `statement_timeout`, `idle_in_transaction_session_timeout`, và (PG17+) `transaction_timeout`; giám sát `max(age(backend_xmin))`.
+
+Dọn dẹp: `DELETE FROM replication_test WHERE token LIKE 'vac-%'; VACUUM replication_test;`
+
+---
+
+## 9. Idle in transaction
 
 | t | Session A | Session C |
 | --- | --- | --- |
@@ -326,7 +437,7 @@ Một transaction bỏ quên: giữ row lock (chặn người khác), giữ snap
 
 ---
 
-## 9. Tổng kết
+## 10. Tổng kết
 
 | Hiện tượng | READ COMMITTED | REPEATABLE READ | SERIALIZABLE |
 | --- | --- | --- | --- |

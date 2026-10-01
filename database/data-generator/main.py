@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 
 import psycopg
 
+from generators import bulk_ddl
 from generators.catalog import generate_catalog
 from generators.config import Config
 from generators.context import Context
@@ -31,8 +32,11 @@ EXPLICIT_ID_TABLES = ("users", "categories", "warehouses", "products", "orders")
 
 
 def _has_completed_run(conn: psycopg.Connection) -> bool:
+    """The LATEST run completed (an older COMPLETED run does not count when a later
+    RESET_DATA run was interrupted half way: its partial data must be regenerated)."""
     with conn.cursor() as cur:
-        cur.execute("SELECT EXISTS (SELECT 1 FROM data_generator_runs WHERE status = 'COMPLETED')")
+        cur.execute("SELECT coalesce((SELECT status = 'COMPLETED' FROM data_generator_runs "
+                    "ORDER BY id DESC LIMIT 1), false)")
         return cur.fetchone()[0]
 
 
@@ -47,6 +51,31 @@ def _truncate(conn: psycopg.Connection) -> None:
     with conn.cursor() as cur:
         cur.execute(f"TRUNCATE {', '.join(DATA_TABLES)} RESTART IDENTITY CASCADE")
     conn.commit()
+
+
+def _fix_product_launch_dates(conn: psycopg.Connection) -> None:
+    """Products are picked for order lines by popularity only, so a product can be
+    "sold" before its created_at. Move created_at of those products to shortly
+    before their first sale (1-60 days, derived from the id: no RNG, so the rest of
+    the dataset stays identical for a given SEED). The updated_at trigger is
+    disabled so it does not overwrite updated_at with the load time."""
+    print("Fixing product launch dates (no product sold before it was created)...", flush=True)
+    started = time.perf_counter()
+    with conn.cursor() as cur:
+        cur.execute("ALTER TABLE products DISABLE TRIGGER trg_products_updated_at")
+        cur.execute("""
+            UPDATE products p
+            SET created_at = f.first_sold_at
+                             - make_interval(days => 1 + (p.id % 60)::int, secs => (p.id % 86400)::float8)
+            FROM (SELECT i.product_id, min(o.created_at) AS first_sold_at
+                  FROM order_items i JOIN orders o ON o.id = i.order_id
+                  GROUP BY i.product_id) f
+            WHERE f.product_id = p.id AND f.first_sold_at < p.created_at
+        """)
+        fixed = cur.rowcount
+        cur.execute("ALTER TABLE products ENABLE TRIGGER trg_products_updated_at")
+    conn.commit()
+    print(f"  {fixed:,} products moved before their first sale ({time.perf_counter() - started:.1f}s)", flush=True)
 
 
 def _finalize(cfg: Config) -> dict[str, int]:
@@ -82,6 +111,13 @@ def _print_summary(cfg: Config, counts: dict[str, int], elapsed: float) -> None:
     print("=" * 60, flush=True)
 
 
+def _reference_now(cfg: Config) -> datetime:
+    if not cfg.data_now:
+        return datetime.now(timezone.utc).replace(microsecond=0)
+    now = datetime.fromisoformat(cfg.data_now.replace("Z", "+00:00"))
+    return (now if now.tzinfo else now.replace(tzinfo=timezone.utc)).astimezone(timezone.utc)
+
+
 def main() -> int:
     cfg = Config.from_env()
     settings = {k: v for k, v in asdict(cfg).items() if k != "db_password"}
@@ -93,6 +129,7 @@ def main() -> int:
 
     conn = connect(cfg)
     if _has_completed_run(conn) and not cfg.reset_data:
+        bulk_ddl.restore_pending(conn)
         print("Data already generated (data_generator_runs has a COMPLETED run) -> skipping.\n"
               "Use RESET_DATA=true to wipe and regenerate:\n"
               "  docker compose run --rm -e RESET_DATA=true data-generator")
@@ -101,6 +138,9 @@ def main() -> int:
         if not cfg.reset_data:
             print("Found data from an unfinished run -> starting over.")
         _truncate(conn)
+    # an interrupted earlier run may have left indexes/FKs dropped: re-create them
+    # now, while the tables are empty (instant)
+    bulk_ddl.restore_pending(conn)
 
     with conn.cursor() as cur:
         cur.execute("INSERT INTO data_generator_runs (status, settings) VALUES ('RUNNING', %s) RETURNING id",
@@ -109,13 +149,17 @@ def main() -> int:
     conn.commit()
 
     started = time.perf_counter()
+    deferred = bulk_ddl.drop_for_load(conn, run_id, DATA_TABLES)
     try:
-        ctx = Context.create(cfg, conn, now=datetime.now(timezone.utc).replace(microsecond=0))
+        ctx = Context.create(cfg, conn, now=_reference_now(cfg))
         catalog = generate_catalog(ctx)
         users = generate_users(ctx)
         products = generate_products(ctx, catalog)
         purchases = generate_orders(ctx, users, products)
         generate_reviews(ctx, users, products, purchases)
+        del users, products, purchases
+        _fix_product_launch_dates(conn)
+        bulk_ddl.rebuild_after_load(conn, run_id, deferred)    # FKs re-validate every row here
         counts = _finalize(cfg)
     except Exception as exc:
         conn.rollback()
@@ -123,6 +167,13 @@ def main() -> int:
             cur.execute("UPDATE data_generator_runs SET status = 'FAILED', error = %s, finished_at = now() "
                         "WHERE id = %s", (repr(exc), run_id))
         conn.commit()
+        try:
+            bulk_ddl.restore_pending(conn)
+        except Exception as restore_exc:      # keep the original error; next run retries the restore
+            conn.rollback()
+            print(f"WARNING: could not restore indexes/constraints ({restore_exc!r}); "
+                  f"they are recorded in data_generator_runs.deferred_ddl and re-created on the next run",
+                  flush=True)
         raise
 
     with conn.cursor() as cur:

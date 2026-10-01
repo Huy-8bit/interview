@@ -9,3 +9,6 @@ backups/*
 __pycache__/
 *.pyc
 .venv/
+
+# Logs of scripts/test-optimization-labs.sh
+sql/optimization/.runs/

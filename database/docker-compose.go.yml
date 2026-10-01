@@ -1,0 +1,29 @@
+# Opt-in override; loaded only by scripts/generate-data-go.sh.
+services:
+  data-generator-go:
+    profiles: [go-generator]
+    build:
+      context: ./data-generator-go
+    image: postgresql-lab/data-generator-go:latest
+    environment:
+      DB_HOST: ${DB_HOST:-postgres-primary}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-${POSTGRES_DB:-ecommerce}}
+      DB_USER: ${DB_USER:-${POSTGRES_USER:-postgres}}
+      DB_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD:-postgres}}
+      AUTO_GENERATE: ${AUTO_GENERATE:-true}
+      RESET_DATA: ${RESET_DATA:-false}
+      SEED: ${SEED:-42}
+      DATA_NOW: ${DATA_NOW:-}
+      BATCH_SIZE: ${BATCH_SIZE:-}
+      GO_WORKERS: ${GO_WORKERS:-4}
+      NUM_USERS: ${NUM_USERS:-100000}
+      NUM_PRODUCTS: ${NUM_PRODUCTS:-100000}
+      NUM_INVENTORY: ${NUM_INVENTORY:-100000}
+      NUM_ORDERS: ${NUM_ORDERS:-500000}
+      NUM_ORDER_ITEMS: ${NUM_ORDER_ITEMS:-1500000}
+      NUM_REVIEWS: ${NUM_REVIEWS:-300000}
+      HEAVY_USER_SHARE: ${HEAVY_USER_SHARE:-0.20}
+      HEAVY_USER_ORDER_SHARE: ${HEAVY_USER_ORDER_SHARE:-0.70}
+    networks: [pgnet]
+    restart: "no"

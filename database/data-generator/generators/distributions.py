@@ -10,6 +10,7 @@ from __future__ import annotations
 import bisect
 import math
 import random
+from array import array
 from datetime import datetime, timedelta, timezone
 from itertools import accumulate
 from typing import Generic, Sequence, TypeVar
@@ -22,13 +23,17 @@ HOUR_WEIGHTS = [2, 1, 1, 1, 1, 2, 3, 5, 6, 7, 7, 8, 9, 8, 7, 7, 8, 9, 11, 13, 14
 
 
 class WeightedSampler(Generic[T]):
-    """O(log n) weighted sampling with pre-computed cumulative weights."""
+    """O(log n) weighted sampling with pre-computed cumulative weights.
+
+    `items` may be a range or an array (kept as is, no copy) so that sampling
+    over millions of products costs 8 bytes per item instead of a Python list.
+    """
 
     def __init__(self, items: Sequence[T], weights: Sequence[float]):
         if len(items) != len(weights) or not items:
             raise ValueError("items and weights must be non-empty and the same length")
-        self.items = list(items)
-        self.cum = list(accumulate(weights))
+        self.items = items if isinstance(items, (range, array)) else list(items)
+        self.cum = array("d", accumulate(weights))
         self.total = self.cum[-1]
         if self.total <= 0:
             raise ValueError("sum of weights must be > 0")
@@ -98,3 +103,18 @@ def cents_to_str(cents: int) -> str:
 
 def days_ago(now: datetime, days: float) -> datetime:
     return now - timedelta(days=days)
+
+
+# Timestamps kept for millions of rows are stored as integer microseconds since
+# the epoch in an array('q'): 8 bytes each instead of ~56 for a datetime object,
+# and (unlike float timestamps) the round trip is exact.
+_EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+_ONE_US = timedelta(microseconds=1)
+
+
+def to_us(dt: datetime) -> int:
+    return (dt - _EPOCH) // _ONE_US
+
+
+def from_us(us: int) -> datetime:
+    return _EPOCH + timedelta(microseconds=us)

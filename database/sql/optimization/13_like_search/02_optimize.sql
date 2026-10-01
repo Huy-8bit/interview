@@ -1,0 +1,22 @@
+-- =============================================================================
+-- Lab 13 · LIKE 'prefix%' vs ILIKE '%contains%': pattern ops vs trigram — OPTIMIZE · Strategy A
+-- Strategy A: B-tree (name varchar_pattern_ops)
+-- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
+-- =============================================================================
+
+-- What / why:
+-- Compares strings byte by byte (ignores the collation) so LIKE 'prefix%' can
+-- be turned into a range: name ~>=~ 'Sony Pro' AND name ~<~ 'Sony Prp'.
+-- Useless for '%contains%' and for ILIKE.
+
+CREATE INDEX ix_lab13_products_name_pattern ON products (name varchar_pattern_ops);
+
+-- Check what was created / changed:
+SELECT indexname, pg_size_pretty(pg_relation_size(format('%I', indexname)::regclass)) AS size
+FROM pg_indexes WHERE tablename = 'products' ORDER BY 1;
+
+-- Undo only this strategy:
+-- DROP INDEX IF EXISTS ix_lab13_products_name_pattern;
+
+-- Next: run 03_after.sql, compare with 01_before.sql, then 05_reset.sql.

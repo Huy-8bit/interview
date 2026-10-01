@@ -120,7 +120,7 @@ SELECT * FROM orders LIMIT 5;
 SELECT * FROM orders WHERE user_id = 55368 AND status = 'COMPLETED' ORDER BY created_at DESC;
 ```
 
-(Chi tiết từng bước: [query-optimization-lab.md](query-optimization-lab.md).)
+(Chi tiết từng bước: [index-lab.md §3.1](index-lab.md#31-bài-tập-tối-ưu-truy-vấn-đơn-hàng-của-tôi); cách đọc plan: [query-optimization-lab.md](query-optimization-lab.md).)
 
 **7.2** Phân trang: lấy trang thứ 5000 (20 dòng/trang) của danh sách đơn mới nhất bằng `OFFSET`, rồi bằng **keyset pagination**. So sánh.
 

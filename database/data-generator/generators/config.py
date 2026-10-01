@@ -43,6 +43,9 @@ class Config:
     num_reviews: int
     heavy_user_share: float
     heavy_user_order_share: float
+    # Reference "now" (ISO 8601, e.g. 2026-10-01T00:00:00Z). Empty = current time.
+    # Fixing it makes runs reproducible: same SEED + same DATA_NOW -> identical data.
+    data_now: str = ""
 
     # How far back in time orders go (users/products start one year earlier)
     history_days: int = 3 * 365
@@ -72,6 +75,7 @@ class Config:
             num_reviews=_env_int("NUM_REVIEWS", 300_000),
             heavy_user_share=_env_float("HEAVY_USER_SHARE", 0.20),
             heavy_user_order_share=_env_float("HEAVY_USER_ORDER_SHARE", 0.70),
+            data_now=os.getenv("DATA_NOW", "").strip(),
         )
         if cfg.num_orders and cfg.num_order_items < cfg.num_orders:
             raise ValueError("NUM_ORDER_ITEMS must be >= NUM_ORDERS (every order has at least one line)")

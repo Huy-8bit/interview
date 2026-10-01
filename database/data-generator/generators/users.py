@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import json
+from array import array
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from .context import Context, ascii_slug
 from .db import Progress, copy_rows
-from .distributions import WeightedSampler, days_ago, skewed_between
+from .distributions import WeightedSampler, days_ago, skewed_between, to_us
 from .reference import (EMAIL_DOMAIN_WEIGHTS, EMAIL_DOMAINS, INTERNATIONAL_CITIES, INTERNATIONAL_SHARE,
                         LANGUAGE_WEIGHTS, LANGUAGES, SIGNUP_SOURCE_WEIGHTS, SIGNUP_SOURCES, US_TOP_CITIES)
 
@@ -25,11 +26,11 @@ BCRYPT_ALPHABET = "./ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
 
 @dataclass
 class UserData:
-    created_at: list[datetime]          # index = user_id - 1
-    shipping_address: list[str]         # JSON snapshot of the default address, index = user_id - 1
-    country: list[str]
-    heavy_ids: list[int]                # the ~20% of users that place ~70% of orders
-    light_ids: list[int]
+    # Compact arrays only (millions of users): orders look up the default address
+    # (shipping snapshot + country) in the database batch by batch instead.
+    created_us: array                   # signup time in epoch microseconds, index = user_id - 1
+    heavy_ids: array                    # the ~20% of users that place ~70% of orders
+    light_ids: array
     heavy_flags: bytearray
 
     def pick_buyer(self, ctx: Context) -> int:
@@ -83,11 +84,11 @@ def generate_users(ctx: Context) -> UserData:
     created_at = sorted(skewed_between(rng, oldest, newest, recency=0.6) for _ in range(n))
 
     heavy_count = max(1, round(n * cfg.heavy_user_share))
-    heavy_ids = sorted(rng.sample(range(1, n + 1), heavy_count))
+    heavy_ids = array("q", sorted(rng.sample(range(1, n + 1), heavy_count)))
     heavy_flags = bytearray(n + 1)
     for uid in heavy_ids:
         heavy_flags[uid] = 1
-    light_ids = [uid for uid in range(1, n + 1) if not heavy_flags[uid]]
+    light_ids = array("q", (uid for uid in range(1, n + 1) if not heavy_flags[uid]))
 
     geo = _Geo(ctx)
     domain_sampler = WeightedSampler(EMAIL_DOMAINS, EMAIL_DOMAIN_WEIGHTS)
@@ -96,9 +97,6 @@ def generate_users(ctx: Context) -> UserData:
     status_sampler = WeightedSampler(("ACTIVE", "INACTIVE", "SUSPENDED", "DELETED"), (90, 6, 1, 3))
     gender_sampler = WeightedSampler(("M", "F", "O", None), (47, 48, 2, 3))
     label_sampler = WeightedSampler(("WORK", "OTHER"), (60, 40))
-
-    shipping_address: list[str] = [""] * n
-    countries: list[str] = [""] * n
 
     users_progress = Progress("Users", n)
     total_addresses = 0
@@ -124,7 +122,6 @@ def generate_users(ctx: Context) -> UserData:
                 email = email[0].upper() + email[1:].replace("@g", "@G")
 
             country, city, state, postal = geo.pick()
-            countries[idx] = country
             phone = _phone(rng, country) if rng.random() < 0.85 else None
             created = created_at[idx]
 
@@ -183,11 +180,6 @@ def generate_users(ctx: Context) -> UserData:
                     phone if a == 0 else (_phone(rng, country_a) if rng.random() < 0.7 else None),
                     line1, line2, city, state, postal, country_a, a == 0, addr_created,
                 ))
-                if a == 0:
-                    shipping_address[idx] = json.dumps({
-                        "recipient_name": recipient, "phone": phone, "line1": line1, "line2": line2,
-                        "city": city, "state": state, "postal_code": postal, "country_code": country_a,
-                    }, separators=(",", ":"))
 
         copy_rows(ctx.conn, "users", USER_COLUMNS, user_rows)
         copy_rows(ctx.conn, "addresses", ADDRESS_COLUMNS, address_rows)
@@ -196,4 +188,6 @@ def generate_users(ctx: Context) -> UserData:
         users_progress.advance(len(user_rows))
 
     users_progress.finish(f"{total_addresses:,} addresses")
-    return UserData(created_at, shipping_address, countries, heavy_ids, light_ids, heavy_flags)
+    created_us = array("q", map(to_us, created_at))
+    del created_at
+    return UserData(created_us, heavy_ids, light_ids, heavy_flags)

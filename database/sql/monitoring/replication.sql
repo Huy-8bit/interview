@@ -80,10 +80,18 @@ SELECT pg_is_in_recovery()                        AS in_recovery,
        pg_last_wal_replay_lsn()                   AS replay_lsn,         -- applied by the startup process
        pg_size_pretty(pg_wal_lsn_diff(pg_last_wal_receive_lsn(), pg_last_wal_replay_lsn())) AS receive_replay_gap,
        pg_last_xact_replay_timestamp()            AS last_replayed_commit_time,
-       CASE WHEN pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() THEN interval '0'
-            ELSE now() - pg_last_xact_replay_timestamp()
-       END                                         AS replay_delay,
+       -- NOT a lag metric: keeps growing while the primary is idle. receive_lsn may also stop in the
+       -- middle of a WAL record (not replayable yet), so "receive = replay" is not a caught-up test.
+       -- Real lag: pg_stat_replication on the PRIMARY (section above) or ./scripts/check-replication.sh
+       now() - pg_last_xact_replay_timestamp()    AS since_last_replayed_commit,
        pg_is_wal_replay_paused()                  AS replay_paused;
+
+-- -----------------------------------------------------------------------------
+-- [REPLICA] Distance from the last WAL position the primary reported
+-- -----------------------------------------------------------------------------
+SELECT pg_size_pretty(pg_wal_lsn_diff(latest_end_lsn, pg_last_wal_replay_lsn())) AS behind_last_reported,
+       latest_end_time
+FROM pg_stat_wal_receiver;
 
 -- -----------------------------------------------------------------------------
 -- [REPLICA] Queries cancelled because of replay conflicts (per database)

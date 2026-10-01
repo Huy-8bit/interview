@@ -309,6 +309,9 @@ CREATE TABLE data_generator_runs (
   settings     jsonb       NOT NULL,
   row_counts   jsonb,
   error        text,
+  -- index / UNIQUE / FK definitions dropped for the bulk load and not rebuilt yet
+  -- (the next run re-creates them if the generator died half way)
+  deferred_ddl jsonb,
   started_at   timestamptz NOT NULL DEFAULT now(),
   finished_at  timestamptz
 );

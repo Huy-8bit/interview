@@ -32,8 +32,10 @@ services:
       - "${BIND_ADDRESS:-127.0.0.1}:${PRIMARY_PORT:-5432}:5432"
     volumes:
       - postgres_primary_data:/var/lib/postgresql/data
-    # Parallel query / hash joins use POSIX shared memory; Docker's default 64MB is too small.
-    shm_size: 256mb
+    # Parallel query and maintenance use POSIX shared memory in /dev/shm.
+    # The 2GB default leaves headroom for concurrent workers on large tables;
+    # override POSTGRES_SHM_SIZE for larger lab profiles if Docker has enough RAM.
+    shm_size: ${POSTGRES_SHM_SIZE:-2gb}
     healthcheck:
       # -h 127.0.0.1 matters: during first-time init the entrypoint runs a temporary
       # server that listens on the unix socket only, so TCP readiness == init finished.
@@ -62,7 +64,7 @@ services:
       - "${BIND_ADDRESS:-127.0.0.1}:${REPLICA_PORT:-5433}:5432"
     volumes:
       - postgres_replica_data:/var/lib/postgresql/data
-    shm_size: 256mb
+    shm_size: ${POSTGRES_SHM_SIZE:-2gb}
     depends_on:
       postgres-primary:
         condition: service_healthy
@@ -95,6 +97,7 @@ services:
       AUTO_GENERATE: ${AUTO_GENERATE:-true}
       RESET_DATA: ${RESET_DATA:-false}
       SEED: ${SEED:-42}
+      DATA_NOW: ${DATA_NOW:-}
       BATCH_SIZE: ${BATCH_SIZE:-10000}
       FAKER_LOCALE: ${FAKER_LOCALE:-en_US}
       NUM_USERS: ${NUM_USERS:-100000}

@@ -1,0 +1,1296 @@
+{
+  "ADJECTIVES": [
+    "Pro",
+    "Ultra",
+    "Classic",
+    "Essential",
+    "Premium",
+    "Lite",
+    "Max",
+    "Smart",
+    "Eco",
+    "Deluxe",
+    "Compact",
+    "Signature",
+    "Sport",
+    "Urban",
+    "Everyday",
+    "Advanced",
+    "Mini",
+    "Plus",
+    "Original",
+    "Vintage"
+  ],
+  "BENEFITS": [
+    "Perfect for everyday use.",
+    "A great gift for friends and family.",
+    "Loved by thousands of customers.",
+    "Designed for people on the go.",
+    "Built to last for years.",
+    "Easy to clean and maintain.",
+    "Ideal for beginners and professionals alike.",
+    "Our best-selling model this season."
+  ],
+  "BOOK_LANGUAGES": [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Vietnamese",
+    "Japanese"
+  ],
+  "BOOK_LANGUAGE_WEIGHTS": [
+    82,
+    5,
+    4,
+    3,
+    4,
+    2
+  ],
+  "BOOK_WORDS_A": [
+    "Silent",
+    "Hidden",
+    "Last",
+    "Broken",
+    "Golden",
+    "Midnight",
+    "Forgotten",
+    "Wild",
+    "Crimson",
+    "Distant",
+    "Little",
+    "Secret",
+    "Practical",
+    "Modern",
+    "Complete",
+    "Effective",
+    "Clean",
+    "Deep"
+  ],
+  "BOOK_WORDS_B": [
+    "River",
+    "Kingdom",
+    "Garden",
+    "Promise",
+    "Code",
+    "Mountain",
+    "Letters",
+    "Habits",
+    "Empire",
+    "Ocean",
+    "Machine",
+    "Journey",
+    "Kitchen",
+    "Mind",
+    "Systems",
+    "Architecture",
+    "Data",
+    "Summer"
+  ],
+  "CAR_MAKES": [
+    "Toyota",
+    "Honda",
+    "Ford",
+    "BMW",
+    "Tesla",
+    "Hyundai",
+    "Kia",
+    "Mazda",
+    "Volkswagen",
+    "Chevrolet"
+  ],
+  "CATEGORY_TREE": [
+    {
+      "name": "Electronics",
+      "code": "ELE",
+      "kind": "electronics",
+      "brands": [
+        "Apple",
+        "Samsung",
+        "Sony",
+        "LG",
+        "Xiaomi",
+        "Lenovo",
+        "Dell",
+        "HP",
+        "Asus",
+        "Anker",
+        "Bose",
+        "JBL",
+        "Canon",
+        "Nikon",
+        "Logitech"
+      ],
+      "weight_grams": [
+        80,
+        3500
+      ],
+      "leaves": [
+        {
+          "name": "Smartphones",
+          "code": "PHN",
+          "nouns": [
+            "Smartphone",
+            "Phone"
+          ],
+          "price_min": 99,
+          "price_max": 1599,
+          "weight": 3
+        },
+        {
+          "name": "Laptops",
+          "code": "LAP",
+          "nouns": [
+            "Laptop",
+            "Notebook",
+            "Ultrabook"
+          ],
+          "price_min": 299,
+          "price_max": 3499,
+          "weight": 2
+        },
+        {
+          "name": "Audio",
+          "code": "AUD",
+          "nouns": [
+            "Headphones",
+            "Earbuds",
+            "Bluetooth Speaker",
+            "Soundbar"
+          ],
+          "price_min": 15,
+          "price_max": 599,
+          "weight": 3
+        },
+        {
+          "name": "Cameras",
+          "code": "CAM",
+          "nouns": [
+            "Mirrorless Camera",
+            "Action Camera",
+            "Lens",
+            "Webcam"
+          ],
+          "price_min": 39,
+          "price_max": 2999,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "Fashion",
+      "code": "FAS",
+      "kind": "fashion",
+      "brands": [
+        "Nike",
+        "Adidas",
+        "Zara",
+        "H&M",
+        "Uniqlo",
+        "Levi's",
+        "Gucci",
+        "Puma",
+        "Under Armour",
+        "Ralph Lauren",
+        "Gap",
+        "Mango"
+      ],
+      "weight_grams": [
+        100,
+        2000
+      ],
+      "leaves": [
+        {
+          "name": "Men's Clothing",
+          "code": "MEN",
+          "nouns": [
+            "T-Shirt",
+            "Jeans",
+            "Jacket",
+            "Hoodie",
+            "Polo Shirt",
+            "Chinos"
+          ],
+          "price_min": 9,
+          "price_max": 199,
+          "weight": 4
+        },
+        {
+          "name": "Women's Clothing",
+          "code": "WOM",
+          "nouns": [
+            "Dress",
+            "Blouse",
+            "Skirt",
+            "Cardigan",
+            "Leggings",
+            "Coat"
+          ],
+          "price_min": 9,
+          "price_max": 249,
+          "weight": 5
+        },
+        {
+          "name": "Shoes",
+          "code": "SHO",
+          "nouns": [
+            "Sneakers",
+            "Running Shoes",
+            "Boots",
+            "Sandals",
+            "Loafers"
+          ],
+          "price_min": 19,
+          "price_max": 299,
+          "weight": 3
+        },
+        {
+          "name": "Accessories",
+          "code": "ACC",
+          "nouns": [
+            "Backpack",
+            "Wallet",
+            "Belt",
+            "Sunglasses",
+            "Watch",
+            "Cap"
+          ],
+          "price_min": 5,
+          "price_max": 499,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "name": "Home & Kitchen",
+      "code": "HOM",
+      "kind": "home",
+      "brands": [
+        "IKEA",
+        "KitchenAid",
+        "Philips",
+        "Dyson",
+        "Tefal",
+        "Cuisinart",
+        "Nespresso",
+        "Le Creuset",
+        "Muji",
+        "Instant Pot"
+      ],
+      "weight_grams": [
+        200,
+        40000
+      ],
+      "leaves": [
+        {
+          "name": "Furniture",
+          "code": "FUR",
+          "nouns": [
+            "Office Chair",
+            "Desk",
+            "Bookshelf",
+            "Sofa",
+            "Coffee Table"
+          ],
+          "price_min": 49,
+          "price_max": 1999,
+          "weight": 1
+        },
+        {
+          "name": "Kitchen Appliances",
+          "code": "KIT",
+          "nouns": [
+            "Blender",
+            "Air Fryer",
+            "Coffee Maker",
+            "Toaster",
+            "Rice Cooker",
+            "Kettle"
+          ],
+          "price_min": 19,
+          "price_max": 699,
+          "weight": 3
+        },
+        {
+          "name": "Bedding",
+          "code": "BED",
+          "nouns": [
+            "Pillow",
+            "Duvet",
+            "Bed Sheet Set",
+            "Mattress Topper"
+          ],
+          "price_min": 15,
+          "price_max": 399,
+          "weight": 2
+        },
+        {
+          "name": "Home Decor",
+          "code": "DEC",
+          "nouns": [
+            "Lamp",
+            "Wall Art",
+            "Vase",
+            "Scented Candle",
+            "Rug",
+            "Mirror"
+          ],
+          "price_min": 5,
+          "price_max": 499,
+          "weight": 2
+        }
+      ]
+    },
+    {
+      "name": "Beauty",
+      "code": "BEA",
+      "kind": "beauty",
+      "brands": [
+        "L'Oreal",
+        "Estee Lauder",
+        "Clinique",
+        "Neutrogena",
+        "Maybelline",
+        "Dove",
+        "Olay",
+        "The Ordinary",
+        "Chanel",
+        "Dior"
+      ],
+      "weight_grams": [
+        30,
+        800
+      ],
+      "leaves": [
+        {
+          "name": "Skincare",
+          "code": "SKN",
+          "nouns": [
+            "Moisturizer",
+            "Serum",
+            "Cleanser",
+            "Sunscreen",
+            "Toner"
+          ],
+          "price_min": 5,
+          "price_max": 199,
+          "weight": 4
+        },
+        {
+          "name": "Makeup",
+          "code": "MKP",
+          "nouns": [
+            "Lipstick",
+            "Foundation",
+            "Mascara",
+            "Eyeshadow Palette"
+          ],
+          "price_min": 4,
+          "price_max": 89,
+          "weight": 3
+        },
+        {
+          "name": "Haircare",
+          "code": "HAI",
+          "nouns": [
+            "Shampoo",
+            "Conditioner",
+            "Hair Oil",
+            "Hair Dryer"
+          ],
+          "price_min": 4,
+          "price_max": 399,
+          "weight": 2
+        },
+        {
+          "name": "Fragrance",
+          "code": "FRG",
+          "nouns": [
+            "Eau de Parfum",
+            "Eau de Toilette",
+            "Body Mist"
+          ],
+          "price_min": 15,
+          "price_max": 349,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "Sports & Outdoors",
+      "code": "SPO",
+      "kind": "sports",
+      "brands": [
+        "Nike",
+        "Adidas",
+        "Decathlon",
+        "Garmin",
+        "Wilson",
+        "Coleman",
+        "The North Face",
+        "Yeti",
+        "Specialized",
+        "Columbia"
+      ],
+      "weight_grams": [
+        100,
+        25000
+      ],
+      "leaves": [
+        {
+          "name": "Fitness",
+          "code": "FIT",
+          "nouns": [
+            "Yoga Mat",
+            "Dumbbell Set",
+            "Resistance Bands",
+            "Kettlebell",
+            "Treadmill"
+          ],
+          "price_min": 9,
+          "price_max": 1499,
+          "weight": 2
+        },
+        {
+          "name": "Camping",
+          "code": "CMP",
+          "nouns": [
+            "Tent",
+            "Sleeping Bag",
+            "Camping Stove",
+            "Headlamp",
+            "Cooler"
+          ],
+          "price_min": 9,
+          "price_max": 599,
+          "weight": 1
+        },
+        {
+          "name": "Cycling",
+          "code": "CYC",
+          "nouns": [
+            "Road Bike",
+            "Mountain Bike",
+            "Bike Helmet",
+            "Bike Light"
+          ],
+          "price_min": 15,
+          "price_max": 3999,
+          "weight": 1
+        },
+        {
+          "name": "Team Sports",
+          "code": "TMS",
+          "nouns": [
+            "Football",
+            "Basketball",
+            "Tennis Racket",
+            "Badminton Set"
+          ],
+          "price_min": 9,
+          "price_max": 299,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "code": "BOK",
+      "kind": "books",
+      "brands": [
+        "Penguin",
+        "HarperCollins",
+        "O'Reilly",
+        "Macmillan",
+        "Simon & Schuster",
+        "Hachette",
+        "Scholastic",
+        "Wiley"
+      ],
+      "weight_grams": [
+        150,
+        1500
+      ],
+      "leaves": [
+        {
+          "name": "Fiction",
+          "code": "FIC",
+          "nouns": [
+            "Novel",
+            "Thriller",
+            "Fantasy Saga",
+            "Mystery"
+          ],
+          "price_min": 5,
+          "price_max": 39,
+          "weight": 3
+        },
+        {
+          "name": "Non-fiction",
+          "code": "NFI",
+          "nouns": [
+            "Biography",
+            "History",
+            "Self-Help Guide",
+            "Cookbook"
+          ],
+          "price_min": 8,
+          "price_max": 49,
+          "weight": 2
+        },
+        {
+          "name": "Children's Books",
+          "code": "CHB",
+          "nouns": [
+            "Picture Book",
+            "Activity Book",
+            "Story Collection"
+          ],
+          "price_min": 4,
+          "price_max": 29,
+          "weight": 2
+        },
+        {
+          "name": "Textbooks",
+          "code": "TXT",
+          "nouns": [
+            "Textbook",
+            "Programming Guide",
+            "Exam Prep Book"
+          ],
+          "price_min": 19,
+          "price_max": 199,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "Toys & Games",
+      "code": "TOY",
+      "kind": "toys",
+      "brands": [
+        "LEGO",
+        "Hasbro",
+        "Mattel",
+        "Ravensburger",
+        "Fisher-Price",
+        "Hot Wheels",
+        "Nerf",
+        "Melissa & Doug"
+      ],
+      "weight_grams": [
+        50,
+        5000
+      ],
+      "leaves": [
+        {
+          "name": "Board Games",
+          "code": "BRD",
+          "nouns": [
+            "Board Game",
+            "Card Game",
+            "Strategy Game"
+          ],
+          "price_min": 9,
+          "price_max": 99,
+          "weight": 2
+        },
+        {
+          "name": "Building Sets",
+          "code": "BLD",
+          "nouns": [
+            "Building Set",
+            "Construction Kit",
+            "Robot Kit"
+          ],
+          "price_min": 9,
+          "price_max": 499,
+          "weight": 2
+        },
+        {
+          "name": "Dolls & Figures",
+          "code": "DOL",
+          "nouns": [
+            "Doll",
+            "Action Figure",
+            "Plush Toy"
+          ],
+          "price_min": 5,
+          "price_max": 99,
+          "weight": 1
+        },
+        {
+          "name": "Puzzles",
+          "code": "PUZ",
+          "nouns": [
+            "Jigsaw Puzzle",
+            "3D Puzzle",
+            "Brain Teaser"
+          ],
+          "price_min": 5,
+          "price_max": 59,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "Grocery",
+      "code": "GRO",
+      "kind": "grocery",
+      "brands": [
+        "Nestle",
+        "Kellogg's",
+        "Lay's",
+        "Coca-Cola",
+        "Starbucks",
+        "Lipton",
+        "Barilla",
+        "Heinz",
+        "Kirkland",
+        "Nature Valley"
+      ],
+      "weight_grams": [
+        50,
+        5000
+      ],
+      "leaves": [
+        {
+          "name": "Snacks",
+          "code": "SNK",
+          "nouns": [
+            "Chips",
+            "Granola Bars",
+            "Cookies",
+            "Mixed Nuts",
+            "Chocolate"
+          ],
+          "price_min": 1,
+          "price_max": 25,
+          "weight": 5
+        },
+        {
+          "name": "Beverages",
+          "code": "BEV",
+          "nouns": [
+            "Sparkling Water",
+            "Juice",
+            "Energy Drink",
+            "Soda Pack"
+          ],
+          "price_min": 1,
+          "price_max": 30,
+          "weight": 4
+        },
+        {
+          "name": "Coffee & Tea",
+          "code": "COF",
+          "nouns": [
+            "Ground Coffee",
+            "Coffee Beans",
+            "Green Tea",
+            "Coffee Pods"
+          ],
+          "price_min": 3,
+          "price_max": 45,
+          "weight": 4
+        },
+        {
+          "name": "Pantry",
+          "code": "PAN",
+          "nouns": [
+            "Pasta",
+            "Olive Oil",
+            "Rice",
+            "Pasta Sauce",
+            "Cereal"
+          ],
+          "price_min": 1,
+          "price_max": 35,
+          "weight": 3
+        }
+      ]
+    },
+    {
+      "name": "Automotive",
+      "code": "AUT",
+      "kind": "automotive",
+      "brands": [
+        "Bosch",
+        "3M",
+        "Michelin",
+        "Castrol",
+        "Garmin",
+        "Thule",
+        "Meguiar's",
+        "Armor All"
+      ],
+      "weight_grams": [
+        50,
+        8000
+      ],
+      "leaves": [
+        {
+          "name": "Car Electronics",
+          "code": "CEL",
+          "nouns": [
+            "Dash Cam",
+            "Car Charger",
+            "GPS Navigator",
+            "Phone Mount"
+          ],
+          "price_min": 9,
+          "price_max": 399,
+          "weight": 1
+        },
+        {
+          "name": "Tools",
+          "code": "TOL",
+          "nouns": [
+            "Socket Set",
+            "Jump Starter",
+            "Tire Inflator",
+            "Torque Wrench"
+          ],
+          "price_min": 9,
+          "price_max": 299,
+          "weight": 1
+        },
+        {
+          "name": "Car Care",
+          "code": "CCR",
+          "nouns": [
+            "Car Wax",
+            "Microfiber Towels",
+            "Car Shampoo",
+            "Interior Cleaner"
+          ],
+          "price_min": 4,
+          "price_max": 59,
+          "weight": 1
+        },
+        {
+          "name": "Parts",
+          "code": "PRT",
+          "nouns": [
+            "Wiper Blades",
+            "Air Filter",
+            "Brake Pads",
+            "Motor Oil"
+          ],
+          "price_min": 5,
+          "price_max": 199,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "code": "HEA",
+      "kind": "health",
+      "brands": [
+        "Nature Made",
+        "Centrum",
+        "Optimum Nutrition",
+        "Omron",
+        "Braun",
+        "Garden of Life",
+        "Myprotein",
+        "Oral-B"
+      ],
+      "weight_grams": [
+        50,
+        2500
+      ],
+      "leaves": [
+        {
+          "name": "Vitamins",
+          "code": "VIT",
+          "nouns": [
+            "Multivitamin",
+            "Vitamin D3",
+            "Omega-3",
+            "Magnesium"
+          ],
+          "price_min": 5,
+          "price_max": 59,
+          "weight": 3
+        },
+        {
+          "name": "Medical Supplies",
+          "code": "MED",
+          "nouns": [
+            "Blood Pressure Monitor",
+            "Thermometer",
+            "First Aid Kit",
+            "Pulse Oximeter"
+          ],
+          "price_min": 9,
+          "price_max": 149,
+          "weight": 1
+        },
+        {
+          "name": "Personal Care",
+          "code": "PER",
+          "nouns": [
+            "Electric Toothbrush",
+            "Razor",
+            "Water Flosser"
+          ],
+          "price_min": 5,
+          "price_max": 249,
+          "weight": 2
+        },
+        {
+          "name": "Sports Nutrition",
+          "code": "SPN",
+          "nouns": [
+            "Whey Protein",
+            "Creatine",
+            "Pre-Workout",
+            "Protein Bar"
+          ],
+          "price_min": 9,
+          "price_max": 89,
+          "weight": 2
+        }
+      ]
+    }
+  ],
+  "COLORS": [
+    "Black",
+    "White",
+    "Silver",
+    "Gray",
+    "Blue",
+    "Red",
+    "Green",
+    "Pink",
+    "Beige",
+    "Navy",
+    "Gold",
+    "Brown"
+  ],
+  "COLOR_WEIGHTS": [
+    30,
+    20,
+    8,
+    10,
+    9,
+    5,
+    4,
+    3,
+    3,
+    4,
+    2,
+    2
+  ],
+  "COUPONS": [
+    "WELCOME10",
+    "SAVE15",
+    "FREESHIP",
+    "BLACKFRIDAY25",
+    "VIP20",
+    "SUMMER10"
+  ],
+  "COUPON_WEIGHTS": [
+    30,
+    20,
+    25,
+    10,
+    5,
+    10
+  ],
+  "EMAIL_DOMAINS": [
+    "gmail.com",
+    "yahoo.com",
+    "outlook.com",
+    "icloud.com",
+    "hotmail.com",
+    "proton.me",
+    "example.com"
+  ],
+  "EMAIL_DOMAIN_WEIGHTS": [
+    45,
+    14,
+    14,
+    8,
+    7,
+    3,
+    9
+  ],
+  "FEATURES": [
+    "long-lasting durability",
+    "a minimalist design",
+    "premium materials",
+    "an ergonomic shape",
+    "fast charging",
+    "a lightweight build",
+    "eco-friendly packaging",
+    "a two-year warranty",
+    "award-winning design",
+    "easy one-hand operation",
+    "a water-resistant finish",
+    "all-day comfort"
+  ],
+  "HOME_MATERIALS": [
+    "Wood",
+    "Metal",
+    "Plastic",
+    "Glass",
+    "Ceramic",
+    "Fabric",
+    "Bamboo"
+  ],
+  "INTERNATIONAL_CITIES": [
+    [
+      "VN",
+      "Ho Chi Minh City",
+      null,
+      22
+    ],
+    [
+      "VN",
+      "Hanoi",
+      null,
+      15
+    ],
+    [
+      "VN",
+      "Da Nang",
+      null,
+      4
+    ],
+    [
+      "CA",
+      "Toronto",
+      "ON",
+      10
+    ],
+    [
+      "CA",
+      "Vancouver",
+      "BC",
+      6
+    ],
+    [
+      "GB",
+      "London",
+      null,
+      12
+    ],
+    [
+      "GB",
+      "Manchester",
+      null,
+      4
+    ],
+    [
+      "DE",
+      "Berlin",
+      null,
+      6
+    ],
+    [
+      "DE",
+      "Munich",
+      null,
+      4
+    ],
+    [
+      "FR",
+      "Paris",
+      null,
+      6
+    ],
+    [
+      "AU",
+      "Sydney",
+      "NSW",
+      6
+    ],
+    [
+      "AU",
+      "Melbourne",
+      "VIC",
+      4
+    ],
+    [
+      "JP",
+      "Tokyo",
+      null,
+      7
+    ],
+    [
+      "JP",
+      "Osaka",
+      null,
+      3
+    ],
+    [
+      "SG",
+      "Singapore",
+      null,
+      5
+    ]
+  ],
+  "INTERNATIONAL_SHARE": 0.15,
+  "LANGUAGES": [
+    "en",
+    "vi",
+    "es",
+    "fr",
+    "de",
+    "ja"
+  ],
+  "LANGUAGE_WEIGHTS": [
+    68,
+    12,
+    7,
+    5,
+    4,
+    4
+  ],
+  "MATERIALS": [
+    "Cotton",
+    "Polyester",
+    "Leather",
+    "Denim",
+    "Wool",
+    "Linen",
+    "Nylon"
+  ],
+  "PRODUCT_TAGS": [
+    "new",
+    "bestseller",
+    "sale",
+    "eco-friendly",
+    "limited-edition",
+    "premium",
+    "gift-idea",
+    "clearance",
+    "exclusive",
+    "trending"
+  ],
+  "PRODUCT_TAG_WEIGHTS": [
+    10,
+    6,
+    12,
+    5,
+    2,
+    5,
+    6,
+    4,
+    2,
+    4
+  ],
+  "REVIEW_SENTENCES": {
+    "positive": [
+      "The quality is outstanding.",
+      "Shipping was fast and the packaging was great.",
+      "I use it every day and it still looks new.",
+      "Exactly what I was looking for.",
+      "My whole family loves it.",
+      "Setup took less than five minutes.",
+      "Worth every penny.",
+      "Customer service was very helpful.",
+      "Already ordered a second one."
+    ],
+    "neutral": [
+      "It works, but the build feels a bit cheap.",
+      "Delivery took longer than expected.",
+      "Good enough for occasional use.",
+      "The color is slightly different from the photos.",
+      "Instructions could be clearer.",
+      "Fine for the price, nothing special."
+    ],
+    "negative": [
+      "It broke after a few days.",
+      "The size was completely wrong.",
+      "Customer support never answered my emails.",
+      "It does not match the description at all.",
+      "The box was damaged and parts were missing.",
+      "I returned it and I'm still waiting for the refund.",
+      "Battery life is terrible."
+    ]
+  },
+  "REVIEW_TITLES": {
+    "positive": [
+      "Absolutely love it",
+      "Great value for money",
+      "Exceeded my expectations",
+      "Highly recommend",
+      "Five stars",
+      "Works perfectly",
+      "Better than expected",
+      "Would buy again",
+      "Excellent quality"
+    ],
+    "neutral": [
+      "It's okay",
+      "Decent for the price",
+      "Does the job",
+      "Average product",
+      "Mixed feelings",
+      "Not bad, not great"
+    ],
+    "negative": [
+      "Very disappointed",
+      "Stopped working after a week",
+      "Not as described",
+      "Poor quality",
+      "Waste of money",
+      "Would not recommend",
+      "Arrived damaged"
+    ]
+  },
+  "SIGNUP_SOURCES": [
+    "web",
+    "ios_app",
+    "android_app",
+    "referral",
+    "facebook_ads",
+    "google_ads"
+  ],
+  "SIGNUP_SOURCE_WEIGHTS": [
+    35,
+    22,
+    20,
+    8,
+    8,
+    7
+  ],
+  "US_TOP_CITIES": [
+    [
+      "New York",
+      "NY",
+      16
+    ],
+    [
+      "Los Angeles",
+      "CA",
+      12
+    ],
+    [
+      "Chicago",
+      "IL",
+      8
+    ],
+    [
+      "Houston",
+      "TX",
+      7
+    ],
+    [
+      "Phoenix",
+      "AZ",
+      5
+    ],
+    [
+      "Philadelphia",
+      "PA",
+      5
+    ],
+    [
+      "San Antonio",
+      "TX",
+      4
+    ],
+    [
+      "San Diego",
+      "CA",
+      4
+    ],
+    [
+      "Dallas",
+      "TX",
+      4
+    ],
+    [
+      "San Jose",
+      "CA",
+      3
+    ],
+    [
+      "Austin",
+      "TX",
+      3
+    ],
+    [
+      "Seattle",
+      "WA",
+      3
+    ],
+    [
+      "Denver",
+      "CO",
+      3
+    ],
+    [
+      "Boston",
+      "MA",
+      3
+    ],
+    [
+      "Miami",
+      "FL",
+      3
+    ],
+    [
+      "Atlanta",
+      "GA",
+      3
+    ],
+    [
+      "Portland",
+      "OR",
+      2
+    ],
+    [
+      "Las Vegas",
+      "NV",
+      2
+    ],
+    [
+      "Nashville",
+      "TN",
+      2
+    ],
+    [
+      "Minneapolis",
+      "MN",
+      2
+    ]
+  ],
+  "WAREHOUSES": [
+    [
+      "US-WEST-1",
+      "Los Angeles Fulfillment Center",
+      "Los Angeles",
+      "US"
+    ],
+    [
+      "US-EAST-1",
+      "New Jersey Fulfillment Center",
+      "Newark",
+      "US"
+    ],
+    [
+      "US-CENTRAL-1",
+      "Dallas Fulfillment Center",
+      "Dallas",
+      "US"
+    ],
+    [
+      "EU-CENTRAL-1",
+      "Frankfurt Distribution Hub",
+      "Frankfurt",
+      "DE"
+    ],
+    [
+      "AP-SOUTHEAST-1",
+      "Singapore Distribution Hub",
+      "Singapore",
+      "SG"
+    ]
+  ]
+}

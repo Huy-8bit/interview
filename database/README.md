@@ -17,6 +17,22 @@ flowchart LR
 
 Chi tiết kiến trúc: [docs/architecture.md](docs/architecture.md).
 
+### Lệnh nhanh
+
+| Việc | Lệnh |
+| --- | --- |
+| Khởi động (build + bootstrap replica + sinh dữ liệu) | `docker compose up -d --build` |
+| Trạng thái / health | `docker compose ps` |
+| Log | `docker compose logs -f` |
+| Kiểm tra replication | `./scripts/check-replication.sh` |
+| Test INSERT primary → SELECT replica | `./scripts/replication-test.sh` |
+| psql vào primary / replica | `./scripts/psql.sh` / `./scripts/psql.sh replica` |
+| Backup / restore | `./scripts/backup.sh` / `./scripts/restore.sh backups/<file>.dump` |
+| Dừng (giữ dữ liệu) | `docker compose down` |
+| Xoá sạch dữ liệu (chỉ khi thật sự muốn) | `docker compose down -v` |
+
+Kết nối: **Primary `localhost:5432`**, **Replica `localhost:5433`**, database `ecommerce`, user/password `postgres` / `postgres`.
+
 ---
 
 ## 1. Yêu cầu
@@ -29,6 +45,7 @@ Chi tiết kiến trúc: [docs/architecture.md](docs/architecture.md).
 | Cổng trống | `5432`, `5433` (đổi được trong `.env`) |
 
 Không cần cài PostgreSQL trên máy: mọi script dùng `psql` bên trong container.
+Hai container PostgreSQL mặc định có giới hạn `/dev/shm` là 2 GB để hỗ trợ `VACUUM`/index song song trên bảng lớn. Có thể đổi bằng `POSTGRES_SHM_SIZE` trong `.env`; đây là giới hạn dung lượng, không phải RAM cấp phát trước. Các profile dữ liệu lớn cần Docker VM có đủ RAM và ổ đĩa riêng.
 
 ## 2. Khởi động
 
@@ -97,6 +114,9 @@ Data generation completed in 1.4 min  (database size: 798 MB)
 
 **DBeaver**: *Database → New Database Connection → PostgreSQL*, điền bảng trên (tạo 2 connection). Gợi ý:
 
+- Host luôn là `localhost` (hoặc `127.0.0.1`). **Không** dùng `postgres-primary` / `postgres-replica` — đó là hostname bên trong Docker network, máy host không phân giải được.
+- Lần đầu DBeaver sẽ đề nghị tải driver PostgreSQL — chọn *Download*.
+
 - Đặt tên `pglab PRIMARY` / `pglab REPLICA`, và ở tab *General* chọn *Connection type = Production* cho replica để DBeaver tô màu, dễ phân biệt.
 - Transaction lab cần mở **2 connection tới cùng primary** (Session A, Session B) và tắt *Auto-commit* khi đề bài yêu cầu `BEGIN` thủ công (hoặc dùng *Smart commit mode* off).
 
@@ -147,21 +167,58 @@ with psycopg.connect("host=localhost port=5433 dbname=ecommerce user=postgres pa
 
 ### Sinh lại / đổi kích thước dữ liệu
 
-Generator có tính **idempotent**: nếu đã có một lần chạy `COMPLETED` (bảng `data_generator_runs`) thì lần `up` sau sẽ bỏ qua.
+**Bản Go tạo data nhanh:** xem [data-generator-go/README.md](data-generator-go/README.md).
+Chạy `./scripts/generate-data-go.sh 5m --dry-run` để đo tốc độ sinh dữ liệu mà không
+kết nối DB. Bản Go từ chối DB có dữ liệu, không hỗ trợ reset/xóa; nạp DB mới bằng
+`DB_NAME=ecommerce_go ./scripts/generate-data-go.sh 5m --bulk-load --analyze`
+sau khi khởi tạo schema trong DB riêng. Script Python dưới đây vẫn có hành vi xóa dữ liệu cũ.
 
 ```bash
-# chạy generator thủ công (bỏ qua nếu đã có dữ liệu)
-docker compose run --rm data-generator
-
-# xoá sạch và sinh lại
-docker compose run --rm -e RESET_DATA=true data-generator
-
-# dataset nhỏ để thử nhanh
-docker compose run --rm -e RESET_DATA=true -e NUM_USERS=10000 -e NUM_PRODUCTS=10000 \
-  -e NUM_ORDERS=50000 -e NUM_ORDER_ITEMS=150000 -e NUM_INVENTORY=10000 -e NUM_REVIEWS=30000 data-generator
+./scripts/generate-data.sh small      # ~10% mặc định, < 1 phút
+./scripts/generate-data.sh default    # ~3.3 triệu dòng, ~1.5 phút (giống lần `up` đầu tiên)
+./scripts/generate-data.sh 5m         # ~5 triệu dòng mỗi bảng chính, ~20 phút, ~13 GB mỗi node
+./scripts/generate-data.sh custom     # lấy NUM_* / BATCH_SIZE từ .env
+#   thêm -y để không hỏi xác nhận, --no-verify để bỏ bước kiểm tra
 ```
 
-Hoặc sửa trong `.env` (`NUM_USERS`, `NUM_PRODUCTS`, `NUM_ORDERS`, `NUM_ORDER_ITEMS`, `NUM_INVENTORY`, `NUM_REVIEWS`, `BATCH_SIZE`, `SEED`, …). Cùng `SEED` → cùng dữ liệu.
+Script **xoá dữ liệu hiện tại** (TRUNCATE), sinh lại, kiểm tra replication, rồi chạy `./scripts/verify-data.sh`. Replica tự nhận dữ liệu mới qua streaming replication.
+
+Profile `5m` (đo trên Docker Desktop 8 CPU / 8 GB RAM; ở quy mô 1/5 mất 3.6 phút, 2.7 GB):
+
+| Bảng | Số dòng | Quan hệ |
+| --- | ---: | --- |
+| `users` | 5,000,000 | 20% user tạo ~65% số đơn |
+| `addresses` | ~8,000,000 | 1–3 địa chỉ/user, đúng 1 địa chỉ mặc định |
+| `products` | 5,000,000 | thuộc 1 trong 40 danh mục con; độ phổ biến theo Zipf |
+| `inventory` | 5,000,000 | `products.stock_quantity` = tổng tồn kho |
+| `orders` | 5,000,000 | đặt sau khi user đăng ký; `shipping_address` = địa chỉ mặc định của user |
+| `order_items` | ~10,000,000 | trung bình 2 dòng/đơn; `orders.subtotal` = tổng các dòng |
+| `payments` | ~5,150,000 | `amount` = `orders.total_amount`; trạng thái khớp trạng thái đơn; ~3% có lần thanh toán FAILED trước |
+| `reviews` | 5,000,000 | ~75% verified: trỏ tới đúng đơn COMPLETED của user có chứa sản phẩm đó |
+
+Muốn đúng 5 triệu `order_items` (mỗi đơn 1 dòng): dùng `custom` với `NUM_ORDER_ITEMS=5000000` trong `.env`.
+
+**Generator nạp nhanh thế nào**: `COPY` theo batch; trước khi nạp, nó tạm bỏ index phụ / UNIQUE / FOREIGN KEY và tạo lại sau khi nạp xong. Tạo index một lần bằng sort, rồi validate FK trên toàn bộ dữ liệu bằng một phép join, nhanh hơn ~20 lần so với cập nhật index từng dòng ở quy mô hàng triệu. Định nghĩa của các đối tượng bị bỏ được lưu vào `data_generator_runs.deferred_ddl` **trước khi** drop; nếu generator chết giữa chừng, lần chạy sau tự tạo lại. Bộ nhớ của generator luôn dưới ~1 GB nhờ dùng mảng gọn thay vì object Python.
+
+**Kiểm tra dữ liệu** (mặc định chạy trên replica):
+
+```bash
+./scripts/verify-data.sh              # 17 check: FK, tổng tiền, payment khớp đơn, review gắn với đơn thật,
+                                      # thứ tự thời gian (không bán sản phẩm trước khi nó tồn tại...),
+                                      # phân phối, và vài query JOIN mẫu trả về dữ liệu thật
+./scripts/verify-data.sh --primary
+```
+
+Chạy thủ công bằng compose (tương đương):
+
+```bash
+docker compose run --rm data-generator                    # bỏ qua nếu lần chạy gần nhất đã COMPLETED
+docker compose run --rm -e RESET_DATA=true data-generator # xoá và sinh lại theo .env
+```
+
+Mọi biến nằm trong `.env` (`NUM_USERS`, `NUM_PRODUCTS`, `NUM_ORDERS`, `NUM_ORDER_ITEMS`, `NUM_INVENTORY`, `NUM_REVIEWS`, `BATCH_SIZE`, `SEED`, `DATA_NOW`, …). Cùng `SEED` + cùng `DATA_NOW` → dữ liệu giống hệt từng byte.
+
+⚠️ Các con số trong docs (ví dụ "user 55368 có 36 đơn", kích thước index, thời gian query) được đo trên profile **default**. Ở profile `5m` plan và thời gian sẽ khác — đó cũng là một bài tập hay: so sánh plan của cùng một query ở hai quy mô.
 
 ## 5. Scripts
 
@@ -172,6 +229,9 @@ Hoặc sửa trong `.env` (`NUM_USERS`, `NUM_PRODUCTS`, `NUM_ORDERS`, `NUM_ORDER
 | [scripts/backup.sh](scripts/backup.sh) | `pg_dump` ra `backups/` (`--from-replica`, `--plain`, `--db`) |
 | [scripts/restore.sh](scripts/restore.sh) | `pg_restore` song song vào DB mới (mặc định `ecommerce_restore`) |
 | [scripts/rebuild-replica.sh](scripts/rebuild-replica.sh) | Xoá replica và clone lại từ primary (sau bài failover) |
+| [scripts/generate-data.sh](scripts/generate-data.sh) | Sinh lại dữ liệu theo profile `small` / `default` / `5m` / `custom`, rồi verify |
+| [scripts/verify-data.sh](scripts/verify-data.sh) | 17 check tính toàn vẹn / quan hệ / thời gian + query JOIN mẫu ([sql/verify/data-quality.sql](sql/verify/data-quality.sql)) |
+| [scripts/test-optimization-labs.sh](scripts/test-optimization-labs.sh) | Chạy toàn bộ lab tối ưu + thử thách, kiểm tra reset về baseline sau mỗi bài |
 | [scripts/psql.sh](scripts/psql.sh) | `psql` tương tác vào primary / replica |
 
 SQL giám sát dùng sẵn trong DBeaver: [sql/monitoring/](sql/monitoring/) — `replication.sql`, `activity.sql`, `locks.sql`, `size.sql`, `performance.sql`.
@@ -184,11 +244,12 @@ SQL giám sát dùng sẵn trong DBeaver: [sql/monitoring/](sql/monitoring/) —
 | 2 | [docs/sql-exercises.md](docs/sql-exercises.md) → [docs/sql-solutions.md](docs/sql-solutions.md) | 60 bài, 10 level: SQL cơ bản → JOIN → aggregation → CTE → window → index → optimization → transaction → locking → internals |
 | 3 | [docs/index-lab.md](docs/index-lab.md) | B-tree, composite, partial, expression, covering, GIN/JSONB, trigram, BRIN, index thừa, FK không có index |
 | 4 | [docs/query-optimization-lab.md](docs/query-optimization-lab.md) | Đọc EXPLAIN, estimate vs actual, các loại scan/join, statistics, work_mem, phân trang |
-| 5 | [docs/transaction-lab.md](docs/transaction-lab.md) | Session A/B: lost update, dirty/non-repeatable/phantom read, row lock, deadlock, isolation level |
+| 5 | [docs/transaction-lab.md](docs/transaction-lab.md) | Session A/B: lost update, dirty/non-repeatable/phantom read, `SELECT FOR UPDATE`, blocking, READ COMMITTED / REPEATABLE READ / SERIALIZABLE, deadlock, long-running transaction (hàng đợi lock, VACUUM bị chặn), idle in transaction |
 | 6 | [docs/mvcc-lab.md](docs/mvcc-lab.md) | `xmin`/`xmax`/`ctid`, pageinspect, HOT update, dead tuple, VACUUM |
-| 7 | [docs/monitoring.md](docs/monitoring.md) | `pg_stat_activity`, `pg_locks`, blocking, kích thước, `pg_stat_statements` |
+| 7 | [docs/monitoring.md](docs/monitoring.md) | `pg_stat_activity`, `pg_locks`, blocking tree, kích thước, `pg_stat_statements`, WAL/checkpoint, đọc đúng replication lag |
 | 8 | [docs/replication.md](docs/replication.md) | Luồng INSERT → WAL → replica chi tiết, metric, read/write, sync replication, failover |
-| 9 | [docs/backup-restore.md](docs/backup-restore.md) | `pg_dump`/`pg_restore`, logical vs physical, PITR |
+| 9 | [docs/backup-restore.md](docs/backup-restore.md) | `backup.sh`/`restore.sh`, định dạng dump, restore chọn lọc, khôi phục dữ liệu xoá nhầm, `pg_basebackup`, PITR |
+| 10 | [sql/optimization/](sql/optimization/) | **41 bài tối ưu query** trên dataset 5m (mỗi bài: before → EXPLAIN / ANALYZE / BUFFERS → tối ưu → after → so sánh → reset), plan quan sát thật, 15 thử thách + lời giải |
 
 ## 7. Dừng / reset
 
@@ -208,6 +269,7 @@ Volumes: `postgresql-lab_postgres_primary_data`, `postgresql-lab_postgres_replic
 | Triệu chứng | Nguyên nhân / cách xử lý |
 | --- | --- |
 | `Bind for 127.0.0.1:5432 failed: port is already allocated` | Có PostgreSQL/container khác đang dùng cổng. Tìm bằng `lsof -iTCP:5432 -sTCP:LISTEN` hoặc `docker ps`, hoặc đổi `PRIMARY_PORT`/`REPLICA_PORT` trong `.env` |
+| `check-replication.sh` báo `replay_lag` rỗng / `since_last_replayed_commit` tăng dần | Bình thường khi không có ghi mới: lag thật là dòng `lag` (so LSN primary vs replica) |
 | Replica `unhealthy` / `check-replication.sh` báo FAIL | `docker compose logs postgres-replica`. Nếu replica đã bị promote hoặc slot bị `lost`: `./scripts/rebuild-replica.sh` |
 | Generator in `Data already generated ... skipping` | Bình thường. Muốn sinh lại: `RESET_DATA=true` (xem mục 4) |
 | Generator bị dừng giữa chừng | Lần chạy sau tự phát hiện run chưa hoàn tất, truncate và sinh lại |
