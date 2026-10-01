@@ -1,0 +1,2 @@
+Faker==39.1.0
+psycopg[binary]==3.3.6

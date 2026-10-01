@@ -1,0 +1,11 @@
+# Local environment (defaults live in docker-compose.yml / .env.example)
+.env
+
+# Backups produced by scripts/backup.sh
+backups/*
+!backups/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/

@@ -1,0 +1,122 @@
+# =============================================================================
+# PostgreSQL Lab: Primary + Streaming Replica + Python data generator
+#
+#   docker compose up -d --build      # start everything (cluster bootstraps itself)
+#   docker compose down               # stop, keep data (volumes)
+#   docker compose down -v            # stop AND delete all data
+# =============================================================================
+name: postgresql-lab
+
+x-postgres-env: &postgres-env
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  POSTGRES_DB: ${POSTGRES_DB:-ecommerce}
+  REPLICATION_USER: ${REPLICATION_USER:-replicator}
+  REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-replicator_pass}
+  REPLICATION_SLOT: ${REPLICATION_SLOT:-replica_1_slot}
+  TZ: UTC
+
+services:
+  # ---------------------------------------------------------------------------
+  # PRIMARY: accepts reads + writes, streams WAL to the replica
+  # ---------------------------------------------------------------------------
+  postgres-primary:
+    build:
+      context: ./postgres/primary
+    image: postgresql-lab/postgres-primary:16
+    container_name: pglab-primary
+    hostname: postgres-primary
+    environment:
+      <<: *postgres-env
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${PRIMARY_PORT:-5432}:5432"
+    volumes:
+      - postgres_primary_data:/var/lib/postgresql/data
+    # Parallel query / hash joins use POSIX shared memory; Docker's default 64MB is too small.
+    shm_size: 256mb
+    healthcheck:
+      # -h 127.0.0.1 matters: during first-time init the entrypoint runs a temporary
+      # server that listens on the unix socket only, so TCP readiness == init finished.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    restart: unless-stopped
+    networks: [pgnet]
+
+  # ---------------------------------------------------------------------------
+  # REPLICA: hot standby, read-only, bootstrapped with pg_basebackup
+  # ---------------------------------------------------------------------------
+  postgres-replica:
+    build:
+      context: ./postgres/replica
+    image: postgresql-lab/postgres-replica:16
+    container_name: pglab-replica
+    hostname: postgres-replica
+    environment:
+      <<: *postgres-env
+      PRIMARY_HOST: postgres-primary
+      PRIMARY_PORT: 5432
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${REPLICA_PORT:-5433}:5432"
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+    shm_size: 256mb
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      # pg_basebackup of a large primary can take a while on first start
+      start_period: 300s
+    restart: unless-stopped
+    networks: [pgnet]
+
+  # ---------------------------------------------------------------------------
+  # DATA GENERATOR: one-shot job, loads fake e-commerce data into the PRIMARY
+  # (the replica receives it through streaming replication).
+  # Idempotent: skips when data already exists unless RESET_DATA=true.
+  # ---------------------------------------------------------------------------
+  data-generator:
+    build:
+      context: ./data-generator
+    image: postgresql-lab/data-generator:latest
+    container_name: pglab-data-generator
+    environment:
+      DB_HOST: postgres-primary
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-ecommerce}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      AUTO_GENERATE: ${AUTO_GENERATE:-true}
+      RESET_DATA: ${RESET_DATA:-false}
+      SEED: ${SEED:-42}
+      BATCH_SIZE: ${BATCH_SIZE:-10000}
+      FAKER_LOCALE: ${FAKER_LOCALE:-en_US}
+      NUM_USERS: ${NUM_USERS:-100000}
+      NUM_PRODUCTS: ${NUM_PRODUCTS:-100000}
+      NUM_ORDERS: ${NUM_ORDERS:-500000}
+      NUM_ORDER_ITEMS: ${NUM_ORDER_ITEMS:-1500000}
+      NUM_INVENTORY: ${NUM_INVENTORY:-100000}
+      NUM_REVIEWS: ${NUM_REVIEWS:-300000}
+      HEAVY_USER_SHARE: ${HEAVY_USER_SHARE:-0.20}
+      HEAVY_USER_ORDER_SHARE: ${HEAVY_USER_ORDER_SHARE:-0.70}
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    restart: "no"
+    networks: [pgnet]
+
+volumes:
+  postgres_primary_data:
+    name: postgresql-lab_postgres_primary_data
+  postgres_replica_data:
+    name: postgresql-lab_postgres_replica_data
+
+networks:
+  pgnet:
+    name: postgresql-lab_pgnet

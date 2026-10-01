@@ -19,6 +19,7 @@ Bộ tài liệu này giải thích **hệ thống đang chạy trong repository
 | [Traffic Generator](TRAFFIC_GENERATOR.md) | REST-only worker, virtual users, retry, duplicate/CDC/cache/replica observation và live guide | Tạo traffic tự động và quan sát xuyên hệ thống |
 | [Traffic Validation](TRAFFIC_VALIDATION.md) | PASS/FAIL scenarios, CDC bằng REST và năm dependency outage | Xem bằng chứng của generator |
 | [Data Model](DATA_MODEL.md) | ERD, dictionary dữ liệu, constraint/index, state machine, migration và retention | Thiết kế/chỉnh schema hoặc tìm invariant nghiệp vụ |
+| [Database Deep Dive](database/README.md) | Tài liệu riêng về kiến trúc database, behavior, toàn bộ bảng/index và query patterns hiện có | Muốn tra cứu database từ hệ thống đến SQL/ORM |
 | [API Contracts](API_CONTRACTS.md) | Toàn bộ endpoint nghiệp vụ, input/output, validation, error và retry contract | Viết client hoặc sửa API |
 | [Event Contracts](EVENT_CONTRACTS.md) | 9 event types, envelope, topics/groups, payload, ordering và versioning | Viết consumer hoặc điều tra event |
 | [Request & Event Flows](REQUEST_FLOWS.md) | Sequence diagrams cho tạo xe, FAIL → repair, API retry, consumer concurrency, cache và expiry | Theo dõi một thao tác đi qua những thành phần nào |
