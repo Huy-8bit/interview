@@ -47,28 +47,28 @@ WHERE id = 250000.0;
 -- 1) The query itself
 SELECT id, order_number, total_amount
 FROM orders
-WHERE user_id::text = '1144205';
+WHERE user_id::text = '1600976';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, order_number, total_amount
 FROM orders
-WHERE user_id::text = '1144205';
+WHERE user_id::text = '1600976';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, order_number, total_amount
 FROM orders
-WHERE user_id::text = '1144205';
+WHERE user_id::text = '1600976';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, order_number, total_amount
 FROM orders
-WHERE user_id::text = '1144205';
+WHERE user_id::text = '1600976';
 
 -- Observe:
---   * Filter: ((user_id)::text = '1144205'::text) - idx_orders_user_id unusable
+--   * Filter: ((user_id)::text = '1600976'::text) - idx_orders_user_id unusable
 
 -- -----------------------------------------------------------------------------
 -- Q3. varchar column compared with a char(n) parameter
@@ -77,25 +77,25 @@ WHERE user_id::text = '1144205';
 -- 1) The query itself
 SELECT id, username
 FROM users
-WHERE phone = '+1-236-702-0729'::char(15);
+WHERE phone = '+1-377-523-1035'::char(15);
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username
 FROM users
-WHERE phone = '+1-236-702-0729'::char(15);
+WHERE phone = '+1-377-523-1035'::char(15);
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username
 FROM users
-WHERE phone = '+1-236-702-0729'::char(15);
+WHERE phone = '+1-377-523-1035'::char(15);
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username
 FROM users
-WHERE phone = '+1-236-702-0729'::char(15);
+WHERE phone = '+1-377-523-1035'::char(15);
 
 -- Observe:
 --   * Filter: ((phone)::bpchar = ...) - the column is converted to the parameter's type

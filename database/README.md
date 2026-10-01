@@ -170,8 +170,9 @@ with psycopg.connect("host=localhost port=5433 dbname=ecommerce user=postgres pa
 **Bản Go tạo data nhanh:** xem [data-generator-go/README.md](data-generator-go/README.md).
 Chạy `./scripts/generate-data-go.sh 5m --dry-run` để đo tốc độ sinh dữ liệu mà không
 kết nối DB. Bản Go từ chối DB có dữ liệu, không hỗ trợ reset/xóa; nạp DB mới bằng
-`DB_NAME=ecommerce_go ./scripts/generate-data-go.sh 5m --bulk-load --analyze`
-sau khi khởi tạo schema trong DB riêng. Script Python dưới đây vẫn có hành vi xóa dữ liệu cũ.
+`DB_NAME=ecommerce ./scripts/generate-data-go.sh 5m --bulk-load --analyze --batch-size 50000`
+khi DB chính đã trống và identity đã reset. Nếu muốn dùng DB riêng, cần tạo database
+và schema trước khi đặt `DB_NAME` tương ứng. Script Python dưới đây vẫn có hành vi xóa dữ liệu cũ.
 
 ```bash
 ./scripts/generate-data.sh small      # ~10% mặc định, < 1 phút

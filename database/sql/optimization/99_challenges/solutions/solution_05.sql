@@ -15,7 +15,7 @@ CREATE INDEX ix_lab99_c05_reviews_negative ON reviews (product_id, created_at DE
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450 AND rating <= 2
+WHERE product_id = 1986295 AND rating <= 2
 ORDER BY created_at DESC
 LIMIT 20;
 

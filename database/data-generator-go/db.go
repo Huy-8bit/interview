@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 var dataTables = []string{"categories", "warehouses", "users", "addresses", "products", "inventory", "orders", "order_items", "payments", "reviews"}
@@ -55,11 +57,23 @@ func openDB(ctx context.Context) (*databaseSink, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("Target database: %s:%d/%s\n", c.Host, c.Port, c.Database)
 	conn, err := pgx.ConnectConfig(ctx, c)
 	if err != nil {
-		return nil, fmt.Errorf("connect to %s:%d/%s failed (check DB_* and PostgreSQL availability)", c.Host, c.Port, c.Database)
+		return nil, describeConnectError(c, err)
 	}
 	return &databaseSink{conn: conn}, nil
+}
+
+func describeConnectError(c *pgx.ConnConfig, err error) error {
+	hint := "Check DB_HOST, DB_PORT, DB_USER, DB_PASSWORD and PostgreSQL availability."
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "3D000" {
+		hint = "The target database does not exist. For this lab's main DB, use DB_NAME=ecommerce (or unset DB_NAME to use POSTGRES_DB). Create the database/schema first if choosing a different name."
+	}
+	// pgx ConnectError includes the server/DNS/TCP cause but not the password.
+	// Retain the cause and SQLSTATE instead of masking all connection failures.
+	return fmt.Errorf("connect to %s:%d/%s failed: %w\n%s", c.Host, c.Port, c.Database, err, hint)
 }
 
 func (s *databaseSink) prepare(ctx context.Context, c config) error {

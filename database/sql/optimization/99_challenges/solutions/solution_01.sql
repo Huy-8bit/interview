@@ -14,11 +14,11 @@ CREATE INDEX ix_lab99_c01_phone_reversed ON users (reverse(phone) text_pattern_o
 
 -- 2) The rewritten query
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, username, phone FROM users WHERE reverse(phone) LIKE reverse('702-0729') || '%';
+SELECT id, username, phone FROM users WHERE reverse(phone) LIKE reverse('523-1035') || '%';
 
 -- (the original query with the new index, for comparison)
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, username, phone FROM users WHERE phone LIKE '%702-0729';
+SELECT id, username, phone FROM users WHERE phone LIKE '%523-1035';
 
 -- 3) Reset
 DROP INDEX IF EXISTS ix_lab99_c01_phone_reversed;

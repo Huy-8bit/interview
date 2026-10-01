@@ -19,25 +19,25 @@
 -- 1) The query itself
 SELECT id, username, email
 FROM users
-WHERE lower(email) = lower('Sarah.Brown2037@gmail.com');
+WHERE lower(email) = lower('Anna.Gomez2037@hotmail.com');
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username, email
 FROM users
-WHERE lower(email) = lower('Sarah.Brown2037@gmail.com');
+WHERE lower(email) = lower('Anna.Gomez2037@hotmail.com');
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username, email
 FROM users
-WHERE lower(email) = lower('Sarah.Brown2037@gmail.com');
+WHERE lower(email) = lower('Anna.Gomez2037@hotmail.com');
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username, email
 FROM users
-WHERE lower(email) = lower('Sarah.Brown2037@gmail.com');
+WHERE lower(email) = lower('Anna.Gomez2037@hotmail.com');
 
 -- Observe:
 --   * Index Scan using ux_users_email_lower

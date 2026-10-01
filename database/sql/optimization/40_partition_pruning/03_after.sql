@@ -72,25 +72,25 @@ WHERE created_at >= (SELECT max(created_at) FROM lab_orders_part_2026_09) - inte
 -- 1) The query itself
 SELECT count(*)
 FROM lab_orders_part
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT count(*)
 FROM lab_orders_part
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT count(*)
 FROM lab_orders_part
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT count(*)
 FROM lab_orders_part
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- Observe:
 --   * One scan per partition under Append: partitioning only helps queries that filter on the key

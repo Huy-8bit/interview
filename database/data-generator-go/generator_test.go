@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"io"
 	"reflect"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type captureSink map[string]string
@@ -282,6 +286,30 @@ func TestProfileAndOptionValidation(t *testing.T) {
 		if _, err := parseConfig(args, io.Discard); err == nil {
 			t.Fatalf("accepted invalid args %v", args)
 		}
+	}
+}
+
+func TestConnectionErrorsExplainMissingDatabase(t *testing.T) {
+	c, err := pgx.ParseConfig("host=postgres-primary dbname=ecommerce_go user=postgres password=do-not-log-this")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cause := &pgconn.PgError{Severity: "FATAL", Code: "3D000", Message: `database "ecommerce_go" does not exist`}
+	got := describeConnectError(c, cause)
+	for _, text := range []string{"postgres-primary:5432/ecommerce_go", "does not exist", "3D000", "DB_NAME=ecommerce"} {
+		if !strings.Contains(got.Error(), text) {
+			t.Errorf("missing %q in %q", text, got)
+		}
+	}
+	if strings.Contains(got.Error(), c.Password) {
+		t.Fatal("password leaked")
+	}
+	if !errors.Is(got, cause) {
+		t.Fatal("connection cause lost")
+	}
+	networkCause := errors.New("dial tcp: connection refused")
+	if got = describeConnectError(c, networkCause); !errors.Is(got, networkCause) || !strings.Contains(got.Error(), "connection refused") {
+		t.Fatal("network cause lost")
 	}
 }
 func BenchmarkGenerateAndEncode(b *testing.B) {

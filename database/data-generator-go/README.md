@@ -22,6 +22,18 @@ không bao gồm COPY vào server, tạo index, WAL, đĩa hay streaming replica
 
 ## Nạp vào một database mới
 
+DB chính của dự án là **`ecommerce`**. Khi các bảng đã trống và identity đã reset
+(hoặc vừa khởi tạo cluster/schema), nạp trực tiếp bằng:
+
+```bash
+DB_NAME=ecommerce ./scripts/generate-data-go.sh 5m --bulk-load --analyze --batch-size 50000
+```
+
+Không đặt `DB_NAME=ecommerce_go` nếu chưa tạo database đó. Biến `DB_NAME` chỉ
+chọn DB đích, không tạo database. Chương trình in DB đích khi kết nối và giữ lại
+lỗi PostgreSQL/SQLSTATE để phân biệt DB không tồn tại, sai mật khẩu và lỗi mạng.
+Bản Go vẫn từ chối nếu bảng còn dữ liệu; không tự truncate hay xóa database.
+
 Nếu đã có DB riêng với schema hiện tại:
 
 ```bash
@@ -162,5 +174,10 @@ tất cả bảng/sequence, identity allocation và phục hồi schema idempote
 | Python hiện tại, cấu hình `small` | ~327 nghìn dòng, **4,35 giây**, gồm rebuild index/FK và VACUUM ANALYZE |
 
 Đây là số đo một lần, dữ liệu không trùng byte và bước hoàn tất khác nhau.
-**Chưa đo thời gian nạp đủ `5m` vào DB có đĩa/WAL/replica thật.** Không suy ra thời
-gian nạp DB từ con số dry-run; tăng worker chỉ giúp phần CPU, không tăng tốc đĩa.
+
+Lần chạy thực tế vào DB chính `ecommerce` đã trống, ngày 01/10/2026, với primary +
+streaming replica của dự án: `5m --bulk-load --analyze --batch-size 50000`, 4 workers,
+**48.128.157 dòng trong 615,18 giây (~10 phút 15 giây)**. Thời gian này gồm COPY,
+tạo lại 38 index/constraint và ANALYZE; không gồm các báo cáo kiểm tra chạy sau đó.
+Không suy ra thời gian nạp DB từ con số dry-run; tăng worker chỉ giúp phần CPU,
+không tăng tốc đĩa.

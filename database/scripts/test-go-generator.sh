@@ -18,6 +18,13 @@ for attempt in {1..30}; do
   sleep 1
 done
 [ "$ready" -eq 1 ] || { echo "PostgreSQL test container did not become ready" >&2; exit 1; }
+if docker run --rm --network "container:$name" \
+  -e DB_HOST=127.0.0.1 -e DB_NAME=missing_generator_database -e DB_PASSWORD=go-test-only \
+  "$image" small > "$test_log/missing-database.log" 2>&1; then
+  echo "FAIL: nonexistent DB was accepted" >&2; exit 1
+fi
+rg -q 'SQLSTATE 3D000' "$test_log/missing-database.log"
+rg -q 'DB_NAME=ecommerce' "$test_log/missing-database.log"
 test_db=generator_test
 psql_test() { docker exec -i "$name" psql -X -v ON_ERROR_STOP=1 -U postgres -d "$test_db" "$@"; }
 schema_snapshot() {

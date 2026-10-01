@@ -22,12 +22,12 @@ SELECT o.order_number, o.status, p.name, i.quantity, i.total_price
 FROM orders o
 JOIN order_items i ON i.order_id = o.id
 JOIN products p    ON p.id = i.product_id
-WHERE upper(o.order_number) = upper('ord-241218-00250000');
+WHERE upper(o.order_number) = upper('ord-241217-00250000');
 
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT o.order_number, o.status, p.name, i.quantity, i.total_price
 FROM orders o
 JOIN order_items i ON i.order_id = o.id
 JOIN products p    ON p.id = i.product_id
-WHERE upper(o.order_number) = upper('ord-241218-00250000');
+WHERE upper(o.order_number) = upper('ord-241217-00250000');
 

@@ -17,8 +17,8 @@ CREATE INDEX ix_lab99_c09_reviews_product_time ON reviews (product_id, created_a
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450
-  AND (created_at, id) < (SELECT created_at, id FROM reviews WHERE product_id = 4905450
+WHERE product_id = 1986295
+  AND (created_at, id) < (SELECT created_at, id FROM reviews WHERE product_id = 1986295
                           ORDER BY created_at DESC, id DESC OFFSET 3979 LIMIT 1)
 ORDER BY created_at DESC, id DESC
 LIMIT 20;
@@ -27,7 +27,7 @@ LIMIT 20;
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450
+WHERE product_id = 1986295
 ORDER BY created_at DESC, id DESC
 LIMIT 20 OFFSET 3980;
 

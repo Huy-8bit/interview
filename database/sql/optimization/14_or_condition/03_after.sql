@@ -12,29 +12,29 @@
 -- 1) The query itself
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR username = 'jessica.reyes4242';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR username = 'marilyn.johnston4242';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR username = 'jessica.reyes4242';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR username = 'marilyn.johnston4242';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR username = 'jessica.reyes4242';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR username = 'marilyn.johnston4242';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR username = 'jessica.reyes4242';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR username = 'marilyn.johnston4242';
 
 -- Observe:
 --   * BitmapOr of two Bitmap Index Scans (ux_users_email_lower, uq_users_username)
@@ -46,29 +46,29 @@ WHERE lower(email) = 'sarah.brown2037@gmail.com'
 -- 1) The query itself
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR phone = '+1-236-702-0729';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR phone = '+1-377-523-1035';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR phone = '+1-236-702-0729';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR phone = '+1-377-523-1035';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR phone = '+1-236-702-0729';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR phone = '+1-377-523-1035';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username, email
 FROM users
-WHERE lower(email) = 'sarah.brown2037@gmail.com'
-   OR phone = '+1-236-702-0729';
+WHERE lower(email) = 'anna.gomez2037@hotmail.com'
+   OR phone = '+1-377-523-1035';
 
 -- Observe:
 --   * Seq Scan: a row can match through EITHER branch, so if one branch needs a full scan
@@ -82,32 +82,32 @@ WHERE lower(email) = 'sarah.brown2037@gmail.com'
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
-   OR u.username = 'jessica.reyes4242';
+WHERE o.order_number = 'ORD-241217-00250000'
+   OR u.username = 'marilyn.johnston4242';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
-   OR u.username = 'jessica.reyes4242';
+WHERE o.order_number = 'ORD-241217-00250000'
+   OR u.username = 'marilyn.johnston4242';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
-   OR u.username = 'jessica.reyes4242';
+WHERE o.order_number = 'ORD-241217-00250000'
+   OR u.username = 'marilyn.johnston4242';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
-   OR u.username = 'jessica.reyes4242';
+WHERE o.order_number = 'ORD-241217-00250000'
+   OR u.username = 'marilyn.johnston4242';
 
 -- Observe:
 --   * Hash Join of the FULL tables + Join Filter: the OR mixes columns of both tables,

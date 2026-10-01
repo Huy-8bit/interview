@@ -19,7 +19,7 @@ SELECT count(DISTINCT u.id)
 FROM users u
 JOIN orders o      ON o.user_id = u.id
 JOIN order_items i ON i.order_id = o.id
-WHERE i.product_id = 4905450;
+WHERE i.product_id = 1986295;
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
@@ -27,7 +27,7 @@ SELECT count(DISTINCT u.id)
 FROM users u
 JOIN orders o      ON o.user_id = u.id
 JOIN order_items i ON i.order_id = o.id
-WHERE i.product_id = 4905450;
+WHERE i.product_id = 1986295;
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
@@ -35,7 +35,7 @@ SELECT count(DISTINCT u.id)
 FROM users u
 JOIN orders o      ON o.user_id = u.id
 JOIN order_items i ON i.order_id = o.id
-WHERE i.product_id = 4905450;
+WHERE i.product_id = 1986295;
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
@@ -43,7 +43,7 @@ SELECT count(DISTINCT u.id)
 FROM users u
 JOIN orders o      ON o.user_id = u.id
 JOIN order_items i ON i.order_id = o.id
-WHERE i.product_id = 4905450;
+WHERE i.product_id = 1986295;
 
 -- Observe:
 --   * Inner joins + an aggregate that de-duplicates

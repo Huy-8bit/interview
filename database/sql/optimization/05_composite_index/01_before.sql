@@ -62,7 +62,7 @@ LIMIT 20;
 -- 1) The query itself
 SELECT id, order_number, status, total_amount, created_at
 FROM orders
-WHERE user_id = 2215979
+WHERE user_id = 1269637
   AND status = 'COMPLETED'
 ORDER BY created_at DESC;
 
@@ -70,7 +70,7 @@ ORDER BY created_at DESC;
 EXPLAIN
 SELECT id, order_number, status, total_amount, created_at
 FROM orders
-WHERE user_id = 2215979
+WHERE user_id = 1269637
   AND status = 'COMPLETED'
 ORDER BY created_at DESC;
 
@@ -78,7 +78,7 @@ ORDER BY created_at DESC;
 EXPLAIN ANALYZE
 SELECT id, order_number, status, total_amount, created_at
 FROM orders
-WHERE user_id = 2215979
+WHERE user_id = 1269637
   AND status = 'COMPLETED'
 ORDER BY created_at DESC;
 
@@ -86,7 +86,7 @@ ORDER BY created_at DESC;
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, order_number, status, total_amount, created_at
 FROM orders
-WHERE user_id = 2215979
+WHERE user_id = 1269637
   AND status = 'COMPLETED'
 ORDER BY created_at DESC;
 

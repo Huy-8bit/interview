@@ -14,7 +14,7 @@ SELECT o.order_number, o.created_at, p.name AS product, i.quantity, i.total_pric
 FROM orders o
 JOIN order_items i ON i.order_id = o.id
 JOIN products p    ON p.id = i.product_id
-WHERE o.user_id = 2215979
+WHERE o.user_id = 1269637
 ORDER BY o.created_at;
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
@@ -23,7 +23,7 @@ SELECT o.order_number, o.created_at, p.name AS product, i.quantity, i.total_pric
 FROM orders o
 JOIN order_items i ON i.order_id = o.id
 JOIN products p    ON p.id = i.product_id
-WHERE o.user_id = 2215979
+WHERE o.user_id = 1269637
 ORDER BY o.created_at;
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
@@ -32,7 +32,7 @@ SELECT o.order_number, o.created_at, p.name AS product, i.quantity, i.total_pric
 FROM orders o
 JOIN order_items i ON i.order_id = o.id
 JOIN products p    ON p.id = i.product_id
-WHERE o.user_id = 2215979
+WHERE o.user_id = 1269637
 ORDER BY o.created_at;
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
@@ -41,7 +41,7 @@ SELECT o.order_number, o.created_at, p.name AS product, i.quantity, i.total_pric
 FROM orders o
 JOIN order_items i ON i.order_id = o.id
 JOIN products p    ON p.id = i.product_id
-WHERE o.user_id = 2215979
+WHERE o.user_id = 1269637
 ORDER BY o.created_at;
 
 -- Observe:

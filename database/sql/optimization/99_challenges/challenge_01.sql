@@ -5,7 +5,7 @@
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT
--- Call-center agents type the LAST 8 characters of a phone number ('702-0729') to find the caller.
+-- Call-center agents type the LAST 8 characters of a phone number ('523-1035') to find the caller.
 -- Must answer in a few milliseconds.
 
 -- YOUR TASK
@@ -19,8 +19,8 @@
 
 -- THE SLOW QUERY
 EXPLAIN
-SELECT id, username, phone FROM users WHERE phone LIKE '%702-0729';
+SELECT id, username, phone FROM users WHERE phone LIKE '%523-1035';
 
 EXPLAIN (ANALYZE, BUFFERS)
-SELECT id, username, phone FROM users WHERE phone LIKE '%702-0729';
+SELECT id, username, phone FROM users WHERE phone LIKE '%523-1035';
 

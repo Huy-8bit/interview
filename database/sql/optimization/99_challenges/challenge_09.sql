@@ -19,21 +19,21 @@
 -- THE SLOW QUERY
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450
+WHERE product_id = 1986295
 ORDER BY created_at DESC, id DESC
 LIMIT 20 OFFSET 3980;
 
 EXPLAIN
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450
+WHERE product_id = 1986295
 ORDER BY created_at DESC, id DESC
 LIMIT 20 OFFSET 3980;
 
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450
+WHERE product_id = 1986295
 ORDER BY created_at DESC, id DESC
 LIMIT 20 OFFSET 3980;
 

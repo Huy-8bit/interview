@@ -5,7 +5,7 @@
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT
--- Product page, 'critical reviews' tab: the 20 newest reviews with rating <= 2 of product 4905450.
+-- Product page, 'critical reviews' tab: the 20 newest reviews with rating <= 2 of product 1986295.
 
 -- YOUR TASK
 --   1. Run the EXPLAIN statements below and find the bottleneck.
@@ -19,21 +19,21 @@
 -- THE SLOW QUERY
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450 AND rating <= 2
+WHERE product_id = 1986295 AND rating <= 2
 ORDER BY created_at DESC
 LIMIT 20;
 
 EXPLAIN
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450 AND rating <= 2
+WHERE product_id = 1986295 AND rating <= 2
 ORDER BY created_at DESC
 LIMIT 20;
 
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, user_id, rating, title, created_at
 FROM reviews
-WHERE product_id = 4905450 AND rating <= 2
+WHERE product_id = 1986295 AND rating <= 2
 ORDER BY created_at DESC
 LIMIT 20;
 

@@ -6,31 +6,31 @@
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- Q1. Containment: users tagged 'wholesale' (~15k of 5M)
+-- Q1. Containment: referral sign-ups who prefer German (~15k of 5M)
 -- -----------------------------------------------------------------------------
 
 -- 1) The query itself
 SELECT count(*)
 FROM users
-WHERE metadata @> '{"tags": ["wholesale"]}';
+WHERE metadata @> '{"signup_source": "referral", "preferred_language": "de"}';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT count(*)
 FROM users
-WHERE metadata @> '{"tags": ["wholesale"]}';
+WHERE metadata @> '{"signup_source": "referral", "preferred_language": "de"}';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT count(*)
 FROM users
-WHERE metadata @> '{"tags": ["wholesale"]}';
+WHERE metadata @> '{"signup_source": "referral", "preferred_language": "de"}';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT count(*)
 FROM users
-WHERE metadata @> '{"tags": ["wholesale"]}';
+WHERE metadata @> '{"signup_source": "referral", "preferred_language": "de"}';
 
 -- Observe:
 --   * Seq Scan: every metadata document is parsed and checked

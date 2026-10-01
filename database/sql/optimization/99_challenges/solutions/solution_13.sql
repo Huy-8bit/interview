@@ -12,7 +12,7 @@
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, order_id, amount, status
 FROM payments
-WHERE transaction_id = 'cba2d687-53f9-4f79-93c3-3ae06278f1c1'::uuid;
+WHERE transaction_id = '0000002a-0000-4000-8000-000000594283'::uuid;
 
 -- 3) Reset
 -- no objects created

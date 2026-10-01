@@ -20,7 +20,7 @@ WITH recent AS MATERIALIZED (
 )
 SELECT id, status, total_amount
 FROM recent
-WHERE user_id = 2732269;
+WHERE user_id = 4900533;
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
@@ -29,7 +29,7 @@ WITH recent AS MATERIALIZED (
 )
 SELECT id, status, total_amount
 FROM recent
-WHERE user_id = 2732269;
+WHERE user_id = 4900533;
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
@@ -38,7 +38,7 @@ WITH recent AS MATERIALIZED (
 )
 SELECT id, status, total_amount
 FROM recent
-WHERE user_id = 2732269;
+WHERE user_id = 4900533;
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
@@ -47,7 +47,7 @@ WITH recent AS MATERIALIZED (
 )
 SELECT id, status, total_amount
 FROM recent
-WHERE user_id = 2732269;
+WHERE user_id = 4900533;
 
 -- Observe:
 --   * CTE Scan on recent + Filter: Rows Removed by Filter = all of August/September

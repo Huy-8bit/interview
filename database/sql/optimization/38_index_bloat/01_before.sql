@@ -5,12 +5,12 @@
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 
--- Lab table: 1M payments with an index on the random uuid transaction_id, then 80% of
+-- Lab table: 1M payments with an index on a RANDOM uuid key (gen_random_uuid()), then 80% of
 -- the rows deleted and vacuumed: the index keeps its pages, now mostly empty.
 DROP TABLE IF EXISTS lab_index_bloat;
 CREATE TABLE lab_index_bloat AS
-SELECT id, order_id, transaction_id, amount, created_at FROM payments
-WHERE id <= 1000000 AND transaction_id IS NOT NULL;
+SELECT id, order_id, gen_random_uuid() AS transaction_id, amount, created_at FROM payments
+WHERE id <= 1000000;   -- random uuid v4 keys (generated here, so the lab does not depend on the data generator)
 CREATE INDEX ix_lab38_ibloat_txn ON lab_index_bloat (transaction_id);
 DELETE FROM lab_index_bloat WHERE id % 5 <> 0;
 

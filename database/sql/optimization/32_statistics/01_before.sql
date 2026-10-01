@@ -48,25 +48,25 @@ GROUP BY user_id;
 -- 1) The query itself
 SELECT count(*)
 FROM orders
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT count(*)
 FROM orders
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT count(*)
 FROM orders
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT count(*)
 FROM orders
-WHERE user_id = 2215979;
+WHERE user_id = 1269637;
 
 -- Observe:
 --   * estimated rows ~ (1 - sum(MCV freqs) - null_frac) / (n_distinct - n_MCV) x reltuples

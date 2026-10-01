@@ -15,7 +15,7 @@ FROM users u
 WHERE u.id IN (SELECT o.user_id
                FROM orders o
                JOIN order_items i ON i.order_id = o.id
-               WHERE i.product_id = 4905450);
+               WHERE i.product_id = 1986295);
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
@@ -24,7 +24,7 @@ FROM users u
 WHERE u.id IN (SELECT o.user_id
                FROM orders o
                JOIN order_items i ON i.order_id = o.id
-               WHERE i.product_id = 4905450);
+               WHERE i.product_id = 1986295);
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
@@ -33,7 +33,7 @@ FROM users u
 WHERE u.id IN (SELECT o.user_id
                FROM orders o
                JOIN order_items i ON i.order_id = o.id
-               WHERE i.product_id = 4905450);
+               WHERE i.product_id = 1986295);
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
@@ -42,7 +42,7 @@ FROM users u
 WHERE u.id IN (SELECT o.user_id
                FROM orders o
                JOIN order_items i ON i.order_id = o.id
-               WHERE i.product_id = 4905450);
+               WHERE i.product_id = 1986295);
 
 -- Observe:
 --   * Semi Join (Hash Semi Join / Nested Loop Semi Join): the planner turned IN into a join

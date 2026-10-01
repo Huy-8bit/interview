@@ -18,7 +18,7 @@ CREATE INDEX ix_lab01_users_phone_hash ON users USING hash (phone);
 -- Check what was created / changed:
 SELECT pg_size_pretty(pg_relation_size('ix_lab01_users_phone_hash')) AS hash_index_size;
 -- A range predicate cannot use a hash index (Seq Scan again):
-EXPLAIN SELECT id FROM users WHERE phone >= '+1-236-702' AND phone < '+1-236-703';
+EXPLAIN SELECT id FROM users WHERE phone >= '+1-377-523' AND phone < '+1-377-524';
 
 -- Undo only this strategy:
 -- DROP INDEX IF EXISTS ix_lab01_users_phone_hash;

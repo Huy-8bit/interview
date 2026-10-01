@@ -12,25 +12,25 @@
 -- 1) The query itself
 SELECT id, username, email
 FROM users
-WHERE phone = '+1-236-702-0729';
+WHERE phone = '+1-377-523-1035';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username, email
 FROM users
-WHERE phone = '+1-236-702-0729';
+WHERE phone = '+1-377-523-1035';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username, email
 FROM users
-WHERE phone = '+1-236-702-0729';
+WHERE phone = '+1-377-523-1035';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username, email
 FROM users
-WHERE phone = '+1-236-702-0729';
+WHERE phone = '+1-377-523-1035';
 
 -- Observe:
 --   * Node: (Parallel) Seq Scan on users -> every heap page is read

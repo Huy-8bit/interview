@@ -20,48 +20,48 @@
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
+WHERE o.order_number = 'ORD-241217-00250000'
 UNION
 SELECT o.id, o.order_number, u.username
 FROM users u
 JOIN orders o ON o.user_id = u.id
-WHERE u.username = 'jessica.reyes4242';
+WHERE u.username = 'marilyn.johnston4242';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
+WHERE o.order_number = 'ORD-241217-00250000'
 UNION
 SELECT o.id, o.order_number, u.username
 FROM users u
 JOIN orders o ON o.user_id = u.id
-WHERE u.username = 'jessica.reyes4242';
+WHERE u.username = 'marilyn.johnston4242';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
+WHERE o.order_number = 'ORD-241217-00250000'
 UNION
 SELECT o.id, o.order_number, u.username
 FROM users u
 JOIN orders o ON o.user_id = u.id
-WHERE u.username = 'jessica.reyes4242';
+WHERE u.username = 'marilyn.johnston4242';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT o.id, o.order_number, u.username
 FROM orders o
 JOIN users u ON u.id = o.user_id
-WHERE o.order_number = 'ORD-241218-00250000'
+WHERE o.order_number = 'ORD-241217-00250000'
 UNION
 SELECT o.id, o.order_number, u.username
 FROM users u
 JOIN orders o ON o.user_id = u.id
-WHERE u.username = 'jessica.reyes4242';
+WHERE u.username = 'marilyn.johnston4242';
 
 -- Observe:
 --   * Two small Nested Loops (index lookups) + HashAggregate/Unique for UNION

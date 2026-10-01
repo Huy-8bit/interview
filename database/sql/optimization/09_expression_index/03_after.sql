@@ -12,25 +12,25 @@
 -- 1) The query itself
 SELECT id, username, email
 FROM users
-WHERE lower(username) = lower('Sarah.Brown2037');
+WHERE lower(username) = lower('Anna.Gomez2037');
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username, email
 FROM users
-WHERE lower(username) = lower('Sarah.Brown2037');
+WHERE lower(username) = lower('Anna.Gomez2037');
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username, email
 FROM users
-WHERE lower(username) = lower('Sarah.Brown2037');
+WHERE lower(username) = lower('Anna.Gomez2037');
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username, email
 FROM users
-WHERE lower(username) = lower('Sarah.Brown2037');
+WHERE lower(username) = lower('Anna.Gomez2037');
 
 -- Observe:
 --   * Seq Scan although uq_users_username exists: the index stores username,
@@ -43,25 +43,25 @@ WHERE lower(username) = lower('Sarah.Brown2037');
 -- 1) The query itself
 SELECT id, username, email
 FROM users
-WHERE username = 'sarah.brown2037';
+WHERE username = 'anna.gomez2037';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username, email
 FROM users
-WHERE username = 'sarah.brown2037';
+WHERE username = 'anna.gomez2037';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username, email
 FROM users
-WHERE username = 'sarah.brown2037';
+WHERE username = 'anna.gomez2037';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username, email
 FROM users
-WHERE username = 'sarah.brown2037';
+WHERE username = 'anna.gomez2037';
 
 -- Observe:
 --   * Index Scan using uq_users_username
@@ -73,25 +73,25 @@ WHERE username = 'sarah.brown2037';
 -- 1) The query itself
 SELECT id, username, email
 FROM users
-WHERE email = 'sarah.brown2037@gmail.com';
+WHERE email = 'anna.gomez2037@hotmail.com';
 
 -- 2) EXPLAIN: plan + ESTIMATES only. The query is NOT executed.
 EXPLAIN
 SELECT id, username, email
 FROM users
-WHERE email = 'sarah.brown2037@gmail.com';
+WHERE email = 'anna.gomez2037@hotmail.com';
 
 -- 3) EXPLAIN ANALYZE: EXECUTES the query, adds actual time / rows / loops.
 EXPLAIN ANALYZE
 SELECT id, username, email
 FROM users
-WHERE email = 'sarah.brown2037@gmail.com';
+WHERE email = 'anna.gomez2037@hotmail.com';
 
 -- 4) Full detail: buffers (I/O), output columns, non-default settings.
 EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)
 SELECT id, username, email
 FROM users
-WHERE email = 'sarah.brown2037@gmail.com';
+WHERE email = 'anna.gomez2037@hotmail.com';
 
 -- Observe:
 --   * Seq Scan: the only email index is on lower(email)

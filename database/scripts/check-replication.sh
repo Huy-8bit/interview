@@ -98,8 +98,10 @@ while IFS= read -r t; do
     continue
   fi
 
-  p="$(scalar_on "$PRIMARY_SERVICE" "SELECT count(*) FROM $t")"
-  r="$(scalar_on "$REPLICA_SERVICE" "SELECT count(*) FROM $t")"
+  # docker compose exec -T otherwise consumes the while loop's table list on
+  # stdin, silently stopping the comparison after the first table.
+  p="$(scalar_on "$PRIMARY_SERVICE" "SELECT count(*) FROM $t" </dev/null)"
+  r="$(scalar_on "$REPLICA_SERVICE" "SELECT count(*) FROM $t" </dev/null)"
   if [ "$p" = "$r" ]; then
     ok "$(printf '%-36s primary=%-10s replica=%s' "$t" "$p" "$r")"
   else
