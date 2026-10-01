@@ -1,0 +1,7 @@
+{"type":"record","name":"OrderCreated","namespace":"lab.orders","fields":[
+  {"name":"order_id","type":"string"},
+  {"name":"user_id","type":"long"},
+  {"name":"product_id","type":"long"},
+  {"name":"quantity","type":"int"},
+  {"name":"coupon","type":["null","string"],"default":null},
+  {"name":"currency","type":"string"}]}

@@ -1,0 +1,59 @@
+date: 2026-10-01T13:03:55Z  records/run: 100000  record size: 1KB  docker: 8 CPU, 8393605120 bytes
+
+==> A1. Producer throughput vs partition count (acks=all, lz4, linger 5ms)
+partitions=1                    446102 rec/s   455.5 MB/s | p50   38.66ms p99    47.60ms | batches    100 ( 1000 rec/batch) | wire    36.2MB ratio 2.87 | cpu  0.23s | errors 0
+partitions=3                    641536 rec/s   655.2 MB/s | p50   24.33ms p99    53.64ms | batches    113 (  885 rec/batch) | wire    36.3MB ratio 2.86 | cpu  0.25s | errors 0
+partitions=6                    369675 rec/s   377.5 MB/s | p50   31.22ms p99   104.78ms | batches    187 (  535 rec/batch) | wire    35.4MB ratio 2.93 | cpu  0.31s | errors 0
+partitions=12                   414158 rec/s   422.9 MB/s | p50   32.53ms p99   122.98ms | batches    324 (  309 rec/batch) | wire    35.1MB ratio 2.96 | cpu  0.35s | errors 0
+
+==> A2. Consumer parallelism vs partition count (consumers = partitions, 1ms work/record, 12000 records)
+partitions=1             consumers=1 active=1 records=12133 time= 31.17s throughput=     389 rec/s (work=1ms/record)
+partitions=3             consumers=3 active=3 records=12292 time= 11.03s throughput=    1115 rec/s (work=1ms/record)
+partitions=6             consumers=6 active=6 records=12800 time=  5.34s throughput=    2397 rec/s (work=1ms/record)
+partitions=12            consumers=12 active=12 records=13400 time=  2.69s throughput=    4991 rec/s (work=1ms/record)
+
+==> B. acks (perf-p6, lz4, linger 5ms)
+acks=0                          657118 rec/s   671.1 MB/s | p50   24.32ms p99    52.47ms | batches    112 (  893 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.29s | errors 0
+acks=1                          625234 rec/s   638.6 MB/s | p50   26.88ms p99    44.53ms | batches    102 (  980 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.27s | errors 0
+acks=all (idempotent)           534140 rec/s   545.6 MB/s | p50   28.63ms p99    61.94ms | batches    166 (  602 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.28s | errors 0
+
+==> C. batching (perf-p6, acks=all, no compression)
+linger=0 batch=16KB              70990 rec/s    72.5 MB/s | p50  256.18ms p99   394.32ms | batches   6670 (   15 rec/batch) | wire   103.8MB ratio 1.00 | cpu  0.34s | errors 0
+linger=5ms batch=1MB            244247 rec/s   249.5 MB/s | p50   64.15ms p99   132.84ms | batches    178 (  562 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.18s | errors 0
+linger=20ms batch=1MB           174266 rec/s   178.0 MB/s | p50   73.87ms p99   215.56ms | batches    200 (  500 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.29s | errors 0
+
+==> D. compression (perf-p6, acks=all, linger 10ms, JSON payload)
+compression=none                324920 rec/s   331.7 MB/s | p50   51.55ms p99    94.21ms | batches    176 (  568 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.14s | errors 0
+compression=gzip                279787 rec/s   285.8 MB/s | p50   61.07ms p99   115.94ms | batches    173 (  578 rec/batch) | wire    20.5MB ratio 5.07 | cpu  0.60s | errors 0
+compression=snappy              267262 rec/s   272.9 MB/s | p50   56.81ms p99   163.10ms | batches    172 (  581 rec/batch) | wire    25.1MB ratio 4.14 | cpu  0.26s | errors 0
+compression=lz4                 504771 rec/s   515.5 MB/s | p50   29.91ms p99    98.62ms | batches    202 (  495 rec/batch) | wire    35.5MB ratio 2.92 | cpu  0.28s | errors 0
+compression=zstd                288691 rec/s   294.8 MB/s | p50   64.81ms p99   124.82ms | batches    205 (  488 rec/batch) | wire    19.2MB ratio 5.41 | cpu  0.52s | errors 0
+
+==> E. consumer scaling on perf-p6 (6 partitions), 1ms work/record, 18000 records
+consumers=1              consumers=1 active=1 records=18200 time= 46.72s throughput=     390 rec/s (work=1ms/record)
+    bench-consumer-1  records=18200  partitions=P0,P1,P2,P3,P4,P5  
+consumers=2              consumers=2 active=2 records=18200 time= 24.32s throughput=     748 rec/s (work=1ms/record)
+    bench-consumer-1  records=9200  partitions=P0,P3,P4  
+    bench-consumer-2  records=9000  partitions=P1,P2,P5  
+consumers=3              consumers=3 active=3 records=18306 time= 15.67s throughput=    1168 rec/s (work=1ms/record)
+    bench-consumer-1  records=6122  partitions=P0,P4  
+    bench-consumer-2  records=6092  partitions=P1,P5  
+    bench-consumer-3  records=6092  partitions=P2,P3  
+consumers=6              consumers=6 active=6 records=18706 time=  8.29s throughput=    2257 rec/s (work=1ms/record)
+    bench-consumer-1  records=3018  partitions=P0  
+    bench-consumer-2  records=3146  partitions=P1  
+    bench-consumer-3  records=3104  partitions=P4  
+    bench-consumer-4  records=3146  partitions=P2  
+    bench-consumer-5  records=3146  partitions=P3  
+    bench-consumer-6  records=3146  partitions=P5  
+consumers=8              consumers=8 active=6 records=18706 time=  8.39s throughput=    2230 rec/s (work=1ms/record)
+    bench-consumer-1  records=3018  partitions=P0  
+    bench-consumer-2  records=3146  partitions=P1  
+    bench-consumer-3  records=3146  partitions=P5  
+    bench-consumer-4  records=3146  partitions=P2  
+    bench-consumer-5  records=3104  partitions=P4  
+    bench-consumer-6  records=0     partitions=    IDLE (no partition)
+    bench-consumer-7  records=0     partitions=    IDLE (no partition)
+    bench-consumer-8  records=3146  partitions=P3  
+
+results saved to labs/performance/last-run.txt

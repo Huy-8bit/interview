@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 5s        # lab: fast feedback (production: 15-30s)
+  evaluation_interval: 5s
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+scrape_configs:
+  # Broker JVM metrics through the JMX exporter java agent (kafka/config/jmx-exporter.yml)
+  - job_name: kafka-broker
+    static_configs:
+      - targets: ["kafka-1:7071", "kafka-2:7071", "kafka-3:7071"]
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "(kafka-[0-9]+):.*"
+        target_label: broker
+
+  # Consumer lag + partition / ISR state computed via the Admin API
+  - job_name: lag-exporter
+    static_configs:
+      - targets: ["lag-exporter:8080"]
+
+  # Go application services (/metrics)
+  - job_name: producer
+    static_configs:
+      - targets: ["producer-service:8080", "traffic-generator:8080"]
+  - job_name: consumer
+    static_configs:
+      - targets:
+          - order-consumer-1:8080
+          - order-consumer-2:8080
+          - order-consumer-3:8080
+          - order-consumer-4:8080
+          - order-consumer-5:8080
+          - order-consumer-6:8080
+          - order-consumer-7:8080
+          - order-consumer-8:8080
+          - payment-consumer:8080
+          - analytics-consumer:8080
+          - notification-consumer:8080
+          - txn-processor:8080
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "([^:]+):.*"
+        target_label: instance

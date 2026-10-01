@@ -1,0 +1,39 @@
+# Example alert rules (visible in Prometheus > Alerts). Thresholds are lab-sized.
+groups:
+  - name: kafka
+    rules:
+      - alert: KafkaUnderReplicatedPartitions
+        expr: sum(kafka_server_replicamanager_underreplicatedpartitions) > 0
+        for: 30s
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $value }} under-replicated partition(s): a follower is offline or lagging"
+      - alert: KafkaOfflinePartitions
+        expr: max(kafka_controller_kafkacontroller_offlinepartitionscount) > 0
+        for: 0s
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $value }} partition(s) have NO leader: reads and writes fail"
+      - alert: KafkaNoActiveController
+        expr: sum(kafka_controller_kafkacontroller_activecontrollercount) != 1
+        for: 30s
+        labels: { severity: critical }
+        annotations:
+          summary: "active controller count = {{ $value }} (must be exactly 1)"
+      - alert: KafkaBrokerDown
+        expr: count(up{job="kafka-broker"} == 1) < 3
+        for: 15s
+        labels: { severity: warning }
+        annotations:
+          summary: "only {{ $value }} of 3 brokers are scrapeable"
+      - alert: ConsumerLagGrowing
+        expr: sum by (group) (kafka_consumergroup_lag) > 1000 and deriv(sum by (group) (kafka_consumergroup_lag)[2m:10s]) > 0
+        for: 1m
+        labels: { severity: warning }
+        annotations:
+          summary: "group {{ $labels.group }} lag {{ $value }} and still growing"
+      - alert: DLQReceivingMessages
+        expr: sum by (group) (increase(dlq_total[5m])) > 0
+        labels: { severity: info }
+        annotations:
+          summary: "group {{ $labels.group }} sent records to a DLQ in the last 5m"

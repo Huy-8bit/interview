@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# kt <tool> [args...]  ->  /opt/kafka/bin/<tool>.sh [args...]
+# Example: kt kafka-topics --bootstrap-server kafka-1:29092 --list
+# Runs Kafka CLI tools without the broker's javaagent / heap settings.
+set -euo pipefail
+tool="$1"; shift
+[[ "$tool" == *.sh ]] || tool="${tool}.sh"
+export KAFKA_OPTS=""
+export KAFKA_HEAP_OPTS="${KT_HEAP_OPTS:--Xms64m -Xmx256m}"
+export KAFKA_JMX_OPTS=""
+export JMX_PORT=""
+exec "/opt/kafka/bin/${tool}" "$@"

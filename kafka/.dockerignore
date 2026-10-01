@@ -1,0 +1,8 @@
+docs
+labs
+monitoring
+scripts
+kafka
+*.md
+.env
+.git

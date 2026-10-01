@@ -1,0 +1,62 @@
+# Prometheus JMX exporter rules for Kafka (KRaft, Kafka 4.x).
+# Only kafka.* MBeans are exported; JVM metrics (jvm_*, process_*) come from the
+# agent's built-in collectors.
+#
+# Naming scheme:  kafka.<domain>:type=<Type>,name=<Name>[,k=v...]
+#   ...PerSec meters  -> kafka_<domain>_<type>_<name>_total   (counter, use rate())
+#   Value gauges      -> kafka_<domain>_<type>_<name>
+#   RequestMetrics    -> kafka_network_requestmetrics_<x>_time_ms{quantile=..}
+lowercaseOutputName: true
+lowercaseOutputLabelNames: true
+includeObjectNames:
+  - "kafka.server:*"
+  - "kafka.controller:*"
+  - "kafka.network:*"
+  - "kafka.log:*"
+  - "kafka.cluster:*"
+rules:
+  # ---- Meters (rates) -------------------------------------------------------
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+)PerSec\w*, ([^,=]+)=([^,]+), ([^,=]+)=([^,]+)><>Count'
+    name: kafka_$1_$2_$3_total
+    type: COUNTER
+    labels: { "$4": "$5", "$6": "$7" }
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+)PerSec\w*, ([^,=]+)=([^,]+)><>Count'
+    name: kafka_$1_$2_$3_total
+    type: COUNTER
+    labels: { "$4": "$5" }
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+)PerSec\w*><>Count'
+    name: kafka_$1_$2_$3_total
+    type: COUNTER
+
+  # ---- Request latency percentiles (Produce, Fetch, FetchConsumer, ...) ------
+  - pattern: 'kafka.network<type=RequestMetrics, name=(\w+)TimeMs, request=(\w+)><>(\d+)thPercentile'
+    name: kafka_network_requestmetrics_$1_time_ms
+    type: GAUGE
+    labels: { request: "$2", quantile: "0.$3" }
+
+  # ---- Thread pool idle ratios (1 = idle, 0 = saturated) ---------------------
+  - pattern: 'kafka.server<type=KafkaRequestHandlerPool, name=(\w+)AvgIdlePercent><>OneMinuteRate'
+    name: kafka_server_kafkarequesthandlerpool_$1_avg_idle_ratio
+    type: GAUGE
+
+  # ---- Gauges ----------------------------------------------------------------
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+), ([^,=]+)=([^,]+), ([^,=]+)=([^,]+)><>Value'
+    name: kafka_$1_$2_$3
+    type: GAUGE
+    labels: { "$4": "$5", "$6": "$7" }
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+), ([^,=]+)=([^,]+)><>Value'
+    name: kafka_$1_$2_$3
+    type: GAUGE
+    labels: { "$4": "$5" }
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+)><>Value'
+    name: kafka_$1_$2_$3
+    type: GAUGE
+
+  # ---- Histogram/timer counts (e.g. LeaderElectionRateAndTimeMs) -------------
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+), ([^,=]+)=([^,]+)><>Count'
+    name: kafka_$1_$2_$3_count
+    type: COUNTER
+    labels: { "$4": "$5" }
+  - pattern: 'kafka.(\w+)<type=([^,]+), name=([^,]+)><>Count'
+    name: kafka_$1_$2_$3_count
+    type: COUNTER

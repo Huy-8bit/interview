@@ -1,0 +1,460 @@
+# Apache Kafka Learning Lab — 3-node KRaft cluster + Go services + observability.
+#
+#   docker compose up -d --build        # start everything
+#   docker compose ps                   # all core services should be (healthy)
+#
+# Listener design (docs/02-cluster-architecture.md):
+#   CONTROLLER://:29093  KRaft quorum traffic (controller <-> controller/broker), never advertised
+#   INTERNAL://:29092    broker <-> broker replication + clients inside the docker network
+#                        advertised as kafka-N:29092
+#   EXTERNAL://:9092     clients on the host machine; advertised as localhost:9092/9093/9094
+#                        (container port 9092 is published on a different host port per broker)
+name: kafka-lab
+
+x-kafka-env: &kafka-env
+  CLUSTER_ID: ${KAFKA_CLUSTER_ID:-CPumNpgKS8u2KpUbNDseQA}
+  # combined mode: every node is both a KRaft controller (metadata quorum) and a broker
+  KAFKA_PROCESS_ROLES: broker,controller
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-1:29093,2@kafka-2:29093,3@kafka-3:29093
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+  KAFKA_LISTENERS: INTERNAL://:29092,CONTROLLER://:29093,EXTERNAL://:9092
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+  KAFKA_LOG_DIRS: /var/lib/kafka/data
+  # production-like durability defaults
+  KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+  KAFKA_MIN_INSYNC_REPLICAS: 2
+  KAFKA_NUM_PARTITIONS: 3
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE: "false"
+  # lab-speed tweaks (documented in docs/12-isr.md and docs/18-retention-compaction.md)
+  KAFKA_REPLICA_LAG_TIME_MAX_MS: 10000            # default 30000: follower dropped from ISR after 10s without catching up
+  KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 10000    # default 300000: retention-demo expires quickly
+  KAFKA_LEADER_IMBALANCE_CHECK_INTERVAL_SECONDS: 30   # default 300: preferred leader comes back faster after a broker restart
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 3000
+  KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xms512m -Xmx512m}
+  KAFKA_OPTS: -javaagent:/opt/jmx/jmx_prometheus_javaagent.jar=7071:/opt/jmx/kafka.yml
+
+x-kafka: &kafka
+  build:
+    context: ./kafka
+    args:
+      KAFKA_VERSION: ${KAFKA_VERSION:-4.3.1}
+  image: kafka-lab/kafka:${KAFKA_VERSION:-4.3.1}
+  restart: unless-stopped
+  networks: [kafka-lab]
+  stop_grace_period: 30s
+  healthcheck:
+    test: ["CMD-SHELL", "kt kafka-broker-api-versions --bootstrap-server localhost:29092 >/dev/null 2>&1"]
+    interval: 10s
+    timeout: 20s
+    retries: 15
+    start_period: 20s
+
+x-app-env: &app-env
+  KAFKA_BROKERS: kafka-1:29092,kafka-2:29092,kafka-3:29092
+  REDIS_ADDR: redis:6379
+  HTTP_ADDR: ":8080"
+  LOG_LEVEL: info
+
+x-app: &app
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: kafka-lab/app:local
+  restart: unless-stopped
+  networks: [kafka-lab]
+  stop_grace_period: 30s
+  depends_on: &app-depends
+    kafka-init:
+      condition: service_completed_successfully
+    redis:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+    interval: 10s
+    timeout: 3s
+    retries: 6
+    start_period: 10s
+
+x-order-consumer-env: &order-consumer-env
+  <<: *app-env
+  SERVICE_NAME: order-consumer
+  CONSUMER_GROUP: order-processing-group
+  CONSUMER_TOPICS: orders
+  RETRY_TOPIC: retry-orders
+  DLQ_TOPIC: orders-dlq
+  MAX_RETRIES: ${ORDER_MAX_RETRIES:-3}
+  RETRY_BACKOFF: 2s
+  COMMIT_MODE: ${ORDER_COMMIT_MODE:-manual}
+  BALANCER: ${ORDER_BALANCER:-cooperative-sticky}
+  GROUP_PROTOCOL: ${ORDER_GROUP_PROTOCOL:-classic}
+  PROCESSING_DELAY_MS: ${ORDER_PROCESSING_DELAY_MS:-0}
+  SESSION_TIMEOUT: 10s
+  HEARTBEAT_INTERVAL: 1s
+  REBALANCE_TIMEOUT: 30s
+
+services:
+  # ============================ Kafka cluster ===================================
+  kafka-1:
+    <<: *kafka
+    hostname: kafka-1
+    networks:
+      kafka-lab:
+        ipv4_address: 172.30.30.11
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:29092,EXTERNAL://localhost:9092
+    ports:
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:7071:7071"
+    volumes:
+      - kafka-1-data:/var/lib/kafka/data
+
+  kafka-2:
+    <<: *kafka
+    hostname: kafka-2
+    networks:
+      kafka-lab:
+        ipv4_address: 172.30.30.12
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 2
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:29092,EXTERNAL://localhost:9093
+    ports:
+      - "127.0.0.1:9093:9092"
+      - "127.0.0.1:7072:7071"
+    volumes:
+      - kafka-2-data:/var/lib/kafka/data
+
+  kafka-3:
+    <<: *kafka
+    hostname: kafka-3
+    networks:
+      kafka-lab:
+        ipv4_address: 172.30.30.13
+    environment:
+      <<: *kafka-env
+      KAFKA_NODE_ID: 3
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-3:29092,EXTERNAL://localhost:9094
+    ports:
+      - "127.0.0.1:9094:9092"
+      - "127.0.0.1:7073:7071"
+    volumes:
+      - kafka-3-data:/var/lib/kafka/data
+
+  # One-shot: creates / re-applies topics from kafka/topics/topics.conf, then exits 0.
+  kafka-init:
+    image: kafka-lab/kafka:${KAFKA_VERSION:-4.3.1}
+    networks: [kafka-lab]
+    restart: "no"
+    entrypoint: ["bash", "/scripts/internal/apply-topics.sh"]
+    environment:
+      BOOTSTRAP: kafka-1:29092,kafka-2:29092,kafka-3:29092
+      ONLY_TOPICS: ${ONLY_TOPICS:-}
+    volumes:
+      - ./scripts:/scripts:ro
+      - ./kafka/topics:/topics:ro
+    depends_on:
+      kafka-1: { condition: service_healthy }
+      kafka-2: { condition: service_healthy }
+      kafka-3: { condition: service_healthy }
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:8.2.4
+    hostname: schema-registry
+    restart: unless-stopped
+    networks: [kafka-lab]
+    depends_on:
+      kafka-init: { condition: service_completed_successfully }
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka-1:29092,PLAINTEXT://kafka-2:29092,PLAINTEXT://kafka-3:29092
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 3
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: backward
+      SCHEMA_REGISTRY_HEAP_OPTS: -Xms128m -Xmx256m
+    ports:
+      - "127.0.0.1:8081:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8081/subjects >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:v1.5.0
+    restart: unless-stopped
+    networks: [kafka-lab]
+    depends_on:
+      kafka-init: { condition: service_completed_successfully }
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: kafka-lab
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:29092,kafka-2:29092,kafka-3:29092
+      KAFKA_CLUSTERS_0_METRICS_TYPE: PROMETHEUS
+      KAFKA_CLUSTERS_0_METRICS_PORT: 7071
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
+      JAVA_OPTS: -Xms128m -Xmx384m
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    networks: [kafka-lab]
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ============================ Go services =====================================
+  producer-service:
+    <<: *app
+    command: ["/app/producer"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: producer-service
+      PRODUCER_ACKS: ${PRODUCER_ACKS:-all}
+      PRODUCER_IDEMPOTENT: ${PRODUCER_IDEMPOTENT:-true}
+      PRODUCER_COMPRESSION: ${PRODUCER_COMPRESSION:-lz4}
+      PRODUCER_LINGER_MS: ${PRODUCER_LINGER_MS:-5}
+      PRODUCER_BATCH_MAX_BYTES: ${PRODUCER_BATCH_MAX_BYTES:-1048576}
+    ports:
+      - "127.0.0.1:8000:8080"
+
+  # consumer-service-1..3 : three instances of the same consumer group
+  order-consumer-1:
+    <<: *app
+    command: ["/app/order-consumer"]
+    environment:
+      <<: *order-consumer-env
+      INSTANCE_ID: order-consumer-1
+    ports:
+      - "127.0.0.1:8011:8080"
+
+  order-consumer-2:
+    <<: *app
+    command: ["/app/order-consumer"]
+    environment:
+      <<: *order-consumer-env
+      INSTANCE_ID: order-consumer-2
+    ports:
+      - "127.0.0.1:8012:8080"
+
+  order-consumer-3:
+    <<: *app
+    command: ["/app/order-consumer"]
+    environment:
+      <<: *order-consumer-env
+      INSTANCE_ID: order-consumer-3
+    ports:
+      - "127.0.0.1:8013:8080"
+
+  # Extra instances for "more consumers than partitions" (labs/05_consumer_group):
+  #   docker compose --profile scale up -d
+  order-consumer-4:
+    <<: *app
+    profiles: [scale]
+    command: ["/app/order-consumer"]
+    environment: { <<: *order-consumer-env, INSTANCE_ID: order-consumer-4 }
+    ports: ["127.0.0.1:8014:8080"]
+  order-consumer-5:
+    <<: *app
+    profiles: [scale]
+    command: ["/app/order-consumer"]
+    environment: { <<: *order-consumer-env, INSTANCE_ID: order-consumer-5 }
+    ports: ["127.0.0.1:8015:8080"]
+  order-consumer-6:
+    <<: *app
+    profiles: [scale]
+    command: ["/app/order-consumer"]
+    environment: { <<: *order-consumer-env, INSTANCE_ID: order-consumer-6 }
+    ports: ["127.0.0.1:8016:8080"]
+  order-consumer-7:
+    <<: *app
+    profiles: [scale]
+    command: ["/app/order-consumer"]
+    environment: { <<: *order-consumer-env, INSTANCE_ID: order-consumer-7 }
+    ports: ["127.0.0.1:8017:8080"]
+  order-consumer-8:
+    <<: *app
+    profiles: [scale]
+    command: ["/app/order-consumer"]
+    environment: { <<: *order-consumer-env, INSTANCE_ID: order-consumer-8 }
+    ports: ["127.0.0.1:8018:8080"]
+
+  payment-consumer:
+    <<: *app
+    command: ["/app/payment-consumer"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: payment-consumer
+      INSTANCE_ID: payment-consumer-1
+      CONSUMER_GROUP: payment-group
+      CONSUMER_TOPICS: orders
+      COMMIT_MODE: manual
+      INLINE_RETRIES: "3"
+    ports:
+      - "127.0.0.1:8025:8080"
+
+  analytics-consumer:
+    <<: *app
+    command: ["/app/analytics-consumer"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: analytics-consumer
+      INSTANCE_ID: analytics-consumer-1
+      CONSUMER_GROUP: analytics-group
+      CONSUMER_TOPICS: orders,payments
+      # analytics tolerates small duplicates/loss -> uses the client's auto commit
+      COMMIT_MODE: auto
+      MAX_POLL_RECORDS: "500"
+      LOG_EVERY: "100"
+    ports:
+      - "127.0.0.1:8022:8080"
+
+  notification-consumer:
+    <<: *app
+    command: ["/app/notification-consumer"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: notification-consumer
+      INSTANCE_ID: notification-consumer-1
+      CONSUMER_GROUP: notification-group
+      CONSUMER_TOPICS: orders,payments
+      RETRY_TOPIC: retry-payments
+      DLQ_TOPIC: payments-dlq
+      MAX_RETRIES: "3"
+      COMMIT_MODE: manual
+    ports:
+      - "127.0.0.1:8023:8080"
+
+  txn-processor:
+    <<: *app
+    command: ["/app/txn-processor"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: txn-processor
+      INSTANCE_ID: txn-processor-1
+      CONSUMER_GROUP: txn-processor-group
+      INPUT_TOPIC: txn-input
+      OUTPUT_TOPIC: txn-output
+    ports:
+      - "127.0.0.1:8024:8080"
+
+  traffic-generator:
+    <<: *app
+    command: ["/app/traffic-generator"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: traffic-generator
+      TOPIC: orders
+      AUTOSTART: ${TRAFFIC_AUTOSTART:-true}
+      MODE: ${TRAFFIC_MODE:-constant}
+      RATE_PER_SECOND: ${TRAFFIC_RATE_PER_SECOND:-5}
+      DURATION: ${TRAFFIC_DURATION:-0s}
+    ports:
+      - "127.0.0.1:8001:8080"
+
+  # Consumer lag + partition/ISR metadata exporter (reads Kafka via the admin API)
+  lag-exporter:
+    <<: *app
+    command: ["/app/lag-exporter"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: lag-exporter
+      SCRAPE_INTERVAL: 5s
+    ports:
+      - "127.0.0.1:8030:8080"
+
+  # Long-running toolbox with the `kcli` lab CLI; scripts use `docker compose exec toolbox kcli ...`
+  toolbox:
+    <<: *app
+    command: ["sleep", "infinity"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: toolbox
+    healthcheck:
+      test: ["CMD", "kcli", "version"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ============================ Observability ===================================
+  prometheus:
+    image: prom/prometheus:v3.13.4
+    restart: unless-stopped
+    networks: [kafka-lab]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=3d
+      - --web.enable-lifecycle
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:13.0.10
+    restart: unless-stopped
+    networks: [kafka-lab]
+    depends_on:
+      prometheus: { condition: service_healthy }
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/kafka-cluster-overview.json
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+networks:
+  kafka-lab:
+    name: kafka-lab
+    # Fixed subnet: brokers get STATIC IPs (.11-.13). With dynamic IPs, restarted
+    # containers can swap addresses and a broker holding a stale address for a peer
+    # cannot rejoin the KRaft quorum (seen in labs/10_replication, docs/21).
+    ipam:
+      config:
+        - subnet: 172.30.30.0/24
+          ip_range: 172.30.30.128/25   # dynamic addresses for every other container
+
+volumes:
+  kafka-1-data:
+  kafka-2-data:
+  kafka-3-data:
+  prometheus-data:
+  grafana-data:
