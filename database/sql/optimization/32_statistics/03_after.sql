@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 32 · Planner statistics: n_distinct, MCV, histogram, correlation — AFTER
 -- Same query again, with the optimization applied (02_optimize.sql or 02b/02c...).
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 03 · Yearly revenue per payment method
 -- Topic: Sargable rewrite   Tables: payments
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_03.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_03.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

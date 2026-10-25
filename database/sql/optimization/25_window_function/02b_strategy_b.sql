@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 25 · Window functions: the sort behind PARTITION BY ... ORDER BY — OPTIMIZE · Strategy B
 -- Strategy B: Rewrite with DISTINCT ON (user_id)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

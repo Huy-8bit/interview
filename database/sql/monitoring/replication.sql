@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Replication monitoring. Open in DBeaver and run statement by statement
--- (Ctrl+Enter). Each section says where to run it: PRIMARY (5432) or REPLICA (5433).
+-- (Ctrl+Enter). Each section says where to run it: PRIMARY (55435) or REPLICA (55436).
 -- Running a [PRIMARY] query on the replica (or vice versa) fails ON PURPOSE, e.g.
 --   pg_current_wal_lsn() on a replica  -> ERROR: recovery is in progress
 --   pg_last_wal_replay_lsn() on the primary -> NULL, pg_is_wal_replay_paused() -> ERROR

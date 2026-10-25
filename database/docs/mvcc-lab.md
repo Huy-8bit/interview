@@ -2,7 +2,7 @@
 
 **MVCC (Multi-Version Concurrency Control)**: PostgreSQL không ghi đè dữ liệu tại chỗ. Mỗi `UPDATE` tạo một **phiên bản mới** của dòng (tuple), phiên bản cũ vẫn nằm trên đĩa cho tới khi VACUUM dọn. Mỗi transaction nhìn dữ liệu qua một **snapshot** và chỉ thấy các phiên bản "hợp lệ" với snapshot đó. Kết quả: *reader không chặn writer, writer không chặn reader*.
 
-Chạy trên **primary** (`localhost:5432`).
+Chạy trên **primary** (`localhost:55435`).
 
 ## 1. Các cột hệ thống
 

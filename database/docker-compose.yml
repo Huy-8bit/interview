@@ -29,7 +29,7 @@ services:
     environment:
       <<: *postgres-env
     ports:
-      - "${BIND_ADDRESS:-127.0.0.1}:${PRIMARY_PORT:-5432}:5432"
+      - "${BIND_ADDRESS:-127.0.0.1}:${PRIMARY_PORT:-55435}:5432"
     volumes:
       - postgres_primary_data:/var/lib/postgresql/data
     # Parallel query and maintenance use POSIX shared memory in /dev/shm.
@@ -61,7 +61,7 @@ services:
       PRIMARY_HOST: postgres-primary
       PRIMARY_PORT: 5432
     ports:
-      - "${BIND_ADDRESS:-127.0.0.1}:${REPLICA_PORT:-5433}:5432"
+      - "${BIND_ADDRESS:-127.0.0.1}:${REPLICA_PORT:-55436}:5432"
     volumes:
       - postgres_replica_data:/var/lib/postgresql/data
     shm_size: ${POSTGRES_SHM_SIZE:-2gb}
@@ -90,6 +90,7 @@ services:
     container_name: pglab-data-generator
     environment:
       DB_HOST: postgres-primary
+      # Containers use the service port; PRIMARY_PORT is the host-side published port.
       DB_PORT: 5432
       DB_NAME: ${POSTGRES_DB:-ecommerce}
       DB_USER: ${POSTGRES_USER:-postgres}

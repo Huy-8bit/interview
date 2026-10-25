@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 15 · A messy customer report
 -- Topic: Query rewrite (everything together)   Tables: users, orders
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_15.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_15.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

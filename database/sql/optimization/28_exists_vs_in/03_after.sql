@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 28 · EXISTS vs IN, NOT EXISTS vs NOT IN (and the NULL trap) — AFTER
 -- The recommended form for 'rows without a match': NOT EXISTS.
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

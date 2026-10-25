@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 11 · Implicit casts that disable an index — OPTIMIZE · Strategy B
 -- Strategy B: See the type resolution: errors and quoted literals
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

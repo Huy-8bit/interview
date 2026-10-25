@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 15 · Indexes are not free: INSERT / UPDATE / DELETE cost and WAL — OPTIMIZE · Strategy B
 -- Strategy B: Only the one index the application really needs (user_id)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

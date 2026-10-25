@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 13 · LIKE 'prefix%' vs ILIKE '%contains%': pattern ops vs trigram — OPTIMIZE · Strategy A
 -- Strategy A: B-tree (name varchar_pattern_ops)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

@@ -2,7 +2,7 @@
 
 ## 0. Chuẩn bị
 
-Mở **2 connection tới PRIMARY** (`localhost:5432`) — gọi là **Session A** và **Session B**. (Thêm Session C để giám sát.)
+Mở **2 connection tới PRIMARY** (`localhost:55435`) — gọi là **Session A** và **Session B**. (Thêm Session C để giám sát.)
 
 **DBeaver**:
 
@@ -410,7 +410,7 @@ WHERE backend_xmin IS NOT NULL
 ORDER BY age(backend_xmin) DESC;
 
 -- Cả replication slot cũng có thể giữ xmin: replica của lab bật hot_standby_feedback,
--- nên một query dài trên REPLICA (5433) cũng làm VACUUM trên PRIMARY không dọn được.
+-- nên một query dài trên REPLICA (55436) cũng làm VACUUM trên PRIMARY không dọn được.
 SELECT slot_name, xmin, catalog_xmin, age(xmin) AS xmin_age FROM pg_replication_slots;
 ```
 

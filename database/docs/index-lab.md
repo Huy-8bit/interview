@@ -1,6 +1,6 @@
 # Index Lab — B-tree, composite, partial, expression, covering, GIN, trigram, BRIN
 
-Chạy trên **primary** (`localhost:5432`). Mọi số liệu trong bài đo trên dataset mặc định (100k users, 500k orders, 1.5M order_items, `SEED=42`) sau khi generator chạy `VACUUM ANALYZE`. Máy bạn sẽ ra số khác — hãy so **thứ tự độ lớn** và **loại node** trong plan.
+Chạy trên **primary** (`localhost:55435`). Mọi số liệu trong bài đo trên dataset mặc định (100k users, 500k orders, 1.5M order_items, `SEED=42`) sau khi generator chạy `VACUUM ANALYZE`. Máy bạn sẽ ra số khác — hãy so **thứ tự độ lớn** và **loại node** trong plan.
 
 Quy tắc của lab:
 
@@ -577,11 +577,11 @@ DROP INDEX idx_reviews_order_id;    -- giữ lab ở trạng thái ban đầu
 Index được tạo trên primary sẽ **tự xuất hiện** trên replica (DDL và nội dung index đều đi qua WAL):
 
 ```sql
--- PRIMARY (5432)
+-- PRIMARY (55435)
 CREATE INDEX idx_users_phone ON users (phone);
 SELECT pg_current_wal_lsn();
 
--- REPLICA (5433) - vài ms sau
+-- REPLICA (55436) - vài ms sau
 SELECT indexname FROM pg_indexes WHERE tablename = 'users';
 EXPLAIN SELECT * FROM users WHERE phone = '+1-915-884-7227';   -- Index Scan trên replica
 CREATE INDEX idx_x ON users (gender);

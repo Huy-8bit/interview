@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 29 · Pagination with OFFSET: the cost of deep pages — OPTIMIZE · Strategy A
 -- Strategy A: (experiment) 'deferred join' WITHOUT a suitable index
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

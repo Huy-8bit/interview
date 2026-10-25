@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 33 · Cardinality estimation: correlated columns and CREATE STATISTICS — OPTIMIZE · Strategy A
 -- Strategy A: CREATE STATISTICS (dependencies) ON country_code, city
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

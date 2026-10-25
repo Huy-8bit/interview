@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 07 · Loyal customers who never write reviews
 -- Topic: Query rewrite   Tables: users, orders, reviews
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_07.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_07.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

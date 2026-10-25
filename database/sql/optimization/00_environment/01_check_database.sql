@@ -1,6 +1,6 @@
 -- =============================================================================
 -- 00_environment / 01 · Which server am I on?
--- Run on PRIMARY (localhost:5432) or REPLICA (localhost:5433), database ecommerce.
+-- Run on PRIMARY (localhost:55435) or REPLICA (localhost:55436), database ecommerce.
 -- =============================================================================
 
 SELECT version();

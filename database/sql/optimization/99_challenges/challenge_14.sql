@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 14 · Categories with the most 5-star reviews this quarter
 -- Topic: Join + covering partial index   Tables: reviews, products, categories
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_14.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_14.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

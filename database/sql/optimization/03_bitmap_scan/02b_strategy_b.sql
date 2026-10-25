@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 03 · Bitmap Index Scan + Bitmap Heap Scan, BitmapAnd — OPTIMIZE · Strategy B
 -- Strategy B: (experiment) tiny work_mem: the planner changes plan, a forced bitmap goes lossy
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

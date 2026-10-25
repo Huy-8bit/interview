@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 36 · VACUUM: dead tuples, visibility map, VACUUM vs VACUUM FULL — OPTIMIZE · Strategy B
 -- Strategy B: VACUUM FULL: rewrite the table compactly
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

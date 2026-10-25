@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 08 · Pink products of a category
 -- Topic: Use the existing index   Tables: products
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_08.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_08.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 27 · Subquery vs JOIN: what the planner rewrites for you — AFTER
 -- Q1 unchanged (already optimal) and Q2 rewritten as one grouped LEFT JOIN.
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

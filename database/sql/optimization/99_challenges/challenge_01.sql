@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 01 · Find a customer by the last digits of the phone number
 -- Topic: Index design   Tables: users
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_01.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_01.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

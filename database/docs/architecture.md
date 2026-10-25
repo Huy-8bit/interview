@@ -40,8 +40,8 @@ flowchart TB
     V1[("volume<br/>postgresql-lab_postgres_primary_data")]
     V2[("volume<br/>postgresql-lab_postgres_replica_data")]
 
-    DBeaver -->|"127.0.0.1:5432<br/>INSERT/UPDATE/DELETE/SELECT"| PM1
-    DBeaver -->|"127.0.0.1:5433<br/>SELECT only"| BE2
+    DBeaver -->|"127.0.0.1:55435<br/>INSERT/UPDATE/DELETE/SELECT"| PM1
+    DBeaver -->|"127.0.0.1:55436<br/>SELECT only"| BE2
     Scripts -. "docker compose exec psql / pg_dump" .-> BE1
     Scripts -. "pg_dump stdout" .-> Backups
     Gen -->|"COPY ... FROM STDIN<br/>(batch = 10,000 rows)"| BE1
@@ -70,8 +70,8 @@ flowchart TB
 
 | Thành phần | Image | Port host | Volume | Vai trò |
 | --- | --- | --- | --- | --- |
-| `postgres-primary` | `postgresql-lab/postgres-primary:16` (từ `postgres:16-bookworm`) | `127.0.0.1:5432` | `postgresql-lab_postgres_primary_data` → `/var/lib/postgresql/data` | nhận mọi thao tác ghi, sinh WAL, gửi WAL |
-| `postgres-replica` | `postgresql-lab/postgres-replica:16` | `127.0.0.1:5433` | `postgresql-lab_postgres_replica_data` → `/var/lib/postgresql/data` (cluster nằm ở `.../pgdata`) | nhận WAL, replay, phục vụ SELECT |
+| `postgres-primary` | `postgresql-lab/postgres-primary:16` (từ `postgres:16-bookworm`) | `127.0.0.1:55435` | `postgresql-lab_postgres_primary_data` → `/var/lib/postgresql/data` | nhận mọi thao tác ghi, sinh WAL, gửi WAL |
+| `postgres-replica` | `postgresql-lab/postgres-replica:16` | `127.0.0.1:55436` | `postgresql-lab_postgres_replica_data` → `/var/lib/postgresql/data` (cluster nằm ở `.../pgdata`) | nhận WAL, replay, phục vụ SELECT |
 | `data-generator` | `postgresql-lab/data-generator` (từ `python:3.12-slim`) | — | — | nạp dữ liệu vào primary rồi thoát |
 
 ## 2. Trình tự khởi động (`docker compose up -d --build`)

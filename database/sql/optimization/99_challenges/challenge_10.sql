@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 10 · Daily active buyers in September
 -- Topic: Index Only Scan + aggregation   Tables: orders
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_10.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_10.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

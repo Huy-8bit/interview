@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 32 · Planner statistics: n_distinct, MCV, histogram, correlation — OPTIMIZE · Strategy B
 -- Strategy B: Override n_distinct manually: ALTER COLUMN ... SET (n_distinct = ...)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

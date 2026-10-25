@@ -77,4 +77,4 @@ docker compose exec -T "$PRIMARY_SERVICE" psql -X -U "$POSTGRES_USER" -d "$targe
 SELECT relname AS table_name, n_live_tup AS rows
 FROM pg_stat_user_tables ORDER BY n_live_tup DESC;" -c "
 SELECT pg_size_pretty(pg_database_size(current_database())) AS database_size;"
-echo "Connect: psql -h localhost -p ${PRIMARY_PORT:-5432} -U $POSTGRES_USER -d $target"
+echo "Connect: psql -h localhost -p ${PRIMARY_PORT:-55435} -U $POSTGRES_USER -d $target"

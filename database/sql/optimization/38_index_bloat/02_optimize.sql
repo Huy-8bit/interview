@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 38 · Index bloat: pgstatindex and REINDEX — OPTIMIZE · Strategy A
 -- Strategy A: REINDEX INDEX: rebuild compactly
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

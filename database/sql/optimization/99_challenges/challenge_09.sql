@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 09 · Page 200 of a product's reviews
 -- Topic: Pagination   Tables: reviews
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_09.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_09.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

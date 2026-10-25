@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 40 · Partition pruning: scan only the relevant partitions — BEFORE (baseline)
 -- The query as it runs today, before any optimization.
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

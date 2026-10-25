@@ -1,6 +1,6 @@
 # Bài tập SQL — 60 bài, 10 level
 
-Chạy trên **primary** (`localhost:5432`, database `ecommerce`). Các bài chỉ đọc (Level 1–5) chạy được cả trên replica (`5433`).
+Chạy trên **primary** (`localhost:55435`, database `ecommerce`). Các bài chỉ đọc (Level 1–5) chạy được cả trên replica (`55436`).
 Lời giải: [sql-solutions.md](sql-solutions.md) — hãy tự làm trước.
 
 Quy ước:

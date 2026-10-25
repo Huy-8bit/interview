@@ -9,7 +9,7 @@
 require_running "$PRIMARY_SERVICE" "$REPLICA_SERVICE"
 status=0
 
-header "PRIMARY  (localhost:${PRIMARY_PORT:-5432})"
+header "PRIMARY  (localhost:${PRIMARY_PORT:-55435})"
 primary_recovery="$(scalar_on "$PRIMARY_SERVICE" "SELECT pg_is_in_recovery()")"
 if [ "$primary_recovery" = "f" ]; then ok "pg_is_in_recovery() = false  -> read/write primary"
 else fail "pg_is_in_recovery() = $primary_recovery on the primary"; status=1; fi
@@ -36,7 +36,7 @@ SELECT slot_name, slot_type, active, active_pid, restart_lsn, wal_status,
        pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn)) AS retained_wal
 FROM pg_replication_slots;"
 
-header "REPLICA  (localhost:${REPLICA_PORT:-5433})"
+header "REPLICA  (localhost:${REPLICA_PORT:-55436})"
 replica_recovery="$(scalar_on "$REPLICA_SERVICE" "SELECT pg_is_in_recovery()")"
 if [ "$replica_recovery" = "t" ]; then ok "pg_is_in_recovery() = true  -> hot standby (read-only)"
 else fail "pg_is_in_recovery() = $replica_recovery on the replica (was it promoted?)"; status=1; fi

@@ -44,7 +44,7 @@ users=$1 products=$2 inventory=$3 orders=$4 items=$5 reviews=$6 batch=$7 est_siz
 
 require_running "$PRIMARY_SERVICE"
 
-header "Profile '$profile'"
+header "Profile '$profile'  (primary localhost:$PRIMARY_PORT; generator connects inside Compose)"
 printf '  %-14s %12s\n' users "$users" "addresses" "~$(( users * 16 / 10 )) (1-3 per user)" \
   products "$products" inventory "$inventory" orders "$orders" order_items "$items" \
   payments "~$(( orders * 103 / 100 )) (some failed attempts)" reviews "$reviews" batch_size "$batch"

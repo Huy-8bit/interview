@@ -21,6 +21,13 @@ def _env_bool(name: str, default: bool) -> bool:
     return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _db_port() -> int:
+    port = int(os.getenv("DB_PORT", os.getenv("PRIMARY_PORT", "55435")))
+    if port < 1:
+        raise ValueError(f"DB_PORT must be >= 1, got {port}")
+    return port
+
+
 @dataclass(frozen=True)
 class Config:
     db_host: str
@@ -58,7 +65,7 @@ class Config:
     def from_env(cls) -> "Config":
         cfg = cls(
             db_host=os.getenv("DB_HOST", "localhost"),
-            db_port=_env_int("DB_PORT", 5432, 1),
+            db_port=_db_port(),
             db_name=os.getenv("DB_NAME", "ecommerce"),
             db_user=os.getenv("DB_USER", "postgres"),
             db_password=os.getenv("DB_PASSWORD", "postgres"),

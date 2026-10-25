@@ -128,7 +128,7 @@ test_challenge() {
   summary+=("$status $name $note")
 }
 
-header "Optimization labs  (logs: $LOG_ROOT/)"
+header "Optimization labs  (primary localhost:$PRIMARY_PORT; via Compose, logs: $LOG_ROOT/)"
 mkdir -p "$LOG_ROOT"
 if [ "$run_labs" -eq 1 ]; then
   for dir in "$LAB_ROOT"/[0-9][0-9]_*/; do

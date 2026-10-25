@@ -2,7 +2,7 @@
 -- Lab 33 · Cardinality estimation: correlated columns and CREATE STATISTICS — COMPARE
 -- Before / after worksheet. Fill in YOUR numbers: timings depend on the machine,
 -- the cache state and the dataset profile, so none are hard-coded here.
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

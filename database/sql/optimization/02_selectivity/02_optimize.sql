@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 02 · Selectivity: the same index, different plans — OPTIMIZE · Strategy A
 -- Strategy A: B-tree index on payments(status)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

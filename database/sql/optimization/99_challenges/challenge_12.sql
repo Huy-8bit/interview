@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 12 · Customers living in Da Nang
 -- Topic: Partial index   Tables: users, addresses
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_12.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_12.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

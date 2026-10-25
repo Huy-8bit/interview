@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 02 · Latest orders that used a coupon
 -- Topic: Composite / partial index   Tables: orders
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_02.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_02.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

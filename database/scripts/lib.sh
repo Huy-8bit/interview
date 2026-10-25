@@ -15,6 +15,8 @@ fi
 
 POSTGRES_USER="${POSTGRES_USER:-postgres}"
 POSTGRES_DB="${POSTGRES_DB:-ecommerce}"
+PRIMARY_PORT="${PRIMARY_PORT:-55435}"
+REPLICA_PORT="${REPLICA_PORT:-55436}"
 PRIMARY_SERVICE="postgres-primary"
 REPLICA_SERVICE="postgres-replica"
 
@@ -29,7 +31,7 @@ ok()     { printf '%s[OK]%s   %s\n' "$C_GREEN" "$C_RESET" "$*"; }
 warn()   { printf '%s[WARN]%s %s\n' "$C_YELLOW" "$C_RESET" "$*"; }
 fail()   { printf '%s[FAIL]%s %s\n' "$C_RED" "$C_RESET" "$*"; }
 
-# psql_on <service> [psql args...]   (unix socket inside the container, pretty output)
+# psql_on <service> [psql args...]   (container socket; host port mappings are not used)
 psql_on() {
   local service="$1"; shift
   docker compose exec -T "$service" psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" "$@"

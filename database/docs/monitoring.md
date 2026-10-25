@@ -291,7 +291,7 @@ Giải thích từng metric, thí nghiệm tạo lag và failover: [replication.
 3. Chạy `./scripts/backup.sh --from-replica` trong khi Session A trên **primary** liên tục `UPDATE` một bảng lớn. `pg_stat_database_conflicts` trên replica có tăng không? Vì sao không (gợi ý: `hot_standby_feedback = on`)? Tắt nó **trên replica** (`ALTER SYSTEM` ghi vào `postgresql.auto.conf`, chạy được cả trên node read-only) và thử lại:
 
    ```sql
-   -- REPLICA (5433)
+   -- REPLICA (55436)
    ALTER SYSTEM SET hot_standby_feedback = off;
    SELECT pg_reload_conf();      -- bất đồng bộ: SHOW ở session mới sau ~1s
    -- ... thí nghiệm ...

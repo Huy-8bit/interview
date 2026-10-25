@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 16 · Nested Loop: small outer side + indexed inner lookups — OPTIMIZE · Strategy A
 -- Strategy A: (experiment) SET enable_nestloop = off: what would the alternative cost?
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 04 · What must warehouse 3 restock first?
 -- Topic: Partial index with an expression predicate   Tables: inventory
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_04.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_04.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

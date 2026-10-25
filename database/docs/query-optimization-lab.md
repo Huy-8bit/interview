@@ -1,6 +1,6 @@
 # Query Optimization Lab — đọc EXPLAIN, scan, join, sort, aggregate, statistics
 
-Chạy trên **primary** (`localhost:5432`) hoặc **replica** (`5433`, mọi bài chỉ đọc). Số liệu trong bài đo trên dataset mặc định; máy bạn sẽ khác về thời gian nhưng **loại node và số buffers** gần như giống hệt (cùng `SEED`).
+Chạy trên **primary** (`localhost:55435`) hoặc **replica** (`55436`, mọi bài chỉ đọc). Số liệu trong bài đo trên dataset mặc định; máy bạn sẽ khác về thời gian nhưng **loại node và số buffers** gần như giống hệt (cùng `SEED`).
 
 Mục tiêu: nhìn một plan và trả lời được 3 câu — *planner đã chọn gì, vì sao, và ước lượng của nó đúng hay sai.*
 
@@ -575,4 +575,4 @@ Với mỗi truy vấn: ghi plan, node đắt nhất, chỗ ước lượng lệ
 
 5. `SELECT count(DISTINCT user_id) FROM orders WHERE created_at >= now() - interval '90 days';` — so với `SELECT count(*) FROM (SELECT DISTINCT user_id ...) s;`.
 
-6. Chạy bài 1 trên **replica** (`5433`). Plan có giống primary không? (Gợi ý: thống kê `pg_statistic` cũng được replicate.) `pg_stat_statements` của replica có ghi lại không?
+6. Chạy bài 1 trên **replica** (`55436`). Plan có giống primary không? (Gợi ý: thống kê `pg_statistic` cũng được replicate.) `pg_stat_statements` của replica có ghi lại không?

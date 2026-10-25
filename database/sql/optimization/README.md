@@ -20,7 +20,7 @@ Nhiều kết quả **không giống sách giáo khoa** — và đó là phần 
 ./scripts/generate-data.sh 5m          # nếu chưa có dataset 5m (README dự án, mục 4)
 ```
 
-Mở bằng **DBeaver** (connection `localhost:5432`, database `ecommerce`) hoặc psql:
+Mở bằng **DBeaver** (connection `localhost:55435`, database `ecommerce`) hoặc psql:
 
 ```bash
 ./scripts/psql.sh primary -f /dev/stdin < sql/optimization/01_seq_scan_vs_index_scan/01_before.sql

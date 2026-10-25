@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 18 · Merge Join: two inputs already sorted on the join key — OPTIMIZE · Strategy B
 -- Strategy B: (experiment) Merge join on an UNINDEXED key needs an explicit Sort
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

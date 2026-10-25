@@ -123,7 +123,7 @@ docker compose exec postgres-primary rm -f /tmp/lab.dump /tmp/lab.list
 ### 2.2 Bài tập: khôi phục sau "tai nạn"
 
 1. `./scripts/backup.sh`
-2. Trên primary: `DELETE FROM reviews WHERE rating = 1;` (27,224 dòng biến mất — trên **cả replica**, kiểm tra ở `5433`).
+2. Trên primary: `DELETE FROM reviews WHERE rating = 1;` (27,224 dòng biến mất — trên **cả replica**, kiểm tra ở `55436`).
 3. Khôi phục **chỉ** các dòng đã mất mà không ghi đè dữ liệu mới phát sinh sau backup:
 
    ```bash

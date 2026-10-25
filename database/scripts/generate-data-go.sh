@@ -10,7 +10,7 @@ if [ "${1:-}" = "--local" ]; then local_run=1; shift; fi
 if [ "$local_run" -eq 1 ]; then
   # Match the existing scripts' .env loading convention.
   if [ -f .env ]; then set -a; . ./.env; set +a; fi
-  export DB_HOST="${DB_HOST:-localhost}" DB_PORT="${DB_PORT:-${PRIMARY_PORT:-5432}}"
+  export DB_HOST="${DB_HOST:-localhost}" DB_PORT="${DB_PORT:-${PRIMARY_PORT:-55435}}"
   export DB_NAME="${DB_NAME:-${POSTGRES_DB:-ecommerce}}" DB_USER="${DB_USER:-${POSTGRES_USER:-postgres}}"
   export DB_PASSWORD="${DB_PASSWORD:-${POSTGRES_PASSWORD:-postgres}}"
   cd data-generator-go

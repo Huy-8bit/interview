@@ -60,7 +60,7 @@ Ví dụ tạo **DB mới tên `ecommerce_go`**, giữ nguyên `ecommerce` đang
 `createdb` sẽ báo lỗi nếu tên DB đã tồn tại; không có lệnh xóa/recreate ở đây.
 DB mới vẫn dùng chung tài nguyên cluster và tạo WAL cho replica; muốn đo biệt lập
 hãy trỏ `DB_HOST`, `DB_PORT`, `DB_NAME` tới PostgreSQL riêng. Với `--local`, mặc
-định là `localhost:$PRIMARY_PORT`; với Docker là `postgres-primary:5432`.
+định là `localhost:$PRIMARY_PORT` (mặc định `55435`); với Docker là `postgres-primary:5432`.
 
 Kiểm tra đúng DB vừa nạp (script `verify-data.sh` cũ dùng `POSTGRES_DB` trong `.env`):
 

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 29 · Pagination with OFFSET: the cost of deep pages — AFTER
 -- Deferred-join versions of the three pages (fast with strategy B's index).
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

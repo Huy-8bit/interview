@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 07 · Covering index: INCLUDE vs composite key — OPTIMIZE · Strategy B
 -- Strategy B: (product_id, quantity, unit_price) as key columns
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

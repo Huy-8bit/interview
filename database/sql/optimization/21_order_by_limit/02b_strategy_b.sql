@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 21 · ORDER BY ... LIMIT: top-N heapsort vs Index Scan Backward — OPTIMIZE · Strategy B
 -- Strategy B: Index on payments(status, created_at)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

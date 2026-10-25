@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 05 · Negative reviews of the best seller
 -- Topic: Index for filter + sort   Tables: reviews
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_05.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_05.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

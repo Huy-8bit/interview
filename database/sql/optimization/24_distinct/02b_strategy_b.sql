@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 24 · DISTINCT: full scan vs emulated skip scan, count(DISTINCT) — OPTIMIZE · Strategy B
 -- Strategy B: Rewrite Q2: count(*) over SELECT DISTINCT
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

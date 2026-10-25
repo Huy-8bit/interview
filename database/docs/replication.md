@@ -401,7 +401,7 @@ SELECT count(*) FROM replication_test WHERE token = 'while-paused';      -- 1
 Thử:
 
 ```sql
--- kết nối localhost:5433
+-- kết nối localhost:55436
 INSERT INTO replication_test (token) VALUES ('x');
 -- ERROR:  cannot execute INSERT in a read-only transaction
 SHOW transaction_read_only;          -- on
@@ -421,7 +421,7 @@ Vì vậy PostgreSQL chặn ngay ở tầng executor: mọi transaction trên st
 Driver hỗ trợ tự chọn node: libpq `target_session_attrs=read-write|read-only|primary|standby`:
 
 ```text
-postgresql://postgres:postgres@localhost:5432,localhost:5433/ecommerce?target_session_attrs=read-write
+postgresql://postgres:postgres@localhost:55435,localhost:55436/ecommerce?target_session_attrs=read-write
 ```
 
 ## 7. Xung đột truy vấn trên replica
@@ -517,7 +517,7 @@ docker compose start postgres-replica
 ### Promote bằng tay
 
 ```sql
--- REPLICA (localhost:5433)
+-- REPLICA (localhost:55436)
 SELECT pg_promote(wait => true);                   -- hoặc: docker compose exec -u postgres postgres-replica pg_ctl promote
 SELECT pg_is_in_recovery();                         -- false
 SELECT pg_walfile_name(pg_current_wal_lsn());       -- 00000002...  <- timeline 2

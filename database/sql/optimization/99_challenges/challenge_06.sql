@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 06 · Top 10 spenders of 2026
 -- Topic: Aggregation   Tables: orders
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_06.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_06.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

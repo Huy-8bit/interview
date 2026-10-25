@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 31 · Query rewrites: count > 0, HAVING, UNION, SELECT * — OPTIMIZE · Strategy A
 -- Strategy A: Rewrite each query (no DDL)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 12 · JSONB: GIN jsonb_ops vs jsonb_path_ops vs expression B-tree — AFTER
 -- Same query again, with the optimization applied (02_optimize.sql or 02b/02c...).
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 13 · Find a payment by its transaction id
 -- Topic: Implicit cast   Tables: payments
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_13.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_13.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

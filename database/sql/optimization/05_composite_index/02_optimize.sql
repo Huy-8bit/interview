@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 05 · Composite index: filter + sort in one index — OPTIMIZE · Strategy A
 -- Strategy A: Indexes on (category_id, status) and (user_id, status)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

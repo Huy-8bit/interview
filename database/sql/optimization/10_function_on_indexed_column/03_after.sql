@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 10 · Function on an indexed column (sargable queries) — AFTER
 -- The same three questions, rewritten as sargable ranges on the bare created_at column.
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

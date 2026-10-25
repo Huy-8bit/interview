@@ -2,17 +2,17 @@
 
 Môi trường thực hành PostgreSQL chạy 100% bằng Docker Compose:
 
-- **PostgreSQL 16 Primary** (`localhost:5432`) — đọc + ghi
-- **PostgreSQL 16 Replica** (`localhost:5433`) — hot standby, chỉ đọc, **Streaming Replication thật** (WAL + replication slot, bootstrap tự động bằng `pg_basebackup`)
+- **PostgreSQL 16 Primary** (`localhost:55435`) — đọc + ghi
+- **PostgreSQL 16 Replica** (`localhost:55436`) — hot standby, chỉ đọc, **Streaming Replication thật** (WAL + replication slot, bootstrap tự động bằng `pg_basebackup`)
 - **Python data generator** (Faker + `COPY`) — nạp ~3.2 triệu dòng dữ liệu e-commerce có phân phối lệch như thực tế
 - **Tài liệu + bài lab**: 60 bài tập SQL (có lời giải), transaction/isolation, MVCC, lock, index, query optimization, replication internals, backup/restore
 
 ```mermaid
 flowchart LR
-    DBeaver["DBeaver / psql"] -->|"read + write :5432"| P[("PRIMARY<br/>pglab-primary")]
+    DBeaver["DBeaver / psql"] -->|"read + write :55435"| P[("PRIMARY<br/>pglab-primary")]
     Gen["data-generator<br/>(Python, COPY)"] -->|"bulk load"| P
     P -->|"WAL streaming<br/>slot replica_1_slot"| R[("REPLICA<br/>pglab-replica<br/>hot_standby")]
-    DBeaver -->|"read-only :5433"| R
+    DBeaver -->|"read-only :55436"| R
 ```
 
 Chi tiết kiến trúc: [docs/architecture.md](docs/architecture.md).
@@ -31,7 +31,7 @@ Chi tiết kiến trúc: [docs/architecture.md](docs/architecture.md).
 | Dừng (giữ dữ liệu)                                    | `docker compose down`                                                |
 | Xoá sạch dữ liệu (chỉ khi thật sự muốn)           | `docker compose down -v`                                             |
 
-Kết nối: **Primary `localhost:5432`**, **Replica `localhost:5433`**, database `ecommerce`, user/password `postgres` / `postgres`.
+Kết nối: **Primary `localhost:55435`**, **Replica `localhost:55436`**, database `ecommerce`, user/password `postgres` / `postgres`.
 
 ---
 
@@ -42,7 +42,7 @@ Kết nối: **Primary `localhost:5432`**, **Replica `localhost:5433`**, databas
 | Docker         | Docker Engine 24+ / Docker Desktop / OrbStack, Compose v2 (`docker compose`) |
 | RAM cho Docker | 4 GB                                                                           |
 | Ổ đĩa       | ~3 GB (2 × ~800 MB data + WAL + image)                                        |
-| Cổng trống   | `5432`, `5433` (đổi được trong `.env`)                              |
+| Cổng trống   | `55435`, `55436` (đổi được trong `.env`)                            |
 
 Không cần cài PostgreSQL trên máy: mọi script dùng `psql` bên trong container.
 Hai container PostgreSQL mặc định có giới hạn `/dev/shm` là 2 GB để hỗ trợ `VACUUM`/index song song trên bảng lớn. Có thể đổi bằng `POSTGRES_SHM_SIZE` trong `.env`; đây là giới hạn dung lượng, không phải RAM cấp phát trước. Các profile dữ liệu lớn cần Docker VM có đủ RAM và ổ đĩa riêng.
@@ -69,8 +69,8 @@ docker compose ps
 ```text
 NAME                   SERVICE            STATUS
 pglab-data-generator   data-generator     Exited (0)          # job chạy một lần, Exited (0) là đúng
-pglab-primary          postgres-primary   Up (healthy)        127.0.0.1:5432->5432/tcp
-pglab-replica          postgres-replica   Up (healthy)        127.0.0.1:5433->5432/tcp
+pglab-primary          postgres-primary   Up (healthy)        127.0.0.1:55435->5432/tcp
+pglab-replica          postgres-replica   Up (healthy)        127.0.0.1:55436->5432/tcp
 ```
 
 ### Xem log
@@ -106,7 +106,7 @@ Data generation completed in 1.4 min  (database size: 798 MB)
 |          | Primary       | Replica              |
 | -------- | ------------- | -------------------- |
 | Host     | `localhost` | `localhost`        |
-| Port     | `5432`      | `5433`             |
+| Port     | `55435`     | `55436`            |
 | Database | `ecommerce` | `ecommerce`        |
 | Username | `postgres`  | `postgres`         |
 | Password | `postgres`  | `postgres`         |
@@ -127,13 +127,13 @@ Data generation completed in 1.4 min  (database size: 798 MB)
 ./scripts/psql.sh primary -c "SELECT count(*) FROM orders"
 ```
 
-**psql trên máy host** (nếu có cài): `psql "postgresql://postgres:postgres@localhost:5432/ecommerce"`
+**psql trên máy host** (nếu có cài): `psql "postgresql://postgres:postgres@localhost:55435/ecommerce"`
 
 **Python**:
 
 ```python
 import psycopg
-with psycopg.connect("host=localhost port=5433 dbname=ecommerce user=postgres password=postgres") as conn:
+with psycopg.connect("host=localhost port=55436 dbname=ecommerce user=postgres password=postgres") as conn:
     print(conn.execute("SELECT pg_is_in_recovery()").fetchone())   # (True,) -> replica
 ```
 
@@ -266,16 +266,16 @@ Volumes: `postgresql-lab_postgres_primary_data`, `postgresql-lab_postgres_replic
 
 ## 8. Xử lý sự cố
 
-| Triệu chứng                                                                                  | Nguyên nhân / cách xử lý                                                                                                                                                  |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Bind for 127.0.0.1:5432 failed: port is already allocated`                                  | Có PostgreSQL/container khác đang dùng cổng. Tìm bằng`lsof -iTCP:5432 -sTCP:LISTEN` hoặc `docker ps`, hoặc đổi `PRIMARY_PORT`/`REPLICA_PORT` trong `.env` |
-| `check-replication.sh` báo `replay_lag` rỗng / `since_last_replayed_commit` tăng dần | Bình thường khi không có ghi mới: lag thật là dòng`lag` (so LSN primary vs replica)                                                                                 |
-| Replica`unhealthy` / `check-replication.sh` báo FAIL                                      | `docker compose logs postgres-replica`. Nếu replica đã bị promote hoặc slot bị `lost`: `./scripts/rebuild-replica.sh`                                              |
-| Generator in`Data already generated ... skipping`                                            | Bình thường. Muốn sinh lại:`RESET_DATA=true` (xem mục 4)                                                                                                               |
-| Generator bị dừng giữa chừng                                                               | Lần chạy sau tự phát hiện run chưa hoàn tất, truncate và sinh lại                                                                                                    |
-| Muốn primary/replica nghe trên mọi interface                                                | `BIND_ADDRESS=0.0.0.0` trong `.env` (chỉ nên làm trong mạng tin cậy — mật khẩu lab rất yếu)                                                                      |
-| Đổi`postgresql.conf`                                                                       | Sửa file trong`postgres/*/`, rồi `docker compose up -d --build` (tham số cần restart) hoặc `SELECT pg_reload_conf()`                                                |
-| Đổi schema trong`init/*.sql`                                                               | Init script chỉ chạy khi volume trống →`docker compose down -v && docker compose up -d --build`                                                                          |
+| Triệu chứng                                                                                  | Nguyên nhân / cách xử lý                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Bind for 127.0.0.1:55435 failed: port is already allocated`                                 | Có PostgreSQL/container khác đang dùng cổng. Tìm bằng`lsof -iTCP:55435 -sTCP:LISTEN` hoặc `docker ps`, hoặc đổi `PRIMARY_PORT`/`REPLICA_PORT` trong `.env` |
+| `check-replication.sh` báo `replay_lag` rỗng / `since_last_replayed_commit` tăng dần | Bình thường khi không có ghi mới: lag thật là dòng`lag` (so LSN primary vs replica)                                                                                  |
+| Replica`unhealthy` / `check-replication.sh` báo FAIL                                      | `docker compose logs postgres-replica`. Nếu replica đã bị promote hoặc slot bị `lost`: `./scripts/rebuild-replica.sh`                                               |
+| Generator in`Data already generated ... skipping`                                            | Bình thường. Muốn sinh lại:`RESET_DATA=true` (xem mục 4)                                                                                                                |
+| Generator bị dừng giữa chừng                                                               | Lần chạy sau tự phát hiện run chưa hoàn tất, truncate và sinh lại                                                                                                     |
+| Muốn primary/replica nghe trên mọi interface                                                | `BIND_ADDRESS=0.0.0.0` trong `.env` (chỉ nên làm trong mạng tin cậy — mật khẩu lab rất yếu)                                                                       |
+| Đổi`postgresql.conf`                                                                       | Sửa file trong`postgres/*/`, rồi `docker compose up -d --build` (tham số cần restart) hoặc `SELECT pg_reload_conf()`                                                 |
+| Đổi schema trong`init/*.sql`                                                               | Init script chỉ chạy khi volume trống →`docker compose down -v && docker compose up -d --build`                                                                           |
 
 ## 9. Cấu trúc project
 

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Challenge 11 · Order lookup by order number (case-insensitive input)
 -- Topic: Function on an indexed column   Tables: orders, order_items, products
--- Run on PRIMARY (localhost:5432). Solution: solutions/solution_11.sql (try first!)
+-- Run on PRIMARY (localhost:55435). Solution: solutions/solution_11.sql (try first!)
 -- =============================================================================
 
 -- BUSINESS REQUIREMENT

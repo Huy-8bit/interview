@@ -183,7 +183,7 @@ SQL
 }
 
 # ---- run ----------------------------------------------------------------------------------
-header "Benchmark $lab_name  ($runs timed runs + 1 warm-up per query, database $POSTGRES_DB)"
+header "Benchmark $lab_name  (primary localhost:$PRIMARY_PORT; $runs timed runs + 1 warm-up per query, database $POSTGRES_DB)"
 run_file "$dir/05_reset.sql" "$work/pre_reset.log" || { fail "05_reset.sql failed: $(tail -3 "$work/pre_reset.log")"; exit 1; }
 baseline_ok || { fail "database is not at baseline - see sql/optimization/00_environment/09_verify_baseline.sql"; cat "$work/baseline.log"; exit 1; }
 

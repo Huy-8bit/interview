@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 11 · Implicit casts that disable an index — OPTIMIZE · Strategy A
 -- Strategy A: Fix the types in the query (cast the VALUE, never the column)
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 

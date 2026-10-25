@@ -1,7 +1,7 @@
 -- =============================================================================
 -- Lab 41 · Materialized view: precompute an expensive aggregate — AFTER
 -- The dashboard served from the materialized view.
--- Run on: PRIMARY (localhost:5432), database ecommerce. Execute statement by statement
+-- Run on: PRIMARY (localhost:55435), database ecommerce. Execute statement by statement
 -- (DBeaver: Ctrl+Enter) or the whole file (DBeaver: Alt+X / psql -f).
 -- =============================================================================
 
