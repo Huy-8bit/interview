@@ -45,6 +45,23 @@ if [ ! -f "$BOOTSTRAP_MARKER" ]; then
     sleep 2
   done
 
+  # Ensure the slot exists even when the primary volume predates this replica.
+  # The replication role can create physical slots; this is safe to repeat.
+  PGPASSWORD="$REPLICATION_PASSWORD" psql \
+    --no-psqlrc \
+    --set=ON_ERROR_STOP=1 \
+    --host="$PRIMARY_HOST" \
+    --port="$PRIMARY_PORT" \
+    --username="$REPLICATION_USER" \
+    --dbname=postgres \
+    --set=slot="$REPLICATION_SLOT" <<'EOSQL'
+SELECT CASE
+  WHEN EXISTS (SELECT 1 FROM pg_replication_slots WHERE slot_name = :'slot')
+    THEN NULL
+  ELSE pg_create_physical_replication_slot(:'slot', true)
+END;
+EOSQL
+
   # pg_basebackup requires an empty target directory; also clears a
   # half-finished backup from an interrupted previous attempt.
   find "$PGDATA" -mindepth 1 -delete

@@ -20,8 +20,9 @@ flowchart TB
             SB1["shared_buffers 256MB<br/>(data pages)"]
             WB1["WAL buffers"]
             WW["walwriter / checkpointer /<br/>bgwriter / autovacuum"]
-            WS["walsender<br/>application_name=pglab-replica"]
-            SLOT{{"physical slot<br/>replica_1_slot<br/>(restart_lsn)"}}
+            WS["walsenders"]
+            SLOT1{{"physical slot<br/>replica_1_slot<br/>(restart_lsn)"}}
+            SLOT2{{"physical slot<br/>replica_2_slot<br/>(restart_lsn)"}}
             WAL1[("pg_wal/<br/>16MB segments")]
             DATA1[("base/ data files")]
         end
@@ -35,13 +36,25 @@ flowchart TB
             DATA2[("base/ data files")]
             BE2["read-only backends<br/>(hot_standby = on)"]
         end
+
+        subgraph REPLICA2["Container pglab-replica-2 (hostname postgres-replica-2)"]
+            direction TB
+            WR2["walreceiver"]
+            WAL3[("pg_wal/")]
+            SU2["startup process<br/>(recovery / redo)"]
+            SB3["shared_buffers"]
+            DATA3[("base/ data files")]
+            BE3["read-only backends<br/>(hot_standby = on)"]
+        end
     end
 
     V1[("volume<br/>postgresql-lab_postgres_primary_data")]
     V2[("volume<br/>postgresql-lab_postgres_replica_data")]
+    V3[("volume<br/>postgresql-lab_postgres_replica_2_data")]
 
     DBeaver -->|"127.0.0.1:55435<br/>INSERT/UPDATE/DELETE/SELECT"| PM1
     DBeaver -->|"127.0.0.1:55436<br/>SELECT only"| BE2
+    DBeaver -->|"127.0.0.1:55437<br/>SELECT only"| BE3
     Scripts -. "docker compose exec psql / pg_dump" .-> BE1
     Scripts -. "pg_dump stdout" .-> Backups
     Gen -->|"COPY ... FROM STDIN<br/>(batch = 10,000 rows)"| BE1
@@ -53,25 +66,36 @@ flowchart TB
     WW -->|"flush dirty pages<br/>at checkpoint"| DATA1
     SB1 -.-> WW
     WAL1 -->|"read"| WS
-    SLOT -. "keeps WAL >= restart_lsn" .-> WAL1
+    SLOT1 -. "keeps WAL >= restart_lsn" .-> WAL1
+    SLOT2 -. "keeps WAL >= restart_lsn" .-> WAL1
     WS ==>|"TCP, replication protocol<br/>XLogData messages"| WR
+    WS ==>|"TCP, replication protocol<br/>XLogData messages"| WR2
     WR -. "feedback: write/flush/apply LSN,<br/>hot_standby_feedback xmin" .-> WS
     WR -->|"write + fsync"| WAL2
     WAL2 -->|"read records"| SU
     SU -->|"redo into pages"| SB2
     SB2 -->|"restartpoint"| DATA2
     BE2 -->|"read"| SB2
+    WR2 -. "feedback: write/flush/apply LSN,<br/>hot_standby_feedback xmin" .-> WS
+    WR2 -->|"write + fsync"| WAL3
+    WAL3 -->|"read records"| SU2
+    SU2 -->|"redo into pages"| SB3
+    SB3 -->|"restartpoint"| DATA3
+    BE3 -->|"read"| SB3
 
     DATA1 --- V1
     WAL1 --- V1
     DATA2 --- V2
     WAL2 --- V2
+    DATA3 --- V3
+    WAL3 --- V3
 ```
 
 | Thành phần | Image | Port host | Volume | Vai trò |
 | --- | --- | --- | --- | --- |
 | `postgres-primary` | `postgresql-lab/postgres-primary:16` (từ `postgres:16-bookworm`) | `127.0.0.1:55435` | `postgresql-lab_postgres_primary_data` → `/var/lib/postgresql/data` | nhận mọi thao tác ghi, sinh WAL, gửi WAL |
 | `postgres-replica` | `postgresql-lab/postgres-replica:16` | `127.0.0.1:55436` | `postgresql-lab_postgres_replica_data` → `/var/lib/postgresql/data` (cluster nằm ở `.../pgdata`) | nhận WAL, replay, phục vụ SELECT |
+| `postgres-replica-2` | `postgresql-lab/postgres-replica:16` | `127.0.0.1:55437` | `postgresql-lab_postgres_replica_2_data` → `/var/lib/postgresql/data` (cluster nằm ở `.../pgdata`) | nhận WAL qua slot riêng, replay, phục vụ SELECT |
 | `data-generator` | `postgresql-lab/data-generator` (từ `python:3.12-slim`) | — | — | nạp dữ liệu vào primary rồi thoát |
 
 ## 2. Trình tự khởi động (`docker compose up -d --build`)

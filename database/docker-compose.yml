@@ -1,5 +1,5 @@
 # =============================================================================
-# PostgreSQL Lab: Primary + Streaming Replica + Python data generator
+# PostgreSQL Lab: Primary + two Streaming Replicas + Python data generator
 #
 #   docker compose up -d --build      # start everything (cluster bootstraps itself)
 #   docker compose down               # stop, keep data (volumes)
@@ -18,7 +18,7 @@ x-postgres-env: &postgres-env
 
 services:
   # ---------------------------------------------------------------------------
-  # PRIMARY: accepts reads + writes, streams WAL to the replica
+  # PRIMARY: accepts reads + writes, streams WAL to both replicas
   # ---------------------------------------------------------------------------
   postgres-primary:
     build:
@@ -48,7 +48,7 @@ services:
     networks: [pgnet]
 
   # ---------------------------------------------------------------------------
-  # REPLICA: hot standby, read-only, bootstrapped with pg_basebackup
+  # REPLICA 1: hot standby, read-only, bootstrapped with pg_basebackup
   # ---------------------------------------------------------------------------
   postgres-replica:
     build:
@@ -74,6 +74,38 @@ services:
       timeout: 5s
       retries: 30
       # pg_basebackup of a large primary can take a while on first start
+      start_period: 300s
+    restart: unless-stopped
+    networks: [pgnet]
+
+  # ---------------------------------------------------------------------------
+  # REPLICA 2: independent hot standby with its own slot, port, and volume
+  # ---------------------------------------------------------------------------
+  postgres-replica-2:
+    build:
+      context: ./postgres/replica
+    image: postgresql-lab/postgres-replica:16
+    container_name: pglab-replica-2
+    hostname: postgres-replica-2
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "cluster_name=pglab-replica-2"]
+    environment:
+      <<: *postgres-env
+      REPLICATION_SLOT: ${REPLICATION_SLOT_2:-replica_2_slot}
+      PRIMARY_HOST: postgres-primary
+      PRIMARY_PORT: 5432
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${REPLICA_2_PORT:-55437}:5432"
+    volumes:
+      - postgres_replica_2_data:/var/lib/postgresql/data
+    shm_size: ${POSTGRES_SHM_SIZE:-2gb}
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
       start_period: 300s
     restart: unless-stopped
     networks: [pgnet]
@@ -115,11 +147,215 @@ services:
     restart: "no"
     networks: [pgnet]
 
+  # ---------------------------------------------------------------------------
+  # SYNTHETIC BACKEND LOAD: 40 CRUD clients on primary + 20 read clients on each
+  # standby = 80 persistent PostgreSQL client connections in total.
+  # ---------------------------------------------------------------------------
+  workload-init:
+    image: postgres:16-bookworm
+    container_name: pglab-workload-init
+    entrypoint: ["psql"]
+    command: ["-v", "ON_ERROR_STOP=1", "-h", "postgres-primary", "-U", "${POSTGRES_USER:-postgres}", "-d", "${POSTGRES_DB:-ecommerce}", "-f", "/workload/init.sql"]
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - ./workload/init.sql:/workload/init.sql:ro
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    restart: "no"
+    networks: [pgnet]
+
+  workload-primary:
+    image: postgres:16-bookworm
+    container_name: pglab-workload-primary
+    entrypoint: ["pgbench"]
+    command:
+      - -h
+      - postgres-primary
+      - -p
+      - "5432"
+      - -U
+      - ${POSTGRES_USER:-postgres}
+      - -d
+      - ${POSTGRES_DB:-ecommerce}
+      - -n
+      - -f
+      - /workload/crud.sql
+      - -c
+      - ${WORKLOAD_PRIMARY_CLIENTS:-15}
+      - -j
+      - ${WORKLOAD_PRIMARY_JOBS:-5}
+      - -T
+      - ${WORKLOAD_DURATION_SECONDS:-31536000}
+      - -P
+      - "10"
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGAPPNAME: backend-simulator-primary
+    volumes:
+      - ./workload/crud.sql:/workload/crud.sql:ro
+    depends_on:
+      workload-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks: [pgnet]
+
+  workload-replica-1:
+    image: postgres:16-bookworm
+    container_name: pglab-workload-replica-1
+    entrypoint: ["pgbench"]
+    command:
+      - -h
+      - postgres-replica
+      - -p
+      - "5432"
+      - -U
+      - ${POSTGRES_USER:-postgres}
+      - -d
+      - ${POSTGRES_DB:-ecommerce}
+      - -n
+      - -f
+      - /workload/read.sql
+      - -c
+      - ${WORKLOAD_REPLICA_1_CLIENTS:-10}
+      - -j
+      - ${WORKLOAD_REPLICA_1_JOBS:-4}
+      - -T
+      - ${WORKLOAD_DURATION_SECONDS:-31536000}
+      - -P
+      - "10"
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGAPPNAME: backend-simulator-replica-1
+    volumes:
+      - ./workload/read.sql:/workload/read.sql:ro
+    depends_on:
+      postgres-replica:
+        condition: service_healthy
+      workload-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks: [pgnet]
+
+  workload-replica-2:
+    image: postgres:16-bookworm
+    container_name: pglab-workload-replica-2
+    entrypoint: ["pgbench"]
+    command:
+      - -h
+      - postgres-replica-2
+      - -p
+      - "5432"
+      - -U
+      - ${POSTGRES_USER:-postgres}
+      - -d
+      - ${POSTGRES_DB:-ecommerce}
+      - -n
+      - -f
+      - /workload/read.sql
+      - -c
+      - ${WORKLOAD_REPLICA_2_CLIENTS:-10}
+      - -j
+      - ${WORKLOAD_REPLICA_2_JOBS:-4}
+      - -T
+      - ${WORKLOAD_DURATION_SECONDS:-31536000}
+      - -P
+      - "10"
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGAPPNAME: backend-simulator-replica-2
+    volumes:
+      - ./workload/read.sql:/workload/read.sql:ro
+    depends_on:
+      postgres-replica-2:
+        condition: service_healthy
+      workload-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks: [pgnet]
+
+  # ---------------------------------------------------------------------------
+  # LOCKLENS STORE: monitoring history and encrypted target connection strings
+  # ---------------------------------------------------------------------------
+  locklens-store:
+    image: postgres:18.6-alpine
+    container_name: pglab-locklens-store
+    environment:
+      POSTGRES_USER: locklens_store
+      POSTGRES_PASSWORD: ${LOCKLENS_STORE_PASSWORD:?Set LOCKLENS_STORE_PASSWORD in .env}
+      POSTGRES_DB: locklens
+    volumes:
+      - locklens_store_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U locklens_store -d locklens"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+    restart: unless-stopped
+    networks: [pgnet]
+
+  # ---------------------------------------------------------------------------
+  # LOCKLENS BACKEND: API and PostgreSQL monitoring collectors
+  # ---------------------------------------------------------------------------
+  locklens-backend:
+    image: johnnynguyen882/locklens-backend:${LOCKLENS_VERSION:-latest}
+    container_name: pglab-locklens-backend
+    depends_on:
+      locklens-store:
+        condition: service_healthy
+      postgres-primary:
+        condition: service_healthy
+      postgres-replica:
+        condition: service_healthy
+      postgres-replica-2:
+        condition: service_healthy
+    environment:
+      LOCKLENS_LISTEN: 0.0.0.0:8080
+      LOCKLENS_STORE_DSN: postgres://locklens_store:${LOCKLENS_STORE_PASSWORD}@locklens-store:5432/locklens?sslmode=disable
+      LOCKLENS_MASTER_KEY: ${LOCKLENS_MASTER_KEY:?Set LOCKLENS_MASTER_KEY in .env}
+      LOCKLENS_ADMIN_USER: ${LOCKLENS_ADMIN_USER:-admin}
+      LOCKLENS_ADMIN_PASSWORD: ${LOCKLENS_ADMIN_PASSWORD:?Set LOCKLENS_ADMIN_PASSWORD in .env}
+      LOCKLENS_COOKIE_SECURE: ${LOCKLENS_COOKIE_SECURE:-false}
+      LOCKLENS_TRUSTED_PROXIES: frontend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/readyz"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+    restart: unless-stopped
+    networks: [pgnet]
+
+  # ---------------------------------------------------------------------------
+  # LOCKLENS FRONTEND: web UI and same-origin API proxy
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: johnnynguyen882/locklens-frontend:${LOCKLENS_VERSION:-latest}
+    container_name: pglab-locklens-frontend
+    depends_on:
+      locklens-backend:
+        condition: service_healthy
+    environment:
+      LOCKLENS_BACKEND_URL: http://locklens-backend:8080
+    ports:
+      - "127.0.0.1:${LOCKLENS_HTTP_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/frontend-healthz"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+    networks: [pgnet]
+
 volumes:
   postgres_primary_data:
     name: postgresql-lab_postgres_primary_data
   postgres_replica_data:
     name: postgresql-lab_postgres_replica_data
+  postgres_replica_2_data:
+    name: postgresql-lab_postgres_replica_2_data
+  locklens_store_data:
+    name: postgresql-lab_locklens_store_data
 
 networks:
   pgnet:

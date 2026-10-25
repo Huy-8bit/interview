@@ -3,7 +3,9 @@
 Môi trường thực hành PostgreSQL chạy 100% bằng Docker Compose:
 
 - **PostgreSQL 16 Primary** (`localhost:55435`) — đọc + ghi
-- **PostgreSQL 16 Replica** (`localhost:55436`) — hot standby, chỉ đọc, **Streaming Replication thật** (WAL + replication slot, bootstrap tự động bằng `pg_basebackup`)
+- **PostgreSQL 16 Replicas** (`localhost:55436`, `localhost:55437`) — hai hot standby chỉ đọc, **Streaming Replication thật** (WAL + replication slot riêng, bootstrap tự động bằng `pg_basebackup`)
+- **LockLens** (`http://localhost:8080`) — giao diện giám sát PostgreSQL, API và store riêng; backend kết nối cùng Docker network với cả ba node
+- **Synthetic workload** — mặc định 80 kết nối đồng thời: 40 CRUD trên Primary, 20 SELECT trên mỗi Replica
 - **Python data generator** (Faker + `COPY`) — nạp ~3.2 triệu dòng dữ liệu e-commerce có phân phối lệch như thực tế
 - **Tài liệu + bài lab**: 60 bài tập SQL (có lời giải), transaction/isolation, MVCC, lock, index, query optimization, replication internals, backup/restore
 
@@ -11,8 +13,10 @@ Môi trường thực hành PostgreSQL chạy 100% bằng Docker Compose:
 flowchart LR
     DBeaver["DBeaver / psql"] -->|"read + write :55435"| P[("PRIMARY<br/>pglab-primary")]
     Gen["data-generator<br/>(Python, COPY)"] -->|"bulk load"| P
-    P -->|"WAL streaming<br/>slot replica_1_slot"| R[("REPLICA<br/>pglab-replica<br/>hot_standby")]
-    DBeaver -->|"read-only :55436"| R
+    P -->|"WAL streaming<br/>slot replica_1_slot"| R1[("REPLICA 1<br/>pglab-replica<br/>hot_standby")]
+    P -->|"WAL streaming<br/>slot replica_2_slot"| R2[("REPLICA 2<br/>pglab-replica-2<br/>hot_standby")]
+    DBeaver -->|"read-only :55436"| R1
+    DBeaver -->|"read-only :55437"| R2
 ```
 
 Chi tiết kiến trúc: [docs/architecture.md](docs/architecture.md).
@@ -21,17 +25,17 @@ Chi tiết kiến trúc: [docs/architecture.md](docs/architecture.md).
 
 | Việc                                                     | Lệnh                                                                  |
 | --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Khởi động (build + bootstrap replica + sinh dữ liệu) | `docker compose up -d --build`                                       |
+| Khởi động (database + LockLens + sinh dữ liệu)       | `docker compose up -d --build`                                       |
 | Trạng thái / health                                     | `docker compose ps`                                                  |
 | Log                                                       | `docker compose logs -f`                                             |
 | Kiểm tra replication                                     | `./scripts/check-replication.sh`                                     |
 | Test INSERT primary → SELECT replica                     | `./scripts/replication-test.sh`                                      |
-| psql vào primary / replica                               | `./scripts/psql.sh` / `./scripts/psql.sh replica`                  |
+| psql vào primary / replica                               | `./scripts/psql.sh` / `./scripts/psql.sh replica` / `./scripts/psql.sh replica-2` |
 | Backup / restore                                          | `./scripts/backup.sh` / `./scripts/restore.sh backups/<file>.dump` |
 | Dừng (giữ dữ liệu)                                    | `docker compose down`                                                |
 | Xoá sạch dữ liệu (chỉ khi thật sự muốn)           | `docker compose down -v`                                             |
 
-Kết nối: **Primary `localhost:55435`**, **Replica `localhost:55436`**, database `ecommerce`, user/password `postgres` / `postgres`.
+Kết nối: **Primary `localhost:55435`**, **Replica 1 `localhost:55436`**, **Replica 2 `localhost:55437`**, database `ecommerce`, user/password `postgres` / `postgres`. LockLens tại `http://localhost:8080`.
 
 ---
 
@@ -41,24 +45,41 @@ Kết nối: **Primary `localhost:55435`**, **Replica `localhost:55436`**, datab
 | -------------- | ------------------------------------------------------------------------------ |
 | Docker         | Docker Engine 24+ / Docker Desktop / OrbStack, Compose v2 (`docker compose`) |
 | RAM cho Docker | 4 GB                                                                           |
-| Ổ đĩa       | ~3 GB (2 × ~800 MB data + WAL + image)                                        |
-| Cổng trống   | `55435`, `55436` (đổi được trong `.env`)                            |
+| Ổ đĩa       | ~4 GB (3 data directories + WAL + image)                                      |
+| Cổng trống   | `55435`, `55436`, `55437`, `8080` (đổi được trong `.env`)                   |
 
 Không cần cài PostgreSQL trên máy: mọi script dùng `psql` bên trong container.
-Hai container PostgreSQL mặc định có giới hạn `/dev/shm` là 2 GB để hỗ trợ `VACUUM`/index song song trên bảng lớn. Có thể đổi bằng `POSTGRES_SHM_SIZE` trong `.env`; đây là giới hạn dung lượng, không phải RAM cấp phát trước. Các profile dữ liệu lớn cần Docker VM có đủ RAM và ổ đĩa riêng.
+Ba container PostgreSQL mặc định có giới hạn `/dev/shm` là 2 GB mỗi container để hỗ trợ `VACUUM`/index song song trên bảng lớn. Có thể đổi bằng `POSTGRES_SHM_SIZE` trong `.env`; đây là giới hạn dung lượng, không phải RAM cấp phát trước. Các profile dữ liệu lớn cần Docker VM có đủ RAM và ổ đĩa riêng.
 
 ## 2. Khởi động
 
 ```bash
-cp .env.example .env          # tuỳ chọn - mọi biến đều có giá trị mặc định
+cp .env.example .env          # chỉ chạy lần đầu nếu chưa có .env
+# Sửa các giá trị LOCKLENS_* trong .env; dùng secrets ngẫu nhiên, ví dụ:
+# openssl rand -hex 32       # LOCKLENS_STORE_PASSWORD và LOCKLENS_ADMIN_PASSWORD
+# openssl rand -base64 32    # LOCKLENS_MASTER_KEY (lưu lại để giữ các DSN đã lưu)
 docker compose up -d --build
 ```
+
+Nếu đã có `database/.env`, giữ nguyên các cấu hình database hiện tại và chỉ thêm/cập nhật các biến `LOCKLENS_*` từ `.env.example`; không ghi đè toàn bộ file.
 
 Điều gì xảy ra khi chạy lệnh này:
 
 1. `postgres-primary` khởi tạo cluster, chạy các script trong [postgres/primary/init/](postgres/primary/init/) (replication user + slot → extensions → schema → indexes), rồi báo `healthy`.
-2. `postgres-replica` chờ primary healthy → `pg_basebackup` sao chép toàn bộ data directory → khởi động ở chế độ standby và bắt đầu stream WAL.
-3. `data-generator` chờ primary healthy → sinh dữ liệu bằng `COPY` (~1.5 phút với cấu hình mặc định) → `VACUUM ANALYZE` → thoát với exit code 0. Dữ liệu tự chảy sang replica qua replication.
+2. `postgres-replica` và `postgres-replica-2` chờ primary healthy → mỗi replica dùng replication slot riêng và `pg_basebackup` sao chép data directory → khởi động ở chế độ standby, bắt đầu stream WAL.
+3. `data-generator` chờ primary healthy → sinh dữ liệu bằng `COPY` (~1.5 phút với cấu hình mặc định) → `VACUUM ANALYZE` → thoát với exit code 0. Dữ liệu tự chảy sang hai replica qua replication.
+4. `workload-init` tạo bảng workload riêng; ba `workload-*` service mở tổng cộng 80 kết nối pgbench liên tục: Primary chạy INSERT/SELECT/UPDATE/DELETE, hai Replica chỉ chạy SELECT.
+5. `locklens-store`, `locklens-backend` và `frontend` khởi động; frontend phục vụ UI, backend giám sát PostgreSQL, store giữ lịch sử và DSN được mã hoá.
+
+Đăng nhập LockLens bằng `LOCKLENS_ADMIN_USER` và `LOCKLENS_ADMIN_PASSWORD` đã đặt trong `.env`. Trong **Settings → Add instance**, thêm các connection sau (backend dùng DNS nội bộ Docker):
+
+```text
+Primary:   postgresql://postgres:postgres@postgres-primary:5432/ecommerce?sslmode=disable
+Replica 1: postgresql://postgres:postgres@postgres-replica:5432/ecommerce?sslmode=disable
+Replica 2: postgresql://postgres:postgres@postgres-replica-2:5432/ecommerce?sslmode=disable
+```
+
+Thêm **Primary trước**, rồi thêm hai Replica để LockLens có thể tái sử dụng role đã tạo. Chọn cùng một Environment, ví dụ `lab-postgres` (không dùng dấu cách). Các DSN trên dùng tài khoản lab `postgres`; LockLens sẽ yêu cầu xác nhận trước khi tạo role giám sát/đọc riêng.
 
 ### Kiểm tra container
 
@@ -71,6 +92,8 @@ NAME                   SERVICE            STATUS
 pglab-data-generator   data-generator     Exited (0)          # job chạy một lần, Exited (0) là đúng
 pglab-primary          postgres-primary   Up (healthy)        127.0.0.1:55435->5432/tcp
 pglab-replica          postgres-replica   Up (healthy)        127.0.0.1:55436->5432/tcp
+pglab-replica-2        postgres-replica-2 Up (healthy)        127.0.0.1:55437->5432/tcp
+pglab-locklens-frontend frontend          Up (healthy)        127.0.0.1:8080->8080/tcp
 ```
 
 ### Xem log
@@ -79,7 +102,31 @@ pglab-replica          postgres-replica   Up (healthy)        127.0.0.1:55436->5
 docker compose logs -f                      # tất cả
 docker compose logs -f data-generator       # tiến độ sinh dữ liệu
 docker compose logs -f postgres-replica     # pg_basebackup + streaming
+docker compose logs -f postgres-replica-2   # replica thứ hai
+docker compose logs -f locklens-backend    # API / collectors
+docker compose logs -f workload-primary workload-replica-1 workload-replica-2
 ```
+
+### Tải giả lập backend
+
+Tải bật mặc định cùng `docker compose up -d`: 40 kết nối CRUD vào Primary và 20 kết nối đọc vào mỗi Replica (80 client kết nối liên tục). Có thể đổi số client bằng `WORKLOAD_PRIMARY_CLIENTS`, `WORKLOAD_REPLICA_1_CLIENTS`, `WORKLOAD_REPLICA_2_CLIENTS` trong `.env`, rồi recreate ba workload service. Chúng dùng `application_name` riêng để lọc trên LockLens và `pg_stat_activity`.
+
+```bash
+docker compose ps workload-primary workload-replica-1 workload-replica-2
+docker compose stop workload-primary workload-replica-1 workload-replica-2  # dừng tải, giữ DB
+docker compose start workload-primary workload-replica-1 workload-replica-2 # chạy tải lại
+```
+
+Xem số kết nối và câu lệnh trên từng node:
+
+```bash
+docker compose exec postgres-primary psql -U postgres -d ecommerce -c \
+  "SELECT application_name, state, count(*) FROM pg_stat_activity WHERE application_name LIKE 'backend-simulator-%' GROUP BY 1,2 ORDER BY 1,2;"
+docker compose exec postgres-primary psql -U postgres -d ecommerce -c \
+  "SELECT query, calls FROM pg_stat_statements WHERE query ILIKE '%backend_workload_items%' ORDER BY calls DESC LIMIT 10;"
+```
+
+Replica chỉ nhận SELECT vì PostgreSQL hot standby không cho ghi; thao tác ghi trên Primary được stream qua WAL. Dừng riêng simulator Go cũ nếu còn chạy: `docker stop pglab-backend-simulator`.
 
 Log generator mẫu:
 
@@ -103,27 +150,42 @@ Data generation completed in 1.4 min  (database size: 798 MB)
 
 ## 3. Kết nối
 
-|          | Primary       | Replica              |
-| -------- | ------------- | -------------------- |
-| Host     | `localhost` | `localhost`        |
-| Port     | `55435`     | `55436`            |
-| Database | `ecommerce` | `ecommerce`        |
-| Username | `postgres`  | `postgres`         |
-| Password | `postgres`  | `postgres`         |
-| Quyền   | đọc + ghi   | **chỉ đọc** |
+|          | Primary       | Replica 1           | Replica 2           |
+| -------- | ------------- | ------------------- | ------------------- |
+| Host     | `localhost`   | `localhost`         | `localhost`         |
+| Port     | `55435`       | `55436`             | `55437`             |
+| Database | `ecommerce`   | `ecommerce`         | `ecommerce`         |
+| Username | `postgres`    | `postgres`          | `postgres`          |
+| Password | `postgres`    | `postgres`          | `postgres`          |
+| Quyền    | đọc + ghi     | **chỉ đọc**         | **chỉ đọc**         |
 
-**DBeaver**: *Database → New Database Connection → PostgreSQL*, điền bảng trên (tạo 2 connection). Gợi ý:
+**DBeaver**: *Database → New Database Connection → PostgreSQL*, điền bảng trên (tạo 3 connection). Gợi ý:
 
 - Host luôn là `localhost` (hoặc `127.0.0.1`). **Không** dùng `postgres-primary` / `postgres-replica` — đó là hostname bên trong Docker network, máy host không phân giải được.
 - Lần đầu DBeaver sẽ đề nghị tải driver PostgreSQL — chọn *Download*.
-- Đặt tên `pglab PRIMARY` / `pglab REPLICA`, và ở tab *General* chọn *Connection type = Production* cho replica để DBeaver tô màu, dễ phân biệt.
+- Đặt tên `pglab PRIMARY`, `pglab REPLICA 1`, `pglab REPLICA 2`; ở tab *General* chọn *Connection type = Production* cho hai replica để DBeaver tô màu, dễ phân biệt.
 - Transaction lab cần mở **2 connection tới cùng primary** (Session A, Session B) và tắt *Auto-commit* khi đề bài yêu cầu `BEGIN` thủ công (hoặc dùng *Smart commit mode* off).
+
+**Connection string Replica 2** (để thêm vào DBeaver/DB client):
+
+```text
+postgresql://postgres:postgres@localhost:55437/ecommerce?sslmode=disable
+```
+
+Nếu client chạy **trong một Docker container khác** (ví dụ LockLens), dùng host gateway thay cho `localhost`:
+
+```text
+postgresql://postgres:postgres@host.docker.internal:55437/ecommerce?sslmode=disable
+```
+
+Trong LockLens chạy cùng Compose, dùng connection string nội bộ `postgres-replica-2:5432` như phần khởi động ở trên; `localhost` hoặc `host.docker.internal` không cần thiết.
 
 **psql trong container** (không cần cài gì):
 
 ```bash
 ./scripts/psql.sh                 # primary
 ./scripts/psql.sh replica         # replica
+./scripts/psql.sh replica-2       # replica thứ hai
 ./scripts/psql.sh primary -c "SELECT count(*) FROM orders"
 ```
 

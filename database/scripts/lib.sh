@@ -17,8 +17,10 @@ POSTGRES_USER="${POSTGRES_USER:-postgres}"
 POSTGRES_DB="${POSTGRES_DB:-ecommerce}"
 PRIMARY_PORT="${PRIMARY_PORT:-55435}"
 REPLICA_PORT="${REPLICA_PORT:-55436}"
+REPLICA_2_PORT="${REPLICA_2_PORT:-55437}"
 PRIMARY_SERVICE="postgres-primary"
 REPLICA_SERVICE="postgres-replica"
+REPLICA_2_SERVICE="postgres-replica-2"
 
 if [ -t 1 ]; then
   C_RED=$'\033[31m'; C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_BOLD=$'\033[1m'; C_RESET=$'\033[0m'
