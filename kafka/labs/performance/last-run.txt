@@ -1,59 +1,100 @@
-date: 2026-10-01T13:03:55Z  records/run: 100000  record size: 1KB  docker: 8 CPU, 8393605120 bytes
+date: 2026-10-03T08:25:43Z  records/run: 100000  record size: 1KB  docker: 8 CPU, 16819924992 bytes
 
-==> A1. Producer throughput vs partition count (acks=all, lz4, linger 5ms)
-partitions=1                    446102 rec/s   455.5 MB/s | p50   38.66ms p99    47.60ms | batches    100 ( 1000 rec/batch) | wire    36.2MB ratio 2.87 | cpu  0.23s | errors 0
-partitions=3                    641536 rec/s   655.2 MB/s | p50   24.33ms p99    53.64ms | batches    113 (  885 rec/batch) | wire    36.3MB ratio 2.86 | cpu  0.25s | errors 0
-partitions=6                    369675 rec/s   377.5 MB/s | p50   31.22ms p99   104.78ms | batches    187 (  535 rec/batch) | wire    35.4MB ratio 2.93 | cpu  0.31s | errors 0
-partitions=12                   414158 rec/s   422.9 MB/s | p50   32.53ms p99   122.98ms | batches    324 (  309 rec/batch) | wire    35.1MB ratio 2.96 | cpu  0.35s | errors 0
+[1m[34m==> A1. Producer throughput vs partition count (acks=all, lz4, linger 5ms)[0m
+partitions=1                    200730 rec/s   205.0 MB/s | p50   93.93ms p99   142.78ms | batches    101 (  990 rec/batch) | wire    36.3MB ratio 2.86 | cpu  0.32s | errors 0
+partitions=3                    336925 rec/s   344.1 MB/s | p50   48.04ms p99    95.07ms | batches    113 (  885 rec/batch) | wire    36.3MB ratio 2.86 | cpu  0.30s | errors 0
+partitions=6                    397215 rec/s   405.6 MB/s | p50   38.35ms p99    94.76ms | batches    171 (  585 rec/batch) | wire    35.6MB ratio 2.92 | cpu  0.33s | errors 0
+partitions=12                   294527 rec/s   300.9 MB/s | p50   53.04ms p99   142.06ms | batches    309 (  324 rec/batch) | wire    35.2MB ratio 2.95 | cpu  0.31s | errors 0
 
-==> A2. Consumer parallelism vs partition count (consumers = partitions, 1ms work/record, 12000 records)
-partitions=1             consumers=1 active=1 records=12133 time= 31.17s throughput=     389 rec/s (work=1ms/record)
-partitions=3             consumers=3 active=3 records=12292 time= 11.03s throughput=    1115 rec/s (work=1ms/record)
-partitions=6             consumers=6 active=6 records=12800 time=  5.34s throughput=    2397 rec/s (work=1ms/record)
-partitions=12            consumers=12 active=12 records=13400 time=  2.69s throughput=    4991 rec/s (work=1ms/record)
+[1m[34m==> A2. Consumer parallelism vs partition count (consumers = partitions, 1ms work/record, 12000 records)[0m
+partitions=1             consumers=1 active=1 records=12196 time= 30.08s throughput=     405 rec/s (work=1ms/record)
+partitions=3             consumers=3 active=3 records=12324 time= 10.66s throughput=    1157 rec/s (work=1ms/record)
+partitions=6             consumers=6 active=6 records=12964 time=  5.33s throughput=    2432 rec/s (work=1ms/record)
+partitions=12            consumers=12 active=12 records=13200 time=  2.96s throughput=    4459 rec/s (work=1ms/record)
 
-==> B. acks (perf-p6, lz4, linger 5ms)
-acks=0                          657118 rec/s   671.1 MB/s | p50   24.32ms p99    52.47ms | batches    112 (  893 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.29s | errors 0
-acks=1                          625234 rec/s   638.6 MB/s | p50   26.88ms p99    44.53ms | batches    102 (  980 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.27s | errors 0
-acks=all (idempotent)           534140 rec/s   545.6 MB/s | p50   28.63ms p99    61.94ms | batches    166 (  602 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.28s | errors 0
+[1m[34m==> B. acks (perf-p6, lz4, linger 5ms)[0m
+acks=0                          371148 rec/s   379.0 MB/s | p50   46.32ms p99    76.34ms | batches    104 (  962 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.34s | errors 0
+acks=1                          292007 rec/s   298.2 MB/s | p50   58.93ms p99    88.41ms | batches    102 (  980 rec/batch) | wire    35.4MB ratio 2.94 | cpu  0.31s | errors 0
+acks=all (idempotent)           371111 rec/s   378.9 MB/s | p50   46.76ms p99    72.97ms | batches    177 (  565 rec/batch) | wire    35.5MB ratio 2.93 | cpu  0.32s | errors 0
 
-==> C. batching (perf-p6, acks=all, no compression)
-linger=0 batch=16KB              70990 rec/s    72.5 MB/s | p50  256.18ms p99   394.32ms | batches   6670 (   15 rec/batch) | wire   103.8MB ratio 1.00 | cpu  0.34s | errors 0
-linger=5ms batch=1MB            244247 rec/s   249.5 MB/s | p50   64.15ms p99   132.84ms | batches    178 (  562 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.18s | errors 0
-linger=20ms batch=1MB           174266 rec/s   178.0 MB/s | p50   73.87ms p99   215.56ms | batches    200 (  500 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.29s | errors 0
+[1m[34m==> C. batching (perf-p6, acks=all, no compression)[0m
+linger=0 batch=16KB              35872 rec/s    36.6 MB/s | p50  530.45ms p99   790.30ms | batches   6669 (   15 rec/batch) | wire   103.8MB ratio 1.00 | cpu  0.45s | errors 0
+linger=5ms batch=1MB            291104 rec/s   297.3 MB/s | p50   50.46ms p99   143.33ms | batches    181 (  552 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.13s | errors 0
+linger=20ms batch=1MB           227850 rec/s   232.7 MB/s | p50   45.17ms p99   229.10ms | batches    176 (  568 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.14s | errors 0
 
-==> D. compression (perf-p6, acks=all, linger 10ms, JSON payload)
-compression=none                324920 rec/s   331.7 MB/s | p50   51.55ms p99    94.21ms | batches    176 (  568 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.14s | errors 0
-compression=gzip                279787 rec/s   285.8 MB/s | p50   61.07ms p99   115.94ms | batches    173 (  578 rec/batch) | wire    20.5MB ratio 5.07 | cpu  0.60s | errors 0
-compression=snappy              267262 rec/s   272.9 MB/s | p50   56.81ms p99   163.10ms | batches    172 (  581 rec/batch) | wire    25.1MB ratio 4.14 | cpu  0.26s | errors 0
-compression=lz4                 504771 rec/s   515.5 MB/s | p50   29.91ms p99    98.62ms | batches    202 (  495 rec/batch) | wire    35.5MB ratio 2.92 | cpu  0.28s | errors 0
-compression=zstd                288691 rec/s   294.8 MB/s | p50   64.81ms p99   124.82ms | batches    205 (  488 rec/batch) | wire    19.2MB ratio 5.41 | cpu  0.52s | errors 0
+[1m[34m==> D. compression (perf-p6, acks=all, linger 10ms, JSON payload)[0m
+compression=none                296419 rec/s   302.6 MB/s | p50   49.60ms p99    94.33ms | batches    196 (  510 rec/batch) | wire   103.9MB ratio 1.00 | cpu  0.17s | errors 0
+compression=gzip                349970 rec/s   357.4 MB/s | p50   51.67ms p99    81.23ms | batches    170 (  588 rec/batch) | wire    20.5MB ratio 5.07 | cpu  0.60s | errors 0
+compression=snappy              402361 rec/s   411.0 MB/s | p50   40.11ms p99    71.59ms | batches    174 (  575 rec/batch) | wire    25.1MB ratio 4.14 | cpu  0.35s | errors 0
+compression=lz4                 410946 rec/s   419.7 MB/s | p50   41.58ms p99    70.64ms | batches    170 (  588 rec/batch) | wire    35.5MB ratio 2.92 | cpu  0.32s | errors 0
+compression=zstd                405214 rec/s   413.8 MB/s | p50   42.74ms p99    68.84ms | batches    174 (  575 rec/batch) | wire    19.3MB ratio 5.39 | cpu  0.50s | errors 0
 
-==> E. consumer scaling on perf-p6 (6 partitions), 1ms work/record, 18000 records
-consumers=1              consumers=1 active=1 records=18200 time= 46.72s throughput=     390 rec/s (work=1ms/record)
+[1m[34m==> E. consumer scaling on perf-p6 (6 partitions), 1ms work/record, 18000 records[0m
+time=2026-10-03T08:27:48.159Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp 172.30.30.12:29092: connect: connection refused"
+time=2026-10-03T08:27:48.424Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp 172.30.30.12:29092: connect: connection refused"
+time=2026-10-03T08:27:48.446Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp 172.30.30.11:29092: connect: connection refused"
+time=2026-10-03T08:27:48.629Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:48.864Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:49.016Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:49.203Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:49.203Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:49.203Z level=ERROR msg="kgo: group manage loop errored" group=bench-847186975 err="unable to dial: dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host" consecutive_errors=1 backoff=266.129275ms
+time=2026-10-03T08:27:49.475Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:49.485Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=seed_1 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:49.485Z level=ERROR msg="kgo: group manage loop errored" group=bench-847186975 err="unable to dial: dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host" consecutive_errors=2 backoff=557.601224ms
+time=2026-10-03T08:27:49.730Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=seed_0 err="dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:50.034Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:50.044Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:50.045Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=seed_2 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:50.045Z level=ERROR msg="kgo: group manage loop errored" group=bench-847186975 err="unable to dial: dial tcp 172.30.30.13:29092: connect: connection refused" consecutive_errors=3 backoff=920.336908ms
+time=2026-10-03T08:27:50.240Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:50.842Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:50.973Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:50.975Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=seed_0 err="dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:50.975Z level=ERROR msg="kgo: group manage loop errored" group=bench-847186975 err="unable to dial: dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host" consecutive_errors=4 backoff=2.366888941s
+time=2026-10-03T08:27:51.913Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:52.319Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:52.550Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:53.140Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:53.351Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:53.351Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:53.353Z level=ERROR msg="kgo: group manage loop errored" group=bench-847186975 err="unable to dial: dial tcp: lookup kafka-1 on 127.0.0.11:53: no such host" consecutive_errors=5 backoff=4.701648958s
+time=2026-10-03T08:27:54.243Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=seed_1 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:55.194Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp: lookup kafka-2 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:55.438Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=seed_2 err="dial tcp: lookup kafka-3 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:55.974Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp: lookup kafka-3 on 127.0.0.11:53: no such host"
+time=2026-10-03T08:27:56.881Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp 172.30.30.11:29092: connect: connection refused"
+time=2026-10-03T08:27:58.056Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp 172.30.30.12:29092: connect: connection refused"
+time=2026-10-03T08:27:58.056Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=seed_0 err="dial tcp 172.30.30.11:29092: connect: connection refused"
+time=2026-10-03T08:27:58.056Z level=ERROR msg="kgo: group manage loop errored" group=bench-847186975 err="unable to dial: dial tcp 172.30.30.12:29092: connect: connection refused" consecutive_errors=6 backoff=5s
+time=2026-10-03T08:27:58.837Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-1:29092 broker=1 err="dial tcp 172.30.30.11:29092: connect: connection refused"
+time=2026-10-03T08:27:59.051Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-3:29092 broker=3 err="dial tcp 172.30.30.13:29092: connect: connection refused"
+time=2026-10-03T08:27:59.536Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=2 err="dial tcp 172.30.30.12:29092: connect: connection refused"
+time=2026-10-03T08:28:00.466Z level=WARN msg="kgo: unable to open connection to broker" addr=kafka-2:29092 broker=seed_1 err="dial tcp 172.30.30.12:29092: connect: connection refused"
+consumers=1              consumers=1 active=1 records=18200 time= 61.13s throughput=     298 rec/s (work=1ms/record)
     bench-consumer-1  records=18200  partitions=P0,P1,P2,P3,P4,P5  
-consumers=2              consumers=2 active=2 records=18200 time= 24.32s throughput=     748 rec/s (work=1ms/record)
-    bench-consumer-1  records=9200  partitions=P0,P3,P4  
-    bench-consumer-2  records=9000  partitions=P1,P2,P5  
-consumers=3              consumers=3 active=3 records=18306 time= 15.67s throughput=    1168 rec/s (work=1ms/record)
-    bench-consumer-1  records=6122  partitions=P0,P4  
-    bench-consumer-2  records=6092  partitions=P1,P5  
-    bench-consumer-3  records=6092  partitions=P2,P3  
-consumers=6              consumers=6 active=6 records=18706 time=  8.29s throughput=    2257 rec/s (work=1ms/record)
+consumers=2              consumers=2 active=2 records=18160 time= 19.09s throughput=     951 rec/s (work=1ms/record)
+    bench-consumer-1  records=9104  partitions=P0,P3,P4  
+    bench-consumer-2  records=9056  partitions=P1,P2,P5  
+consumers=3              consumers=3 active=3 records=18400 time= 16.57s throughput=    1111 rec/s (work=1ms/record)
+    bench-consumer-1  records=6000  partitions=P0,P4  
+    bench-consumer-2  records=6200  partitions=P1,P5  
+    bench-consumer-3  records=6200  partitions=P2,P3  
+consumers=6              consumers=6 active=6 records=18760 time=  8.15s throughput=    2303 rec/s (work=1ms/record)
     bench-consumer-1  records=3018  partitions=P0  
-    bench-consumer-2  records=3146  partitions=P1  
-    bench-consumer-3  records=3104  partitions=P4  
+    bench-consumer-2  records=3164  partitions=P1  
+    bench-consumer-3  records=3146  partitions=P4  
     bench-consumer-4  records=3146  partitions=P2  
-    bench-consumer-5  records=3146  partitions=P3  
+    bench-consumer-5  records=3140  partitions=P3  
     bench-consumer-6  records=3146  partitions=P5  
-consumers=8              consumers=8 active=6 records=18706 time=  8.39s throughput=    2230 rec/s (work=1ms/record)
+consumers=8              consumers=8 active=6 records=18760 time=  8.10s throughput=    2316 rec/s (work=1ms/record)
     bench-consumer-1  records=3018  partitions=P0  
-    bench-consumer-2  records=3146  partitions=P1  
+    bench-consumer-2  records=3164  partitions=P1  
     bench-consumer-3  records=3146  partitions=P5  
     bench-consumer-4  records=3146  partitions=P2  
-    bench-consumer-5  records=3104  partitions=P4  
+    bench-consumer-5  records=3146  partitions=P4  
     bench-consumer-6  records=0     partitions=    IDLE (no partition)
     bench-consumer-7  records=0     partitions=    IDLE (no partition)
-    bench-consumer-8  records=3146  partitions=P3  
+    bench-consumer-8  records=3140  partitions=P3  
 
 results saved to labs/performance/last-run.txt

@@ -19,17 +19,17 @@ Chi tiết kiến trúc: [docs/architecture.md](docs/architecture.md).
 
 ### Lệnh nhanh
 
-| Việc | Lệnh |
-| --- | --- |
-| Khởi động (build + bootstrap replica + sinh dữ liệu) | `docker compose up -d --build` |
-| Trạng thái / health | `docker compose ps` |
-| Log | `docker compose logs -f` |
-| Kiểm tra replication | `./scripts/check-replication.sh` |
-| Test INSERT primary → SELECT replica | `./scripts/replication-test.sh` |
-| psql vào primary / replica | `./scripts/psql.sh` / `./scripts/psql.sh replica` |
-| Backup / restore | `./scripts/backup.sh` / `./scripts/restore.sh backups/<file>.dump` |
-| Dừng (giữ dữ liệu) | `docker compose down` |
-| Xoá sạch dữ liệu (chỉ khi thật sự muốn) | `docker compose down -v` |
+| Việc                                                     | Lệnh                                                                  |
+| --------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Khởi động (build + bootstrap replica + sinh dữ liệu) | `docker compose up -d --build`                                       |
+| Trạng thái / health                                     | `docker compose ps`                                                  |
+| Log                                                       | `docker compose logs -f`                                             |
+| Kiểm tra replication                                     | `./scripts/check-replication.sh`                                     |
+| Test INSERT primary → SELECT replica                     | `./scripts/replication-test.sh`                                      |
+| psql vào primary / replica                               | `./scripts/psql.sh` / `./scripts/psql.sh replica`                  |
+| Backup / restore                                          | `./scripts/backup.sh` / `./scripts/restore.sh backups/<file>.dump` |
+| Dừng (giữ dữ liệu)                                    | `docker compose down`                                                |
+| Xoá sạch dữ liệu (chỉ khi thật sự muốn)           | `docker compose down -v`                                             |
 
 Kết nối: **Primary `localhost:5432`**, **Replica `localhost:5433`**, database `ecommerce`, user/password `postgres` / `postgres`.
 
@@ -37,12 +37,12 @@ Kết nối: **Primary `localhost:5432`**, **Replica `localhost:5433`**, databas
 
 ## 1. Yêu cầu
 
-| | Tối thiểu |
-| --- | --- |
-| Docker | Docker Engine 24+ / Docker Desktop / OrbStack, Compose v2 (`docker compose`) |
-| RAM cho Docker | 4 GB |
-| Ổ đĩa | ~3 GB (2 × ~800 MB data + WAL + image) |
-| Cổng trống | `5432`, `5433` (đổi được trong `.env`) |
+|                | Tối thiểu                                                                    |
+| -------------- | ------------------------------------------------------------------------------ |
+| Docker         | Docker Engine 24+ / Docker Desktop / OrbStack, Compose v2 (`docker compose`) |
+| RAM cho Docker | 4 GB                                                                           |
+| Ổ đĩa       | ~3 GB (2 × ~800 MB data + WAL + image)                                        |
+| Cổng trống   | `5432`, `5433` (đổi được trong `.env`)                              |
 
 Không cần cài PostgreSQL trên máy: mọi script dùng `psql` bên trong container.
 Hai container PostgreSQL mặc định có giới hạn `/dev/shm` là 2 GB để hỗ trợ `VACUUM`/index song song trên bảng lớn. Có thể đổi bằng `POSTGRES_SHM_SIZE` trong `.env`; đây là giới hạn dung lượng, không phải RAM cấp phát trước. Các profile dữ liệu lớn cần Docker VM có đủ RAM và ổ đĩa riêng.
@@ -103,20 +103,19 @@ Data generation completed in 1.4 min  (database size: 798 MB)
 
 ## 3. Kết nối
 
-| | Primary | Replica |
-| --- | --- | --- |
-| Host | `localhost` | `localhost` |
-| Port | `5432` | `5433` |
-| Database | `ecommerce` | `ecommerce` |
-| Username | `postgres` | `postgres` |
-| Password | `postgres` | `postgres` |
-| Quyền | đọc + ghi | **chỉ đọc** |
+|          | Primary       | Replica              |
+| -------- | ------------- | -------------------- |
+| Host     | `localhost` | `localhost`        |
+| Port     | `5432`      | `5433`             |
+| Database | `ecommerce` | `ecommerce`        |
+| Username | `postgres`  | `postgres`         |
+| Password | `postgres`  | `postgres`         |
+| Quyền   | đọc + ghi   | **chỉ đọc** |
 
 **DBeaver**: *Database → New Database Connection → PostgreSQL*, điền bảng trên (tạo 2 connection). Gợi ý:
 
 - Host luôn là `localhost` (hoặc `127.0.0.1`). **Không** dùng `postgres-primary` / `postgres-replica` — đó là hostname bên trong Docker network, máy host không phân giải được.
 - Lần đầu DBeaver sẽ đề nghị tải driver PostgreSQL — chọn *Download*.
-
 - Đặt tên `pglab PRIMARY` / `pglab REPLICA`, và ở tab *General* chọn *Connection type = Production* cho replica để DBeaver tô màu, dễ phân biệt.
 - Transaction lab cần mở **2 connection tới cùng primary** (Session A, Session B) và tắt *Auto-commit* khi đề bài yêu cầu `BEGIN` thủ công (hoặc dùng *Smart commit mode* off).
 
@@ -140,30 +139,30 @@ with psycopg.connect("host=localhost port=5433 dbname=ecommerce user=postgres pa
 
 ## 4. Dữ liệu
 
-| Bảng | Số dòng (mặc định) | Ghi chú |
-| --- | ---: | --- |
-| `categories` | 50 | cây 2 cấp: 10 danh mục cha × 4 danh mục con |
-| `users` | 100,000 | `id` tăng theo `created_at` (đăng ký), JSONB `metadata` |
-| `addresses` | ~160,000 | 1–3 địa chỉ/user, đúng 1 địa chỉ mặc định |
-| `warehouses` | 5 | |
-| `products` | 100,000 | giá theo từng danh mục, JSONB `attributes` khác nhau theo ngành hàng, `tags text[]` |
-| `inventory` | 100,000 | tồn kho theo (product, warehouse) |
-| `orders` | 500,000 | 3 năm lịch sử, `id` tăng theo thời gian |
-| `order_items` | ~1,500,000 | tiền tính bằng cent → CHECK `total = qty × price − discount` luôn đúng |
-| `payments` | ~513,000 | ~3% đơn có một lần thanh toán FAILED trước đó |
-| `reviews` | 300,000 | ~75% là verified purchase (gắn với order COMPLETED thật) |
+| Bảng           | Số dòng (mặc định) | Ghi chú                                                                                     |
+| --------------- | ----------------------: | -------------------------------------------------------------------------------------------- |
+| `categories`  |                      50 | cây 2 cấp: 10 danh mục cha × 4 danh mục con                                             |
+| `users`       |                 100,000 | `id` tăng theo `created_at` (đăng ký), JSONB `metadata`                            |
+| `addresses`   |                ~160,000 | 1–3 địa chỉ/user, đúng 1 địa chỉ mặc định                                        |
+| `warehouses`  |                       5 |                                                                                              |
+| `products`    |                 100,000 | giá theo từng danh mục, JSONB`attributes` khác nhau theo ngành hàng, `tags text[]` |
+| `inventory`   |                 100,000 | tồn kho theo (product, warehouse)                                                           |
+| `orders`      |                 500,000 | 3 năm lịch sử,`id` tăng theo thời gian                                                |
+| `order_items` |              ~1,500,000 | tiền tính bằng cent → CHECK`total = qty × price − discount` luôn đúng             |
+| `payments`    |                ~513,000 | ~3% đơn có một lần thanh toán FAILED trước đó                                      |
+| `reviews`     |                 300,000 | ~75% là verified purchase (gắn với order COMPLETED thật)                                 |
 
 **Phân phối không đồng đều (cố ý)** — để query planner có cái mà "suy nghĩ":
 
-| Đặc điểm | Giá trị |
-| --- | --- |
-| 20% user tạo ~70% đơn hàng | `HEAVY_USER_SHARE`, `HEAVY_USER_ORDER_SHARE` |
-| Độ phổ biến sản phẩm theo Zipf | top 1% sản phẩm ≈ 50% lượt bán; ~10% sản phẩm chưa từng bán |
-| Order status | COMPLETED 60%, SHIPPED 13%, CANCELLED 10%, PROCESSING 7%, PENDING 5%, CONFIRMED 5% |
-| Đơn "đang mở" là đơn mới | PENDING ≤ 10 ngày, CONFIRMED ≤ 20, PROCESSING ≤ 45, SHIPPED ≤ 90 ngày |
-| Mùa cao điểm | ~10% đơn rơi vào Black Friday → Giáng sinh; giờ cao điểm buổi tối |
-| Thành phố | New York, Los Angeles… chiếm phần lớn, hàng nghìn thị trấn chỉ vài địa chỉ; 15% quốc tế (VN, GB, CA, JP…) |
-| Rating | hình chữ J (nhiều 5★, có "gò" ở 1★), phụ thuộc "chất lượng ẩn" của sản phẩm |
+| Đặc điểm                         | Giá trị                                                                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| 20% user tạo ~70% đơn hàng       | `HEAVY_USER_SHARE`, `HEAVY_USER_ORDER_SHARE`                                                                          |
+| Độ phổ biến sản phẩm theo Zipf | top 1% sản phẩm ≈ 50% lượt bán; ~10% sản phẩm chưa từng bán                                                    |
+| Order status                         | COMPLETED 60%, SHIPPED 13%, CANCELLED 10%, PROCESSING 7%, PENDING 5%, CONFIRMED 5%                                        |
+| Đơn "đang mở" là đơn mới     | PENDING ≤ 10 ngày, CONFIRMED ≤ 20, PROCESSING ≤ 45, SHIPPED ≤ 90 ngày                                               |
+| Mùa cao điểm                      | ~10% đơn rơi vào Black Friday → Giáng sinh; giờ cao điểm buổi tối                                              |
+| Thành phố                          | New York, Los Angeles… chiếm phần lớn, hàng nghìn thị trấn chỉ vài địa chỉ; 15% quốc tế (VN, GB, CA, JP…) |
+| Rating                               | hình chữ J (nhiều 5★, có "gò" ở 1★), phụ thuộc "chất lượng ẩn" của sản phẩm                              |
 
 ### Sinh lại / đổi kích thước dữ liệu
 
@@ -186,16 +185,16 @@ Script **xoá dữ liệu hiện tại** (TRUNCATE), sinh lại, kiểm tra repl
 
 Profile `5m` (đo trên Docker Desktop 8 CPU / 8 GB RAM; ở quy mô 1/5 mất 3.6 phút, 2.7 GB):
 
-| Bảng | Số dòng | Quan hệ |
-| --- | ---: | --- |
-| `users` | 5,000,000 | 20% user tạo ~65% số đơn |
-| `addresses` | ~8,000,000 | 1–3 địa chỉ/user, đúng 1 địa chỉ mặc định |
-| `products` | 5,000,000 | thuộc 1 trong 40 danh mục con; độ phổ biến theo Zipf |
-| `inventory` | 5,000,000 | `products.stock_quantity` = tổng tồn kho |
-| `orders` | 5,000,000 | đặt sau khi user đăng ký; `shipping_address` = địa chỉ mặc định của user |
-| `order_items` | ~10,000,000 | trung bình 2 dòng/đơn; `orders.subtotal` = tổng các dòng |
-| `payments` | ~5,150,000 | `amount` = `orders.total_amount`; trạng thái khớp trạng thái đơn; ~3% có lần thanh toán FAILED trước |
-| `reviews` | 5,000,000 | ~75% verified: trỏ tới đúng đơn COMPLETED của user có chứa sản phẩm đó |
+| Bảng           |   Số dòng | Quan hệ                                                                                                             |
+| --------------- | ----------: | -------------------------------------------------------------------------------------------------------------------- |
+| `users`       |   5,000,000 | 20% user tạo ~65% số đơn                                                                                         |
+| `addresses`   |  ~8,000,000 | 1–3 địa chỉ/user, đúng 1 địa chỉ mặc định                                                                |
+| `products`    |   5,000,000 | thuộc 1 trong 40 danh mục con; độ phổ biến theo Zipf                                                           |
+| `inventory`   |   5,000,000 | `products.stock_quantity` = tổng tồn kho                                                                         |
+| `orders`      |   5,000,000 | đặt sau khi user đăng ký;`shipping_address` = địa chỉ mặc định của user                                |
+| `order_items` | ~10,000,000 | trung bình 2 dòng/đơn;`orders.subtotal` = tổng các dòng                                                     |
+| `payments`    |  ~5,150,000 | `amount` = `orders.total_amount`; trạng thái khớp trạng thái đơn; ~3% có lần thanh toán FAILED trước |
+| `reviews`     |   5,000,000 | ~75% verified: trỏ tới đúng đơn COMPLETED của user có chứa sản phẩm đó                                  |
 
 Muốn đúng 5 triệu `order_items` (mỗi đơn 1 dòng): dùng `custom` với `NUM_ORDER_ITEMS=5000000` trong `.env`.
 
@@ -223,34 +222,34 @@ Mọi biến nằm trong `.env` (`NUM_USERS`, `NUM_PRODUCTS`, `NUM_ORDERS`, `NUM
 
 ## 5. Scripts
 
-| Script | Tác dụng |
-| --- | --- |
-| [scripts/check-replication.sh](scripts/check-replication.sh) | Báo cáo đầy đủ: `pg_stat_replication`, slot, LSN, lag, `pg_is_in_recovery()`, so sánh số dòng. Exit code ≠ 0 nếu có vấn đề |
-| [scripts/replication-test.sh](scripts/replication-test.sh) | INSERT trên primary → poll replica → đo thời gian → chứng minh replica từ chối ghi |
-| [scripts/backup.sh](scripts/backup.sh) | `pg_dump` ra `backups/` (`--from-replica`, `--plain`, `--db`) |
-| [scripts/restore.sh](scripts/restore.sh) | `pg_restore` song song vào DB mới (mặc định `ecommerce_restore`) |
-| [scripts/rebuild-replica.sh](scripts/rebuild-replica.sh) | Xoá replica và clone lại từ primary (sau bài failover) |
-| [scripts/generate-data.sh](scripts/generate-data.sh) | Sinh lại dữ liệu theo profile `small` / `default` / `5m` / `custom`, rồi verify |
-| [scripts/verify-data.sh](scripts/verify-data.sh) | 17 check tính toàn vẹn / quan hệ / thời gian + query JOIN mẫu ([sql/verify/data-quality.sql](sql/verify/data-quality.sql)) |
-| [scripts/test-optimization-labs.sh](scripts/test-optimization-labs.sh) | Chạy toàn bộ lab tối ưu + thử thách, kiểm tra reset về baseline sau mỗi bài |
-| [scripts/psql.sh](scripts/psql.sh) | `psql` tương tác vào primary / replica |
+| Script                                                                | Tác dụng                                                                                                                                   |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| [scripts/check-replication.sh](scripts/check-replication.sh)           | Báo cáo đầy đủ:`pg_stat_replication`, slot, LSN, lag, `pg_is_in_recovery()`, so sánh số dòng. Exit code ≠ 0 nếu có vấn đề |
+| [scripts/replication-test.sh](scripts/replication-test.sh)             | INSERT trên primary → poll replica → đo thời gian → chứng minh replica từ chối ghi                                                  |
+| [scripts/backup.sh](scripts/backup.sh)                                 | `pg_dump` ra `backups/` (`--from-replica`, `--plain`, `--db`)                                                                      |
+| [scripts/restore.sh](scripts/restore.sh)                               | `pg_restore` song song vào DB mới (mặc định `ecommerce_restore`)                                                                    |
+| [scripts/rebuild-replica.sh](scripts/rebuild-replica.sh)               | Xoá replica và clone lại từ primary (sau bài failover)                                                                                  |
+| [scripts/generate-data.sh](scripts/generate-data.sh)                   | Sinh lại dữ liệu theo profile`small` / `default` / `5m` / `custom`, rồi verify                                                   |
+| [scripts/verify-data.sh](scripts/verify-data.sh)                       | 17 check tính toàn vẹn / quan hệ / thời gian + query JOIN mẫu ([sql/verify/data-quality.sql](sql/verify/data-quality.sql))              |
+| [scripts/test-optimization-labs.sh](scripts/test-optimization-labs.sh) | Chạy toàn bộ lab tối ưu + thử thách, kiểm tra reset về baseline sau mỗi bài                                                       |
+| [scripts/psql.sh](scripts/psql.sh)                                     | `psql` tương tác vào primary / replica                                                                                                 |
 
 SQL giám sát dùng sẵn trong DBeaver: [sql/monitoring/](sql/monitoring/) — `replication.sql`, `activity.sql`, `locks.sql`, `size.sql`, `performance.sql`.
 
 ## 6. Lộ trình học
 
-| # | Tài liệu | Nội dung |
-| --- | --- | --- |
-| 1 | [docs/architecture.md](docs/architecture.md) | Kiến trúc, process, volume, ER diagram |
-| 2 | [docs/sql-exercises.md](docs/sql-exercises.md) → [docs/sql-solutions.md](docs/sql-solutions.md) | 60 bài, 10 level: SQL cơ bản → JOIN → aggregation → CTE → window → index → optimization → transaction → locking → internals |
-| 3 | [docs/index-lab.md](docs/index-lab.md) | B-tree, composite, partial, expression, covering, GIN/JSONB, trigram, BRIN, index thừa, FK không có index |
-| 4 | [docs/query-optimization-lab.md](docs/query-optimization-lab.md) | Đọc EXPLAIN, estimate vs actual, các loại scan/join, statistics, work_mem, phân trang |
-| 5 | [docs/transaction-lab.md](docs/transaction-lab.md) | Session A/B: lost update, dirty/non-repeatable/phantom read, `SELECT FOR UPDATE`, blocking, READ COMMITTED / REPEATABLE READ / SERIALIZABLE, deadlock, long-running transaction (hàng đợi lock, VACUUM bị chặn), idle in transaction |
-| 6 | [docs/mvcc-lab.md](docs/mvcc-lab.md) | `xmin`/`xmax`/`ctid`, pageinspect, HOT update, dead tuple, VACUUM |
-| 7 | [docs/monitoring.md](docs/monitoring.md) | `pg_stat_activity`, `pg_locks`, blocking tree, kích thước, `pg_stat_statements`, WAL/checkpoint, đọc đúng replication lag |
-| 8 | [docs/replication.md](docs/replication.md) | Luồng INSERT → WAL → replica chi tiết, metric, read/write, sync replication, failover |
-| 9 | [docs/backup-restore.md](docs/backup-restore.md) | `backup.sh`/`restore.sh`, định dạng dump, restore chọn lọc, khôi phục dữ liệu xoá nhầm, `pg_basebackup`, PITR |
-| 10 | [sql/optimization/](sql/optimization/) | **41 bài tối ưu query** trên dataset 5m (mỗi bài: before → EXPLAIN / ANALYZE / BUFFERS → tối ưu → after → so sánh → reset), plan quan sát thật, 15 thử thách + lời giải |
+| #  | Tài liệu                                                                                     | Nội dung                                                                                                                                                                                                                                  |
+| -- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1  | [docs/architecture.md](docs/architecture.md)                                                    | Kiến trúc, process, volume, ER diagram                                                                                                                                                                                                   |
+| 2  | [docs/sql-exercises.md](docs/sql-exercises.md) → [docs/sql-solutions.md](docs/sql-solutions.md) | 60 bài, 10 level: SQL cơ bản → JOIN → aggregation → CTE → window → index → optimization → transaction → locking → internals                                                                                                    |
+| 3  | [docs/index-lab.md](docs/index-lab.md)                                                          | B-tree, composite, partial, expression, covering, GIN/JSONB, trigram, BRIN, index thừa, FK không có index                                                                                                                               |
+| 4  | [docs/query-optimization-lab.md](docs/query-optimization-lab.md)                                | Đọc EXPLAIN, estimate vs actual, các loại scan/join, statistics, work_mem, phân trang                                                                                                                                                 |
+| 5  | [docs/transaction-lab.md](docs/transaction-lab.md)                                              | Session A/B: lost update, dirty/non-repeatable/phantom read,`SELECT FOR UPDATE`, blocking, READ COMMITTED / REPEATABLE READ / SERIALIZABLE, deadlock, long-running transaction (hàng đợi lock, VACUUM bị chặn), idle in transaction |
+| 6  | [docs/mvcc-lab.md](docs/mvcc-lab.md)                                                            | `xmin`/`xmax`/`ctid`, pageinspect, HOT update, dead tuple, VACUUM                                                                                                                                                                    |
+| 7  | [docs/monitoring.md](docs/monitoring.md)                                                        | `pg_stat_activity`, `pg_locks`, blocking tree, kích thước, `pg_stat_statements`, WAL/checkpoint, đọc đúng replication lag                                                                                                     |
+| 8  | [docs/replication.md](docs/replication.md)                                                      | Luồng INSERT → WAL → replica chi tiết, metric, read/write, sync replication, failover                                                                                                                                                  |
+| 9  | [docs/backup-restore.md](docs/backup-restore.md)                                                | `backup.sh`/`restore.sh`, định dạng dump, restore chọn lọc, khôi phục dữ liệu xoá nhầm, `pg_basebackup`, PITR                                                                                                             |
+| 10 | [sql/optimization/](sql/optimization/)                                                          | **41 bài tối ưu query** trên dataset 5m (mỗi bài: before → EXPLAIN / ANALYZE / BUFFERS → tối ưu → after → so sánh → reset), plan quan sát thật, 15 thử thách + lời giải                                          |
 
 ## 7. Dừng / reset
 
@@ -267,16 +266,16 @@ Volumes: `postgresql-lab_postgres_primary_data`, `postgresql-lab_postgres_replic
 
 ## 8. Xử lý sự cố
 
-| Triệu chứng | Nguyên nhân / cách xử lý |
-| --- | --- |
-| `Bind for 127.0.0.1:5432 failed: port is already allocated` | Có PostgreSQL/container khác đang dùng cổng. Tìm bằng `lsof -iTCP:5432 -sTCP:LISTEN` hoặc `docker ps`, hoặc đổi `PRIMARY_PORT`/`REPLICA_PORT` trong `.env` |
-| `check-replication.sh` báo `replay_lag` rỗng / `since_last_replayed_commit` tăng dần | Bình thường khi không có ghi mới: lag thật là dòng `lag` (so LSN primary vs replica) |
-| Replica `unhealthy` / `check-replication.sh` báo FAIL | `docker compose logs postgres-replica`. Nếu replica đã bị promote hoặc slot bị `lost`: `./scripts/rebuild-replica.sh` |
-| Generator in `Data already generated ... skipping` | Bình thường. Muốn sinh lại: `RESET_DATA=true` (xem mục 4) |
-| Generator bị dừng giữa chừng | Lần chạy sau tự phát hiện run chưa hoàn tất, truncate và sinh lại |
-| Muốn primary/replica nghe trên mọi interface | `BIND_ADDRESS=0.0.0.0` trong `.env` (chỉ nên làm trong mạng tin cậy — mật khẩu lab rất yếu) |
-| Đổi `postgresql.conf` | Sửa file trong `postgres/*/`, rồi `docker compose up -d --build` (tham số cần restart) hoặc `SELECT pg_reload_conf()` |
-| Đổi schema trong `init/*.sql` | Init script chỉ chạy khi volume trống → `docker compose down -v && docker compose up -d --build` |
+| Triệu chứng                                                                                  | Nguyên nhân / cách xử lý                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Bind for 127.0.0.1:5432 failed: port is already allocated`                                  | Có PostgreSQL/container khác đang dùng cổng. Tìm bằng`lsof -iTCP:5432 -sTCP:LISTEN` hoặc `docker ps`, hoặc đổi `PRIMARY_PORT`/`REPLICA_PORT` trong `.env` |
+| `check-replication.sh` báo `replay_lag` rỗng / `since_last_replayed_commit` tăng dần | Bình thường khi không có ghi mới: lag thật là dòng`lag` (so LSN primary vs replica)                                                                                 |
+| Replica`unhealthy` / `check-replication.sh` báo FAIL                                      | `docker compose logs postgres-replica`. Nếu replica đã bị promote hoặc slot bị `lost`: `./scripts/rebuild-replica.sh`                                              |
+| Generator in`Data already generated ... skipping`                                            | Bình thường. Muốn sinh lại:`RESET_DATA=true` (xem mục 4)                                                                                                               |
+| Generator bị dừng giữa chừng                                                               | Lần chạy sau tự phát hiện run chưa hoàn tất, truncate và sinh lại                                                                                                    |
+| Muốn primary/replica nghe trên mọi interface                                                | `BIND_ADDRESS=0.0.0.0` trong `.env` (chỉ nên làm trong mạng tin cậy — mật khẩu lab rất yếu)                                                                      |
+| Đổi`postgresql.conf`                                                                       | Sửa file trong`postgres/*/`, rồi `docker compose up -d --build` (tham số cần restart) hoặc `SELECT pg_reload_conf()`                                                |
+| Đổi schema trong`init/*.sql`                                                               | Init script chỉ chạy khi volume trống →`docker compose down -v && docker compose up -d --build`                                                                          |
 
 ## 9. Cấu trúc project
 

@@ -7,6 +7,7 @@ cd ~/Desktop/poc/lab/kafka
 ```
 
 Quy ước:
+
 - Trước mỗi lab: đọc `labs/<lab>/README.md` và doc tương ứng (ghi ở cột "Đọc").
 - Mỗi lab in `[OK] EXPECT ...` / `[FAIL] EXPECT ...` và kết thúc bằng `LAB PASSED`.
 - **Sau mỗi lab chạy `./scripts/reset-lab.sh`** để lab sau không bị ảnh hưởng (broker bị dừng, network fault, consumer crash, config tạm…).
@@ -24,6 +25,7 @@ docker compose ps                    # mọi service (healthy), kafka-init: Exit
 ```
 
 Mở trên trình duyệt:
+
 - Kafka UI: http://localhost:8080
 - Grafana: http://localhost:3000 (admin / admin)
 - Prometheus: http://localhost:9090
@@ -45,29 +47,29 @@ docker compose logs -f order-consumer-1            # log consumer (Ctrl-C để 
 
 ## Bước 2 — Các lab theo thứ tự học
 
-| # | Lệnh | Đọc | Thời gian |
-|---|---|---|---|
-| 1 | `./labs/01_producer_consumer/run.sh` | docs 01, 05, 06 | ~10s |
-| 2 | `./labs/02_partitions/run.sh` | docs 04, 27 | ~10s |
-| 3 | `./labs/03_message_key/run.sh` | doc 04 | ~10s |
-| 4 | `./labs/04_ordering/run.sh` | doc 10 | ~10s |
-| 5 | `./labs/05_consumer_group/run.sh` | doc 07 | ~1.5 phút |
-| 6 | `./labs/07_offsets/run.sh` | docs 08, 26 | ~1.5 phút |
-| 7 | `./labs/10_replication/run.sh` | docs 11, 12, 03 | ~2 phút |
-| 8 | `./labs/11_broker_failure/run.sh` | doc 13 | ~1.5 phút |
-| 9 | `./labs/08_delivery_semantics/run.sh` | doc 14 | ~2 phút |
-| 10 | `./labs/16_idempotent_producer/run.sh` | doc 15 | ~30s |
-| 11 | `./labs/09_retry_dlq/run.sh` | doc 17 | ~1 phút |
-| 12 | `./labs/06_rebalancing/run.sh` | doc 09 | ~5 phút |
-| 13 | `./labs/13_retention/run.sh` | doc 18 | ~1.5 phút |
-| 14 | `./labs/14_compaction/run.sh` | doc 18 | ~1.5 phút |
-| 15 | `./labs/15_transactions/run.sh` | doc 16 | ~30s |
-| 16 | `./labs/performance/run.sh` | doc 19 | ~4 phút |
-| 17 | `./labs/17_backpressure/run.sh` | doc 19 | ~2 phút |
-| 18 | `./labs/12_hot_partition/run.sh` | docs 19, 21 | ~1 phút |
-| 19 | `./labs/18_large_messages/run.sh` | doc 25 | ~30s |
-| 20 | `./labs/20_observability/run.sh` | doc 20 | ~10s |
-| 21 | `./labs/19_schema_evolution/run.sh` | doc 23 | ~10s |
+| #  | Lệnh                                    | Đọc           | Thời gian |
+| -- | ---------------------------------------- | --------------- | ---------- |
+| 1  | `./labs/01_producer_consumer/run.sh`   | docs 01, 05, 06 | ~10s       |
+| 2  | `./labs/02_partitions/run.sh`          | docs 04, 27     | ~10s       |
+| 3  | `./labs/03_message_key/run.sh`         | doc 04          | ~10s       |
+| 4  | `./labs/04_ordering/run.sh`            | doc 10          | ~10s       |
+| 5  | `./labs/05_consumer_group/run.sh`      | doc 07          | ~1.5 phút |
+| 6  | `./labs/07_offsets/run.sh`             | docs 08, 26     | ~1.5 phút |
+| 7  | `./labs/10_replication/run.sh`         | docs 11, 12, 03 | ~2 phút   |
+| 8  | `./labs/11_broker_failure/run.sh`      | doc 13          | ~1.5 phút |
+| 9  | `./labs/08_delivery_semantics/run.sh`  | doc 14          | ~2 phút   |
+| 10 | `./labs/16_idempotent_producer/run.sh` | doc 15          | ~30s       |
+| 11 | `./labs/09_retry_dlq/run.sh`           | doc 17          | ~1 phút   |
+| 12 | `./labs/06_rebalancing/run.sh`         | doc 09          | ~5 phút   |
+| 13 | `./labs/13_retention/run.sh`           | doc 18          | ~1.5 phút |
+| 14 | `./labs/14_compaction/run.sh`          | doc 18          | ~1.5 phút |
+| 15 | `./labs/15_transactions/run.sh`        | doc 16          | ~30s       |
+| 16 | `./labs/performance/run.sh`            | doc 19          | ~4 phút   |
+| 17 | `./labs/17_backpressure/run.sh`        | doc 19          | ~2 phút   |
+| 18 | `./labs/12_hot_partition/run.sh`       | docs 19, 21     | ~1 phút   |
+| 19 | `./labs/18_large_messages/run.sh`      | doc 25          | ~30s       |
+| 20 | `./labs/20_observability/run.sh`       | doc 20          | ~10s       |
+| 21 | `./labs/19_schema_evolution/run.sh`    | doc 23          | ~10s       |
 
 Chạy lần lượt, mỗi lab kèm reset:
 
